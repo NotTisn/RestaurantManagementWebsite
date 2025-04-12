@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 // Import các hàm Firestore cần thiết VÀO ĐÂY
 import { collection, onSnapshot, addDoc, getDocs, doc, updateDoc, query, where } from "firebase/firestore";
-import { db } from '../firebaseConfig'; // Import db vào đây
+import { db } from '../../firebaseConfig'; // <<< Import db vào đây
 import './FoodManagement.css'; // <<< THÊM DÒNG IMPORT FILE CSS
 import EditDishModal from './EditDishModal';
 import AddDishModal from './AddDishModal';

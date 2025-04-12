@@ -126,10 +126,10 @@ import React from 'react'; // Không cần useState, useEffect ở đây nữa
 import Sidebar from './components/Sidebar';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import FoodManagement from './pages/FoodManagement';
-import OrdersManagement from './pages/OrdersManagement';
-import Statistics from './pages/Statistics';
+import Dashboard from './components/Dashboard';
+import FoodManagement from './pages/food/FoodManagement';
+import OrdersManagement from './pages/orders/OrdersManagement';
+import Statistics from './pages/statistics/Statistics';
 // import NotFound from './pages/NotFound'; // Nếu bạn có trang 404
 
 // Tên collection không cần ở đây nữa
