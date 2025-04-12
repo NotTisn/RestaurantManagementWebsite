@@ -1,0 +1,77 @@
+/* #root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+} */
+
+/* src/App.css */
+
+/* Reset một số style mặc định của trình duyệt */
+body {
+  margin: 0;
+  font-family: sans-serif; /* Chọn font chữ dễ đọc */
+  background-color: #f4f7f6; /* Màu nền nhẹ cho phần nội dung */
+}
+
+.app-layout {
+  display: flex; /* Sử dụng Flexbox để xếp Sidebar và Main Content */
+  min-height: 100vh; /* Đảm bảo layout chiếm ít nhất toàn bộ chiều cao màn hình */
+}
+.sidebar {
+  width: 250px;      /* Đặt chiều rộng CỐ ĐỊNH bạn muốn cho sidebar (ví dụ: 250px) */
+  flex-shrink: 0;  /* Rất quan trọng: Ngăn không cho sidebar bị co nhỏ lại khi nội dung chính lớn */
+  border-right: 1px solid #e0e0e0; /* Ví dụ: Đường kẻ phân cách nhẹ nhàng */
+}
+
+.main-content {
+  flex-grow: 1; /* Cho phép nội dung chính chiếm hết không gian còn lại */
+  padding: 30px; /* Khoảng đệm cho nội dung chính */
+  height: 100vh; /* Đảm bảo nội dung chính cũng có thể cuộn nếu cần */
+  overflow-y: auto; /* Thêm thanh cuộn nếu nội dung dài hơn màn hình */
+}
+
+/* Có thể thêm các style chung khác cho ứng dụng tại đây */
+h1, h2, h3, h4, h5, h6 {
+    color: #333; /* Màu chữ đậm hơn cho tiêu đề */
+}
+
+p{
+  color: black;
+}

@@ -1,0 +1,220 @@
+/* FoodManagement.css */
+
+/* ----- Tổng thể bảng ----- */
+  .food-table {
+    width: 100%;
+    border-collapse: collapse; /* Gộp đường viền */
+    margin-top: 20px;
+    font-size: 0.9em; /* Có thể giảm nhẹ font nếu cần thêm không gian */
+  }
+  
+  /* ----- Tiêu đề bảng (th) ----- */
+  .food-table th {
+    background-color: #f2f2f2; /* Màu nền nhẹ cho tiêu đề */
+    border: 1px solid #ddd;
+    padding: 12px 10px; /* Tăng padding */
+    text-align: left; /* Căn lề trái (hoặc center tùy ý) */
+    font-weight: bold;
+    white-space: nowrap; /* Không xuống dòng tiêu đề */
+  }
+
+  .table-container { /* <<< Thêm class này vào div bao quanh table nếu chưa có */
+    overflow-x: auto; /* Cho phép cuộn ngang */
+    margin-top: 20px;
+    border-radius: 8px; /* Bo góc container */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Bóng đổ mềm mại */
+    background-color: #fff; /* Nền trắng cho container */
+  }
+  
+  /* ----- Ô dữ liệu (td) ----- */
+  .food-table td {
+    border: none; /* <<< Bỏ viền mặc định */
+    border-bottom: 1px solid #e9ecef; /* <<< Chỉ giữ đường kẻ dưới mờ */
+    padding: 12px 12px; /* Tăng padding */
+    vertical-align: middle;
+    color: #495057; /* Màu chữ */
+  }
+  
+  /* ----- Zebra striping (màu xen kẽ cho các dòng) ----- */
+  .food-table tbody tr:last-child() td {
+    border-bottom: none;
+  }
+  
+/* Loại bỏ border-bottom cho dòng cuối cùng */
+  .food-table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+/* ----- Zebra striping (màu xen kẽ) - tinh tế hơn ----- */
+.food-table tbody tr:nth-child(even) {
+  background-color: #fdfdfd; /* Màu nền rất nhạt */
+}
+  
+/* ----- Hover effect (hiệu ứng khi di chuột qua dòng)*/
+.food-table tbody tr:hover {
+  background-color: #f1f5f9; /* Màu nền thay đổi nhẹ khi hover */
+  /* transition: background-color 0.15s ease-in-out; <<< Thêm hiệu ứng chuyển đổi */
+}
+  /* ----- Hình ảnh món ăn ----- */
+  .food-table .dish-image {
+    max-width: 50px; /* Có thể giảm nhẹ */
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    vertical-align: middle; /* Đảm bảo căn giữa */
+  }
+
+  .food-table .no-image-text {
+      font-style: italic;
+      color: #888;
+      font-size: 0.85em;
+  }
+  
+  
+  /* ----- Cột Đánh giá (Sao) ----- */
+  .food-table .col-star {
+    white-space: nowrap; /* Quan trọng: Ngăn không cho số và sao xuống dòng */
+    text-align: center;
+    min-width: 70px; /* Đặt chiều rộng tối thiểu nếu cần */
+  }
+  
+  /* ----- Cột Hành động ----- */
+  .food-table .col-actions {
+    white-space: nowrap; /* Quan trọng: Ngăn các nút xuống dòng */
+    text-align: center; /* Căn giữa các nút */
+    min-width: 120px; /* Đặt chiều rộng tối thiểu để chứa vừa 2 nút */
+  }
+  /* ----- Badge cho cột "Phổ biến" ----- */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px; /* Padding nhỏ hơn */
+  font-size: 0.8em;  /* Chữ nhỏ hơn */
+  font-weight: 600;
+  border-radius: 12px; /* Bo tròn nhiều hơn */
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-badge.popular {
+  background-color: #d1e7dd; /* Màu nền xanh lá nhạt */
+  color: #0f5132; /* Màu chữ xanh lá đậm */
+  border: 1px solid #a3cfbb; /* Viền nhẹ (tùy chọn) */
+}
+
+.status-badge.not-popular {
+  background-color: #f8d7da; /* Màu nền đỏ nhạt */
+  color: #58151c; /* Màu chữ đỏ đậm */
+   border: 1px solid #f1aeae; /* Viền nhẹ (tùy chọn) */
+   /* Hoặc dùng màu xám */
+  /* background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #dee2e6; */
+}
+  
+  /* ----- Nút Sửa/Xóa ----- */
+  .food-table .action-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin: 0 3px; /* Tạo khoảng cách nhỏ giữa các nút */
+    transition: background-color 0.2s ease; /* Hiệu ứng chuyển màu */
+  }
+  
+  .food-table .edit-button {
+    background-color: #4CAF50; /* Màu xanh lá */
+    color: white;
+  }
+  .food-table .edit-button:hover {
+      background-color: #45a049;
+  }
+  
+  .food-table .delete-button {
+    background-color: #f44336; /* Màu đỏ */
+    color: white;
+  }
+  .food-table .delete-button:hover {
+      background-color: #da190b;
+  }
+  
+  /* ----- Responsive (Tùy chọn, nếu muốn bảng hiển thị tốt hơn trên mobile) ----- */
+  @media screen and (max-width: 768px) {
+    /* Có thể ẩn bớt cột không quan trọng hoặc thay đổi cách hiển thị */
+    .food-table th, .food-table td {
+      font-size: 0.85em; /* Giảm font trên màn hình nhỏ hơn */
+      padding: 8px 5px;
+    }
+    .food-table .dish-image {
+        max-width: 50px;
+    }
+     .food-table .col-actions {
+         min-width: 100px;
+     }
+     .food-table .action-button {
+         padding: 4px 8px;
+         font-size: 0.8em;
+     }
+  }
+
+  .modal-content .form-group-checkbox {
+    display: flex;
+    align-items: center; /* Căn giữa checkbox và label theo chiều dọc */
+    gap: 8px; /* Khoảng cách giữa checkbox và label */
+    margin-top: 20px; /* Thêm khoảng cách phía trên */
+  }
+  
+  .modal-content .form-group-checkbox input[type="checkbox"] {
+    width: auto; /* Reset width mặc định */
+    cursor: pointer;
+    /* Tùy chỉnh kích thước checkbox nếu muốn */
+    /* transform: scale(1.2); */
+  }
+  
+  .modal-content .form-group-checkbox label {
+    margin-bottom: 0; /* Bỏ margin bottom mặc định của label */
+    font-weight: normal; /* Bỏ bold nếu muốn */
+    cursor: pointer;
+  }
+
+  .action-button {
+    display: inline-flex; /* Để căn chỉnh icon và text dễ hơn nếu có icon */
+    align-items: center;
+    justify-content: center;
+    padding: 8px 15px;   /* Padding cơ bản */
+    border: none;         /* Không viền */
+    border-radius: 4px;   /* Bo góc */
+    cursor: pointer;
+    font-size: 0.95em;    /* Cỡ chữ */
+    font-weight: 500;     /* Độ đậm vừa phải */
+    text-align: center;
+    vertical-align: middle;
+    transition: background-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease; /* Hiệu ứng chuyển đổi */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Thêm bóng đổ nhẹ */
+}
+
+
+// Add Button
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.add-button {
+  background-color: #007bff; /* Màu xanh dương chính */
+  color: white;
+  margin-bottom: 20px; /* <<< Di chuyển margin từ inline style vào đây */
+  padding: 10px 20px;  /* <<< Có thể làm nút này to hơn một chút */
+  font-size: 1em;      /* <<< Cỡ chữ to hơn một chút */
+  font-weight: bold;   /* <<< Chữ đậm hơn */
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #0056b3; /* Màu đậm hơn khi hover */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.add-button:active:not(:disabled) {
+  background-color: #004085; /* Màu đậm hơn nữa khi nhấn */
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}

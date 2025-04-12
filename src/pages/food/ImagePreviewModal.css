@@ -1,0 +1,63 @@
+/* ----- Làm ảnh thumbnail trong bảng trông 'clickable' hơn ----- */
+.food-table .dish-image.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.food-table .dish-image.clickable:hover {
+    transform: scale(1.1); /* Phóng to nhẹ khi hover */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ----- Style cho Modal Xem Ảnh ----- */
+.image-preview-modal {
+    border: none;
+    padding: 0; /* Không cần padding cho dialog */
+    background: none; /* Nền trong suốt */
+    max-width: 90vw; /* Chiếm tối đa 90% chiều rộng viewport */
+    max-height: 90vh; /* Chiếm tối đa 90% chiều cao viewport */
+    overflow: visible; /* Cho phép nút đóng tràn ra ngoài */
+    box-shadow: none; /* Không cần bóng đổ cho dialog */
+    border-radius: 0; /* Không cần bo góc cho dialog */
+}
+
+.image-preview-modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.75); /* Nền đen mờ đậm hơn */
+    /* backdrop-filter: blur(3px); */ /* Optional: Hiệu ứng blur */
+}
+
+/* Style cho ảnh lớn bên trong modal */
+.image-preview-modal .preview-image {
+    display: block; /* Để loại bỏ khoảng trắng thừa bên dưới */
+    max-width: 100%; /* Chiếm tối đa chiều rộng của dialog */
+    max-height: 100%; /* Chiếm tối đa chiều cao của dialog */
+    width: auto; /* Để giữ tỷ lệ */
+    height: auto; /* Để giữ tỷ lệ */
+    object-fit: contain; /* Đảm bảo thấy toàn bộ ảnh, không bị cắt */
+    border-radius: 4px; /* Bo góc nhẹ cho ảnh (tùy chọn) */
+}
+
+/* Nút đóng cho modal ảnh (có thể khác nút đóng modal form) */
+.image-preview-modal .image-close-button {
+    position: absolute;
+    top: -15px;  /* Đặt vị trí nút đóng (ví dụ: hơi ra ngoài phía trên bên phải) */
+    right: -15px;
+    background-color: rgba(255, 255, 255, 0.8); /* Nút màu trắng mờ */
+    border: none;
+    border-radius: 50%; /* Nút tròn */
+    width: 35px;
+    height: 35px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333; /* Màu dấu X */
+    cursor: pointer;
+    line-height: 35px; /* Căn giữa dấu X */
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.image-preview-modal .image-close-button:hover {
+    background-color: #fff;
+    color: #000;
+}

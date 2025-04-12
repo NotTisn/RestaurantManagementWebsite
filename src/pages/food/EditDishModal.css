@@ -1,0 +1,146 @@
+/* EditDishModal.css hoặc thêm vào FoodManagement.css - ĐÃ CẬP NHẬT CHO <dialog> */
+
+/* --- BỎ HOÀN TOÀN KHỐI STYLE CHO .modal-overlay --- */
+/* .modal-overlay { ... } */ /* <<< XÓA KHỐI NÀY */
+
+/* --- Style cho thẻ dialog (thay vì .modal-overlay) --- */
+.edit-dish-modal {
+    /* Reset một số style mặc định của trình duyệt */
+    border: none;
+    padding: 0; /* Bỏ padding mặc định của dialog */
+    /* Áp dụng các style về kích thước, bo góc, bóng đổ từ .modal-content cũ */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: visible; /* Đổi thành visible để nút X không bị cắt */
+    /* Không cần position, top, left, transform nữa */
+  
+    /* Thêm thuộc tính này để tránh lỗi layout khi nội dung quá dài */
+     box-sizing: border-box;
+  }
+  
+  /* Style cho backdrop (nền mờ phía sau) của dialog */
+  .edit-dish-modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Có thể thêm hiệu ứng nếu muốn */
+     /* backdrop-filter: blur(2px); */
+  }
+  
+  /* Style cho .modal-content bên trong dialog */
+  .edit-dish-modal .modal-content {
+     /* Giữ lại padding cho nội dung bên trong */
+     padding: 25px 30px;
+     position: relative; /* <<< Quan trọng: Để định vị nút đóng X */
+     /* Bỏ các thuộc tính đã chuyển lên .edit-dish-modal */
+     /* background-color: #fff; <<< Có thể bỏ nếu dialog đã có nền trắng */
+     /* border-radius: 8px; <<< Bỏ */
+     /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); <<< Bỏ */
+     /* max-width, width, max-height, overflow-y <<< Bỏ */
+  
+     /* Thêm lại để đảm bảo cuộn bên trong nếu cần */
+      max-height: calc(90vh - 50px); /* Trừ đi padding trên dưới của content */
+      overflow-y: auto;
+  }
+  
+  /* Nút đóng (dấu X) - Vẫn giữ nguyên */
+  .modal-content .modal-close-button { /* <<< Chính xác hơn là trong .modal-content */
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 10; /* Đảm bảo nút X nằm trên các phần tử khác trong content */
+  }
+  .modal-content .modal-close-button:hover {
+      color: #333;
+  }
+  
+  
+  /* Tiêu đề modal - Vẫn giữ nguyên */
+  .modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.4rem;
+  }
+  
+  /* Style chung cho các nhóm form trong modal - Vẫn giữ nguyên */
+  .modal-content .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .modal-content .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .modal-content .form-group input[type="text"],
+  .modal-content .form-group input[type="number"],
+  .modal-content .form-group textarea,
+  .modal-content .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+  }
+  .modal-content .form-group textarea {
+      resize: vertical;
+  }
+  
+  /* Nút hành động trong modal - Vẫn giữ nguyên */
+  .modal-content .modal-actions { /* <<< Chính xác hơn là trong .modal-content */
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  /* Kế thừa hoặc định nghĩa lại .action-button nếu cần */
+  /* Ví dụ style nút Lưu/Hủy - Vẫn giữ nguyên */
+  .modal-actions .action-button { /* <<< Thêm class này vào CSS chung nếu chưa có */
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95em;
+      transition: background-color 0.2s ease;
+  }
+  .modal-actions .action-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+  }
+  
+  .modal-actions .save-button {
+      background-color: #007bff;
+      color: white;
+  }
+  .modal-actions .save-button:hover:not(:disabled) {
+      background-color: #0056b3;
+  }
+  .modal-actions .cancel-button {
+      background-color: #6c757d;
+      color: white;
+  }
+  .modal-actions .cancel-button:hover:not(:disabled) {
+       background-color: #5a6268;
+  }
+  
+  /* Thông báo lỗi trong modal - Vẫn giữ nguyên */
+  .modal-content .error-message {
+      color: #dc3545;
+      font-size: 0.9em;
+      margin-top: 5px;
+      margin-bottom: 10px;
+  }
