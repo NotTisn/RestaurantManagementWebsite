@@ -1,11 +1,9 @@
 // src/firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-// import { getAuth } from "firebase/auth"; // Thêm nếu bạn cần xác thực
-// import { getStorage } from "firebase/storage"; // Thêm nếu bạn cần lưu trữ file
+import { getAuth } from "firebase/auth";
 
-// Your web app's Firebase configuration
-// TODO: Thay thế bằng cấu hình Firebase của BẠN
+
 const firebaseConfig = {
   apiKey: "AIzaSyDr6AkU9bQJSwetamdd7IPtxs7UnlmRAEY",
   authDomain: "foodapp2025-482ed.firebaseapp.com	",
@@ -21,10 +19,8 @@ const app = initializeApp(firebaseConfig);
 // Get Firestore instance
 const db = getFirestore(app);
 
-// Get other instances if needed
-// const auth = getAuth(app);
-// const storage = getStorage(app);
+const projectAuth = getAuth(app);
 
 // Export the instances you need
-export { db }; // Chỉ export db nếu chỉ cần Firestore
+export { db, projectAuth }; // Chỉ export db nếu chỉ cần Firestore
 // export { db, auth, storage }; // Export nhiều hơn nếu cần

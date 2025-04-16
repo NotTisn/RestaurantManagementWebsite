@@ -8,21 +8,20 @@ function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-header">
         {/* 2. Có thể bọc tiêu đề/logo bằng Link về trang chủ */}
-        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link to="/app" style={{ textDecoration: 'none', color: 'inherit' }}>
            <h2>Nhà Hàng XYZ</h2>
         </Link>
       </div>
       <nav className="sidebar-nav">
         <ul>
           <li>
-            {/* Thay thế <a> bằng <Link> và href bằng to */}
-            <Link to="/food">Quản lý Món ăn</Link>
+            <Link to="/app/food">Quản lý Món ăn</Link>
           </li>
           <li>
-            <Link to="/orders">Quản lý Đơn hàng</Link>
+            <Link to="/app/orders">Quản lý Đơn hàng</Link>
           </li>
           <li>
-            <Link to="/statistics">Thống kê Doanh thu</Link>
+            <Link to="/app/statistics">Thống kê Doanh thu</Link>
           </li>
         </ul>
       </nav>

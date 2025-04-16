@@ -200,14 +200,7 @@
   box-shadow: none;
 }
 
-.add-button {
-  background-color: #007bff; /* Màu xanh dương chính */
-  color: white;
-  margin-bottom: 20px; /* <<< Di chuyển margin từ inline style vào đây */
-  padding: 10px 20px;  /* <<< Có thể làm nút này to hơn một chút */
-  font-size: 1em;      /* <<< Cỡ chữ to hơn một chút */
-  font-weight: bold;   /* <<< Chữ đậm hơn */
-}
+
 
 .add-button:hover:not(:disabled) {
   background-color: #0056b3; /* Màu đậm hơn khi hover */
@@ -217,4 +210,79 @@
 .add-button:active:not(:disabled) {
   background-color: #004085; /* Màu đậm hơn nữa khi nhấn */
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+// Search feature
+.actions-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px; /* Có thể tăng margin dưới nếu muốn cách xa bảng hơn */
+  flex-wrap: wrap;     /* Giữ lại để xuống dòng trên màn hình nhỏ */
+  gap: 15px;           /* Khoảng cách giữa các input, select, button */
+}
+
+.search-input {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 280px;     /* Giữ độ rộng tối thiểu */
+  margin-right: 15px;
+}
+
+.filter-select {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 200px; /* Điều chỉnh độ rộng nếu cần */
+  background-color: white;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.filter-select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.actions-bar .add-button {
+  /* Style cơ bản */
+  padding: 10px 20px;       /* Padding lớn hơn chút cho nút chính */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;          /* Đồng bộ font-size */
+  font-weight: bold;        /* Chữ đậm */
+  white-space: nowrap;      /* Không xuống dòng chữ */
+  transition: background-color 0.2s ease, box-shadow 0.2s ease; /* Thêm transition cho shadow */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Bóng đổ nhẹ */
+
+  margin-left: auto;
+
+
+}
+
+/* Hover & Active states cho nút Add */
+.actions-bar .add-button:hover:not(:disabled) {
+  background-color: #0056b3;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.actions-bar .add-button:active:not(:disabled) {
+  background-color: #004085;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Style khi các control bị disable */
+.search-input:disabled,
+.filter-select:disabled,
+.actions-bar .add-button:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none; /* Bỏ shadow khi disable */
 }

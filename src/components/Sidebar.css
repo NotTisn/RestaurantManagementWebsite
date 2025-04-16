@@ -7,6 +7,8 @@
     padding: 20px 0; /* Khoảng đệm trên dưới */
     display: flex;
     flex-direction: column; /* Sắp xếp các thành phần con theo chiều dọc */
+    position: sticky;
+    top: 0;
   }
   
   .sidebar-header {
