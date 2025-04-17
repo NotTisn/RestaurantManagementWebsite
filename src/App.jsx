@@ -13,6 +13,7 @@ import Statistics from './pages/statistics/Statistics';
 import PrivateRoute from "./components/PrivateRoute"; 
 import Login from './pages/Login';
 import PrivateLayout from './components/PrivateLayout';
+import Register from './pages/Register';
 
 
 
@@ -21,6 +22,7 @@ function App() {
   return (
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path='/register' element={<Register />} />
 
         <Route
         path="/app"

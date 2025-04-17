@@ -20,7 +20,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const projectAuth = getAuth(app);
+const projectFirestore = getFirestore(app);
 
 // Export the instances you need
-export { db, projectAuth }; // Chỉ export db nếu chỉ cần Firestore
+export { db, projectAuth, projectFirestore }; // Chỉ export db nếu chỉ cần Firestore
 // export { db, auth, storage }; // Export nhiều hơn nếu cần

@@ -5,7 +5,7 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { login } = useAuth(); // Lấy thông tin người dùng hiện tại
+  const {login, userRole } = useAuth(); // Lấy thông tin người dùng hiện tại
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,7 +19,14 @@ export default function Login() {
       setError("");
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
-      navigate("/app"); // Chuyển hướng đến trang chính sau khi đăng nhập thành công
+      console.log(userRole)
+      if (userRole === "restaurantOwner") {
+        navigate("/app"); // Chuyển hướng đến trang chính sau khi đăng nhập thành công
+      }
+      else {
+        // Xử lý trường hợp không xác định vai trò hoặc vai trò không được phép truy cập
+        setError("Bạn không có quyền truy cập trang này.");
+      }
     } catch (err) {
       setError(`Đăng nhập thất bại! ${err.message}`);
     }
@@ -34,10 +41,12 @@ export default function Login() {
         {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label>Email</label>
             <input type="email" ref={emailRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label>Mật khẩu</label>
             <input type="password" ref={passwordRef} required style={styles.input} />
           </div>
