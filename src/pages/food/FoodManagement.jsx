@@ -59,7 +59,7 @@ function FoodManagement() {
 
     // === State cho phân trang ===
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10); // Số lượng món ăn trên mỗi trang
+    const [itemsPerPage, setItemsPerPage] = useState(5) // Số lượng món ăn trên mỗi trang
 
     // === useEffect LẤY DỮ LIỆU MÓN ĂN ===
     useEffect(() => {
@@ -440,7 +440,7 @@ function FoodManagement() {
                                     value={itemsPerPage}
                                     label="Số món/trang"
                                     onChange={(e) => {
-                                        setItemsPerPage(Number.parseInt(e.target.value, 10));
+                                        setItemsPerPage(Number.parseInt(e.target.value, 5))
                                         setCurrentPage(1);
                                     }}
                                 >

@@ -1,56 +1,62 @@
-/* src/components/Sidebar.css */
-.sidebar {
-    width: 250px; /* Độ rộng của sidebar */
-    height: 100vh; /* Cao bằng chiều cao màn hình */
-    background-color: #2c3e50; /* Màu nền tối */
-    color: #ecf0f1; /* Màu chữ sáng */
-    padding: 20px 0; /* Khoảng đệm trên dưới */
-    display: flex;
-    flex-direction: column; /* Sắp xếp các thành phần con theo chiều dọc */
-    position: sticky;
-    top: 0;
-  }
-  
-  .sidebar-header {
-    padding: 0 20px 20px 20px; /* Khoảng đệm cho tiêu đề */
-    text-align: center;
-    border-bottom: 1px solid #34495e; /* Đường kẻ phân cách */
-  }
-  
-  .sidebar-header h2 {
-    margin: 0;
-    font-size: 1.5em;
-  }
-  
-  .sidebar-nav {
-    flex-grow: 1; /* Cho phép phần điều hướng chiếm không gian còn lại */
-    margin-top: 20px;
-  }
-  
-  .sidebar-nav ul {
-    list-style: none; /* Bỏ dấu chấm đầu dòng của danh sách */
-    padding: 0;
-    margin: 0;
-  }
-  
-  .sidebar-nav li {
-    margin: 0;
-  }
-  
-  .sidebar-nav a {
-    display: block; /* Để link chiếm toàn bộ chiều rộng của li */
-    padding: 12px 20px; /* Khoảng đệm cho mỗi link */
-    color: #ecf0f1; /* Màu chữ link */
-    text-decoration: none; /* Bỏ gạch chân */
-    transition: background-color 0.2s ease; /* Hiệu ứng chuyển đổi nền khi hover */
-  }
-  
-  .sidebar-nav a:hover {
-    background-color: #34495e; /* Màu nền khi di chuột qua */
-  }
-  
-  /* (Tùy chọn) Thêm style cho link đang active sau này khi dùng React Router */
-  .sidebar-nav a.active {
-    background-color: #1abc9c;
-    font-weight: bold;
-  }
+:where(.sidebar-drawer-paper) .sidebar-menu-item.Mui-selected {
+  background-color: #1976d2;
+  color: white;
+  border-radius: 8px;
+}
+
+:where(.sidebar-drawer-paper) .sidebar-menu-item.Mui-selected .MuiListItemIcon-root {
+  color: white;
+}
+
+.sidebar-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
+  padding-top: 16px; /* Thay py: 2 bằng padding top và bottom tương ứng */
+  padding-bottom: 16px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.sidebar-logo-link {
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+}
+
+.sidebar-logo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar-menu-item {
+  padding-left: 16px; 
+  padding-right: 8px; 
+  margin-left: 4px; 
+  margin-right: 4px;
+  box-sizing: border-box;
+}
+
+.sidebar-menu-item.Mui-selected {
+  background-color: #1976d2; /* Màu xanh dương đậm hơn của MUI */
+  color: white ; /* Override màu chữ mặc định của MUI */
+  border-radius: 8px; /* Thêm border-radius */
+}
+
+.sidebar-menu-item.Mui-selected .MuiListItemIcon-root {
+  color: white ; /* Override màu icon mặc định của MUI */
+}
+
+.sidebar-menu-item:hover {
+  background-color: #e9ecef; /* Màu nền khi hover */
+}
+
+.sidebar-menu-item.Mui-selected:hover {
+  background-color: #1565c0; /* Màu nền khi hover trên mục đang chọn */
+}
+
+.sidebar-list-item-icon {
+  color: #495057;
+}

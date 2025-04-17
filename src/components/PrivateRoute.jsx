@@ -9,14 +9,14 @@ const PrivateRoute = ({ children }) => {
  // Nếu đang tải trạng thái đăng nhập, hiển thị loading indicator
  if (loading) {
  return (
- <Box
- display="flex"
- justifyContent="center"
- alignItems="center"
- minHeight="100vh" // Để hiển thị ở giữa màn hình (tùy chọn)
- >
- <CircularProgress />
- </Box>
+        <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh" // Để hiển thị ở giữa màn hình (tùy chọn)
+        >
+        <CircularProgress />
+        </Box>
  );
  }
 
