@@ -31,7 +31,7 @@ function App() {
             <PrivateLayout />
           </PrivateRoute>
         }
-      >
+        >
         <Route index element={<Dashboard />} />
         <Route path="food" element={<FoodManagement />} />
         <Route path="orders" element={<OrdersManagement />} />

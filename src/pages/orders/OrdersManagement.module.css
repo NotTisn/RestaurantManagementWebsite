@@ -1,0 +1,171 @@
+/* OrdersManagement.module.css */
+
+/* Container chính của toàn bộ trang */
+.container {
+    padding: 20px; /* Khoảng cách lề xung quanh nội dung */
+    max-width: 1200px; /* Chiều rộng tối đa của nội dung */
+    margin: 0 auto; /* Canh giữa khối nội dung */
+    font-family: sans-serif; /* Chọn font chữ dễ đọc */
+    background-color: #f4f7f6; /* Màu nền nhẹ cho trang */
+}
+
+/* Tiêu đề chính */
+.heading {
+    text-align: center; /* Canh giữa tiêu đề */
+    color: #333; /* Màu chữ xám đậm */
+    margin-bottom: 30px; /* Khoảng cách dưới tiêu đề */
+    text-transform: uppercase; /* Chuyển chữ in hoa */
+    letter-spacing: 1px; /* Khoảng cách giữa các chữ */
+}
+
+/* Container hiển thị lưới các thẻ đơn hàng */
+.ordersGrid {
+    display: grid;
+    /* Tạo cột tự động, mỗi cột rộng tối thiểu 300px và tối đa 1fr (phần còn lại) */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px; /* Khoảng cách giữa các thẻ đơn hàng */
+}
+
+/* Thẻ đơn hàng */
+.orderCard {
+    border: 1px solid #ddd; /* Viền thẻ */
+    border-radius: 8px; /* Bo góc */
+    padding: 20px; /* Khoảng cách lề bên trong thẻ */
+    background-color: #fff; /* Nền trắng cho thẻ */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Đổ bóng nhẹ */
+    display: flex;
+    flex-direction: column; /* Các phần tử con xếp dọc */
+    justify-content: space-between; /* Dãn cách các phần tử con */
+    transition: transform 0.2s ease-in-out; /* Hiệu ứng khi hover */
+}
+
+/* Hiệu ứng khi di chuột qua thẻ */
+.orderCard:hover {
+    transform: translateY(-5px); /* Nhấc nhẹ thẻ lên */
+}
+
+/* Tiêu đề trong thẻ (Mã đơn hàng) */
+.orderCard h3 {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee; /* Đường kẻ dưới */
+    padding-bottom: 10px;
+}
+
+/* Phần thông tin đơn hàng (Khách, Mã giảm giá) */
+.orderInfo p {
+    margin-bottom: 8px;
+    color: #666;
+    font-size: 0.95em;
+}
+
+/* Container danh sách sản phẩm */
+.itemsList {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee; /* Đường kẻ trên */
+}
+
+.itemsList h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+/* Mỗi dòng sản phẩm trong danh sách */
+.itemRow {
+    display: flex; /* Dùng flexbox để xếp ảnh và thông tin ngang hàng */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9; /* Nền nhẹ cho mỗi dòng sản phẩm */
+    border-radius: 4px;
+    border: 1px solid #eee; /* Viền nhẹ */
+}
+
+/* Xóa margin dưới cho dòng sản phẩm cuối cùng */
+.itemRow:last-child {
+    margin-bottom: 0;
+}
+
+/* Ảnh sản phẩm */
+.itemImage {
+    margin-right: 15px; /* Khoảng cách với thông tin */
+    border-radius: 5px;
+    object-fit: cover; /* Đảm bảo ảnh không bị méo */
+    border: 1px solid #ddd; /* Viền ảnh */
+}
+
+/* Container thông tin chi tiết sản phẩm */
+.itemDetails {
+    flex-grow: 1; /* Cho phép phần này chiếm hết không gian còn lại */
+}
+
+.itemDetails div {
+    margin-bottom: 4px; /* Khoảng cách giữa các dòng thông tin */
+    color: #666;
+    font-size: 0.9em;
+}
+
+.itemDetails strong {
+    color: #333; /* Chữ đậm màu sẫm hơn */
+    font-size: 1em;
+}
+
+/* Tổng đơn hàng */
+.orderTotal {
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+    border-top: 1px dashed #eee; /* Đường kẻ đứt */
+    padding-top: 10px;
+}
+
+/* Phần hiển thị trạng thái hoặc button hành động */
+/* Sử dụng một class chung cho phần này */
+.statusActionSection {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+    text-align: right; /* Canh phải */
+}
+
+
+/* Button hành động (Đánh dấu làm xong) */
+.actionButton {
+    padding: 10px 15px;
+    background-color: #4CAF50; /* Nền xanh lá */
+    color: white; /* Chữ trắng */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer; /* Hiển thị con trỏ là bàn tay */
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu khi hover */
+}
+
+/* Hiệu ứng khi di chuột qua button */
+.actionButton:hover {
+    background-color: #388E3C; /* Màu xanh đậm hơn khi hover */
+}
+
+/* Trạng thái button bị vô hiệu hóa */
+.actionButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed; /* Con trỏ không cho phép */
+}
+
+/* Text hiển thị trạng thái khi không có button */
+.statusMessage {
+    font-style: italic;
+    color: #666; /* Màu chữ mặc định */
+    /* text-align: right; -> Đã set ở .statusActionSection */
+    /* margin-top/padding-top/border-top -> Đã set ở .statusActionSection */
+}
+
+/* Các màu cho trạng thái cụ thể */
+.status-pending { color: #ff9800; /* Màu cam cho Pending */ }
+.status-completed { color: #2196f3; /* Màu xanh dương cho Completed */ }
+.status-delivered { color: #4caf50; /* Màu xanh lá cho Delivered */ }
