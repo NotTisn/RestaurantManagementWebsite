@@ -1,6 +1,4 @@
-// src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { projectAuth, projectFirestore } from "../firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -9,61 +7,60 @@ import {
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
+import { projectAuth, projectFirestore } from "../firebaseConfig";
+
 const AuthContext = createContext();
 
-// Xuất useAuth dưới dạng named export
 export function useAuth() {
   return useContext(AuthContext);
 }
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Hàm đăng ký
-  function signup(email, password) {
-    return createUserWithEmailAndPassword(projectAuth, email, password);
-  }
+  const signup = (email, password) =>
+    createUserWithEmailAndPassword(projectAuth, email, password);
 
-  // Hàm đăng nhập
-  async function login(email, password) {
+  const login = async (email, password) => {
     try {
+      setLoading(true);
       const userCredential = await signInWithEmailAndPassword(projectAuth, email, password);
       const user = userCredential.user;
 
-      // Sau khi đăng nhập thành công, lấy vai trò từ Firestore
-      const userDocRef = doc(projectFirestore, 'users', user.uid);
+      const userDocRef = doc(projectFirestore, "users", user.uid);
       const docSnap = await getDoc(userDocRef);
 
       if (docSnap.exists()) {
         setUserRole(docSnap.data().role);
       } else {
-        // Xử lý trường hợp không tìm thấy thông tin người dùng trong Firestore
-        console.error("Không tìm thấy thông tin người dùng trong Firestore");
-        setUserRole(null); // Hoặc một vai trò mặc định
+        console.error("User document not found in Firestore");
+        setUserRole(null);
       }
-      setCurrentUser(user);
-      return userCredential; // Trả về userCredential nếu cần
-    } catch (error) {
-      setUserRole(null); // Reset vai trò khi đăng nhập thất bại
-      throw error;
-    }
-  }
 
-  // Hàm đăng xuất
-  function logout() {
+      setCurrentUser(user);
+      return userCredential;
+    } catch (error) {
+      setUserRole(null);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
     setUserRole(null);
     return signOut(projectAuth);
-  }
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(projectAuth, async user => {
+    const unsubscribe = onAuthStateChanged(projectAuth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        // Khi trạng thái auth thay đổi, cũng lấy vai trò nếu người dùng đã đăng nhập
-        const userDocRef = doc(projectFirestore, 'users', user.uid);
+        const userDocRef = doc(projectFirestore, "users", user.uid);
         const docSnap = await getDoc(userDocRef);
+
         if (docSnap.exists()) {
           setUserRole(docSnap.data().role);
         } else {
@@ -81,11 +78,11 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    userRole,
+    loading,
     signup,
     login,
     logout,
-    loading, 
-    userRole
   };
 
   return (
@@ -94,3 +91,8 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+export { AuthContext };
+export const useAuthContext = () => useContext(AuthContext);
+
+

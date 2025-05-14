@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 10vh;
+    color: white;
+}
+
+.container {
+    width: 90vw;
+    height: 90vw;
+    background-color: orange;
+    opacity: 0.75;
+    border-radius: 12%;
+    backdrop-filter: blur(19px) saturate(180);
+}
