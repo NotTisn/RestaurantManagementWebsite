@@ -22,7 +22,8 @@ function Sidebar() {
     { path: '/app/food', text: 'Quản lý Món ăn', icon: <RestaurantMenuIcon /> },
     { path: '/app/orders', text: 'Quản lý Đơn hàng', icon: <ShoppingCartIcon /> },
     { path: '/app/statistics', text: 'Thống kê Doanh thu', icon: <AssessmentIcon /> },
-  ];
+    { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
+  ]
 
   return (
     <Drawer

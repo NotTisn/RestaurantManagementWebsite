@@ -45,6 +45,7 @@ export default function Register() {
       await setDoc(restaurantDocRef, restaurantData);
       console.log("Thông tin nhà hàng đã được lưu vào Firestore");
 
+      await setDoc(doc(db, "userChats", user.uid), {});
       navigate("/");
     } catch (err) {
       setError(`Tạo tài khoản thất bại! ${err.message}`);

@@ -14,12 +14,15 @@ import PrivateRoute from "./components/PrivateRoute";
 import Login from './pages/Login';
 import PrivateLayout from './components/PrivateLayout';
 import Register from './pages/Register';
-
+import Message from './pages/message/Message'
 
 
 function App() {
+  console.log("App started");
+
   // Phần JSX để render giao diện
   return (
+    
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path='/register' element={<Register />} />
@@ -36,7 +39,9 @@ function App() {
         <Route path="food" element={<FoodManagement />} />
         <Route path="orders" element={<OrdersManagement />} />
         <Route path="statistics" element={<Statistics />} />
+        <Route path="message" element={<Message/>}/>
       </Route>
+      console.log("App started");
 
       </Routes>
   );
