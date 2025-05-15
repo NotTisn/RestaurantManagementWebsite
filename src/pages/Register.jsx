@@ -12,7 +12,7 @@ export default function Register() {
   const restaurantNameRef = useRef(); // Thêm ref cho tên nhà hàng
   const phoneRef = useRef(); // Thêm ref cho số điện thoại
   const addressRef = useRef(); // Thêm ref cho địa chỉ
-  const { signup, currentUser } = useAuth(); // Get currentUser from AuthContext
+  const { signup } = useAuth(); // Get currentUser from AuthContext
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,7 +27,11 @@ export default function Register() {
     try {
       setError("");
       setLoading(true);
-      await signup(emailRef.current.value, passwordRef.current.value);
+      const currentUser = await signup(emailRef.current.value, passwordRef.current.value);
+
+      // const user = currentUser.user;
+      // console.log(currentUser);
+      // console.log(currentUser.uid)
 
       // Sau khi đăng ký thành công, lưu thêm thông tin nhà hàng vào Firestore
       const restaurantData = {
@@ -36,7 +40,7 @@ export default function Register() {
         address: addressRef.current.value,
         uid: currentUser.uid, // Lưu userId để liên kết với tài khoản người dùng
         role: "restaurantOwner", // Lưu vai trò để xác định quyền truy cập
-
+        email: emailRef.current.value
       };
       console.log("Thông tin nhà hàng:", restaurantData);
 
@@ -45,7 +49,7 @@ export default function Register() {
       await setDoc(restaurantDocRef, restaurantData);
       console.log("Thông tin nhà hàng đã được lưu vào Firestore");
 
-      await setDoc(doc(db, "userChats", user.uid), {});
+      await setDoc(doc(db, "userChats", currentUser.uid), {});
       navigate("/");
     } catch (err) {
       setError(`Tạo tài khoản thất bại! ${err.message}`);
