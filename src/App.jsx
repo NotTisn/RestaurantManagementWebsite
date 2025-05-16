@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import PrivateLayout from './components/PrivateLayout';
 import Register from './pages/Register';
 import Message from './pages/message/Message'
+import VoucherManagementPage from './pages/voucher/VoucherManagementPage';
 
 
 function App() {
@@ -40,7 +41,8 @@ function App() {
         <Route path="orders" element={<OrdersManagement />} />
         <Route path="statistics" element={<Statistics />} />
         <Route path="message" element={<Message/>}/>
-      </Route>
+        <Route path="voucher" element={<VoucherManagementPage/>}/>
+        </Route>
       console.log("App started");
 
       </Routes>
