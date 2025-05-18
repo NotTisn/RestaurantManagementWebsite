@@ -18,10 +18,10 @@ function Sidebar() {
 
   const menuItems = [
     { path: '/app', text: 'Dashboard', icon: <HomeIcon /> },
-    { path: '/app/voucher', text: 'Quản lý voucher', icon: <LocalOfferIcon /> },
-    { path: '/app/food', text: 'Quản lý Món ăn', icon: <RestaurantMenuIcon /> },
-    { path: '/app/orders', text: 'Quản lý Đơn hàng', icon: <ShoppingCartIcon /> },
-    { path: '/app/statistics', text: 'Thống kê Doanh thu', icon: <AssessmentIcon /> },
+    { path: '/app/voucher', text: 'Voucher', icon: <LocalOfferIcon /> },
+    { path: '/app/food', text: 'Dishes', icon: <LocalShippingIcon /> },
+    { path: '/app/orders', text: 'Orders', icon: <ShoppingCartIcon /> },
+    { path: '/app/statistics', text: 'Statistics', icon: <AssessmentIcon /> },
     { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
   ]
 

@@ -11,11 +11,9 @@ import toast from 'react-hot-toast';
 import debounce from 'lodash.debounce';
 import { Pagination, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-// Tên collection món ăn và categories được định nghĩa ở đây
 const DISHES_COLLECTION_NAME = 'food';
 const CATEGORIES_COLLECTION_NAME = 'categories';
 
-// Hàm không dấu (đặt bên ngoài component hoặc import từ utils)
 function removeDiacritics(str) {
     if (!str) return '';
     return str
@@ -29,7 +27,7 @@ function FoodManagement() {
     // === State quản lý dữ liệu món ăn ===
     const [dishes, setDishes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // Lỗi chung (tải danh sách, tải loại)
+    const [error, setError] = useState(null); 
 
     // === State cho việc thêm món ăn ===
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -80,7 +78,7 @@ function FoodManagement() {
             console.log("FoodManagement: Realtime dishes update:", dishesData);
         }, (err) => {
             console.error("FoodManagement: Error listening to dishes collection: ", err);
-            setError("Không thể tải danh sách món ăn.");
+            setError("Can't load dishes. Please try again later.");
             setLoading(false);
         });
 
@@ -107,7 +105,7 @@ function FoodManagement() {
                 console.log("FoodManagement: Fetched categories:", categoriesData);
             } catch (err) {
                 console.error("FoodManagement: Error fetching categories: ", err);
-                setCategoryError("Không thể tải danh sách loại món ăn.");
+                setCategoryError("Can't load categories. Please try again later.");
             } finally {
                 setCategoryLoading(false);
             }
@@ -190,13 +188,13 @@ function FoodManagement() {
                 isDeleted: false
             });
             console.log("FoodManagement: Document added successfully!")
-            toast.success('Thêm món ăn mới thành công!');
+            toast.success('Added new dish successfully!');
             handleCloseAddModal(); // Đóng modal sau khi thêm thành công
             // onSnapshot sẽ tự cập nhật danh sách
         } catch (error) {
             console.error("FoodManagement: Error adding document: ", error);
-            setAddError("Lỗi khi thêm món ăn. Vui lòng thử lại."); // Set lỗi để hiển thị trong modal
-            const errorMsg = "Lỗi khi thêm món ăn. Vui lòng thử lại.";
+            setAddError("Error adding dish. Please try again."); // Set lỗi để hiển thị trong modal
+            const errorMsg = "Error adding dish. Please try again.";
             // Không đóng modal nếu có lỗi
             // Ném lỗi ra để modal biết và dừng trạng thái isSaving
             toast.error(errorMsg);
@@ -210,34 +208,34 @@ function FoodManagement() {
         try {
             await updateDoc(dishDocRef, updatedData);
             console.log("FoodManagement: Document updated with ID: ", dishId)
-            toast.success('Cập nhật món ăn thành công!');
+            toast.success('Updated dish successfully!');
             handleCloseEditModal(); // Đóng modal sau khi cập nhật thành công
         }
         catch(error){
             console.error("FoodManagement: Error updating document: ", error);
-            setUpdateError("Lỗi khi cập nhật món ăn."); // Set lỗi riêng cho việc cập nhật
+            setUpdateError("Error updating dish. Please try again."); // Set lỗi riêng cho việc cập nhật
             // Không đóng modal nếu có lỗi để người dùng thấy thông báo
-            const errorMsg = "Lỗi khi cập nhật món ăn.";
+            const errorMsg = "Error updating dish. Please try again.";
             toast.error(errorMsg);
         }
     }
 
     // === HÀM XÓA MÓN ĂN ===
     const handleSoftDelete = async (dishId, dishName) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa món "${dishName}" không? Món ăn sẽ được ẩn đi và có thể khôi phục sau.`)) {
-            return; // Không làm gì nếu người dùng hủy
+        if (!window.confirm(`Do you really want to delete "${dishName}"? The dish will be hidden and can be restored later.`)) {
+            return; 
         }
         setError(null); // Reset lỗi cập nhật cũ
         const dishDocRef = doc(db, DISHES_COLLECTION_NAME, dishId);
         try {
             await updateDoc(dishDocRef, { isDeleted: true });
             console.log(`Dish soft deleted successfully: ${dishId}`);
-            toast.success(`Đã xóa món "${dishName}"!`);
+            toast.success(`Deleted dish "${dishName}" successfully!`);
         }
         catch(error){
             console.error("Error soft deleting dish: ", error);
-            setError("Đã xảy ra lỗi khi xóa món ăn."); // Hiển thị lỗi chung
-            toast.error("Đã xảy ra lỗi khi xóa món ăn.");
+            setError("Error deleting dish. Please try again."); // Hiển thị lỗi chung
+            toast.error("Error deleting dish. Please try again.");
         }
     }
 
@@ -269,17 +267,13 @@ function FoodManagement() {
     // === HÀM MỞ MODAL XEM ẢNH ===
     const handleImageClick = (imageUrl, altText) => {
         setSelectedImageUrl(imageUrl);
-        setSelectedImageAlt(altText || 'Hình ảnh món ăn'); // Dùng alt text mặc định nếu cần
+        setSelectedImageAlt(altText || 'Dish image'); 
         setIsImageModalOpen(true);
     };
 
     // === HÀM ĐÓNG MODAL XEM ẢNH ===
     const handleCloseImageModal = () => {
         setIsImageModalOpen(false);
-        // Không cần reset URL/Alt ngay lập tức, sẽ bị ẩn đi
-        // Reset khi mở lần sau hoặc trong useEffect của modal xem ảnh nếu cần
-        // setSelectedImageUrl(null);
-        // setSelectedImageAlt('');
     };
 
     // Tính toán số trang
@@ -294,12 +288,12 @@ function FoodManagement() {
     // --- Phần JSX để render ---
     return (
         <div>
-            <h1>Quản lý Món ăn</h1>
+            <h1>Dishes Management</h1>
 
-            {loading && <p>Đang tải...</p>}
+            {loading && <p>Loading...</p>}
             {/* Hiển thị lỗi tải danh sách hoặc loại */}
-            {error && <p style={{ color: 'red' }}>Lỗi: {error}</p>}
-            {categoryError && <p style={{ color: 'red' }}>Lỗi: {categoryError}</p>}
+            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+            {categoryError && <p style={{ color: 'red' }}>Error: {categoryError}</p>}
 
             {!loading && !categoryLoading && (
                 <>
@@ -309,7 +303,7 @@ function FoodManagement() {
                         {/* Ô Search */}
                         <input
                             type='text'
-                            placeholder='Tìm kiếm món ăn then tên...'
+                            placeholder='Search dishes by name...'
                             value={searchTerm}
                             onChange={handleSearchChange}
                             className='search-input'
@@ -319,12 +313,12 @@ function FoodManagement() {
                         {/* === DROPDOWN LỌC CATEGORY === */}
                         <select
                             value={selectedCategory}
-                            onChange={handleCategoryChange} // <<< Gọi hàm xử lý mới
-                            className="filter-select" // Dùng class đã tạo ở bước trước
+                            onChange={handleCategoryChange} 
+                            className="filter-select" 
                             disabled={isAddModalOpen || isEditModalOpen || categoryLoading}
                         >
                             {/* Option mặc định */}
-                            <option value="">Tất cả Danh mục</option>
+                            <option value="">All Categories</option>
 
                             {/* Render các options từ state categories */}
                             {categories.map(cat => (
@@ -336,14 +330,13 @@ function FoodManagement() {
 
 
                         {/* Nút mở form thêm (MODAL) */}
-                        {/* Luôn hiển thị nút này nếu không loading và không có modal nào đang mở */}
                         {!isEditModalOpen && !isAddModalOpen && (
                             <button
                                 type="button"
                                 onClick={handleOpenAddModal}
                                 className="action-button add-button" // Thêm class để style
                             >
-                                Thêm món ăn mới
+                                Add New Dish
                             </button>
                         )}
 
@@ -355,15 +348,15 @@ function FoodManagement() {
                             {/* ... thead và tbody ... */}
                             <thead>
                                 <tr>
-                                    <th>Tên Món ăn</th>
-                                    <th>Giá (VNĐ)</th>
-                                    <th>Mô tả</th>
-                                    <th>Loại</th>
-                                    <th>Ảnh</th>
-                                    <th className="col-star">Sao</th>
-                                    <th>Thời gian</th>
-                                    <th>Phổ biến</th>
-                                    <th className="col-actions">Hành động</th>
+                                    <th>Dish Name</th>
+                                    <th>Price ($)</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Image</th>
+                                    <th className="col-star">Star</th>
+                                    <th>Time</th>
+                                    <th>Popular</th>
+                                    <th className="col-actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -379,13 +372,13 @@ function FoodManagement() {
                                                {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
                                                 {dish.imageUrl ? (<img src={dish.imageUrl} alt={dish.name}className="dish-image clickable"
                                                 onClick={() => handleImageClick(dish.imageUrl, dish.name)}
-                                                onError={() => { /*...*/ }} />) : (<span className="no-image-text">Không có ảnh</span>)}
+                                                onError={() => { /*...*/ }} />) : (<span className="no-image-text">No image</span>)}
                                             </td>
                                             <td className="col-star">{dish.star} ⭐</td>
                                             <td>{dish.time}</td>
                                             <td style={{ textAlign: 'center' }}>
                                                <span className={`status-badge ${dish.isPopular ? 'popular' : ''}`}>
-                                                    {dish.isPopular ? 'Phổ biến' : 'Không'}
+                                                    {dish.isPopular ? 'Popular' : 'Not'}
                                                 </span>
                                             </td>
                                             <td className="col-actions">
@@ -394,7 +387,7 @@ function FoodManagement() {
                                                     onClick={() => handleEditClick(dish)}
                                                     disabled={isAddModalOpen || isEditModalOpen}
                                                 >
-                                                    Sửa
+                                                    Edit
                                                 </button>
                                                 <button
                                                     type='button'
@@ -402,7 +395,7 @@ function FoodManagement() {
                                                     disabled={isAddModalOpen || isEditModalOpen}
                                                     onClick={() => handleSoftDelete(dish.id, dish.name)}
                                                 >
-                                                    Xóa
+                                                    Delete
                                                 </button>
                                             </td>
                                         </tr>
@@ -411,7 +404,7 @@ function FoodManagement() {
                                     // Hiển thị thông báo khi không có kết quả
                                     <tr>
                                         <td colSpan="9" style={{ textAlign: 'center' }}>
-                                            {searchTerm ? 'Không tìm thấy món ăn nào phù hợp.' : 'Chưa có món ăn nào.'}
+                                            {searchTerm ? 'No matching dishes found.' : 'No dishes found.'}
                                         </td>
                                     </tr>
                                 )}
@@ -433,14 +426,14 @@ function FoodManagement() {
                                 shape="rounded" // Hình dạng của các nút (tùy chọn)
                             />
                             <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                                <InputLabel id="items-per-page-label">Số món/trang</InputLabel>
+                                <InputLabel id="items-per-page-label">Items per page</InputLabel>
                                 <Select
                                     labelId="items-per-page-label"
                                     id="itemsPerPage"
                                     value={itemsPerPage}
-                                    label="Số món/trang"
+                                    label="Items per page"
                                     onChange={(e) => {
-                                        setItemsPerPage(Number.parseInt(e.target.value, 5))
+                                        setItemsPerPage(Number.parseInt(e.target.value, 10))
                                         setCurrentPage(1);
                                     }}
                                 >
