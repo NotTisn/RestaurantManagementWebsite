@@ -33,11 +33,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload'; // Import icon xuất dữ liệu
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 // Import Firebase Firestore functions
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig'; // Adjust the import path to your firebaseConfig.js
+import { db } from '../../firebaseConfig'; 
 
 // --- Modal Components ---
 const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
@@ -122,11 +122,8 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-    // Allow empty string or positive integers/decimals depending on field
-    // For discountValue, minOrderValue, usageLimit: allow empty or positive number (integer for usageLimit)
-    if (value === '' || /^\d+(\.\d+)?$/.test(value)) { // Allow decimal for discountValue, minOrderValue
+    if (value === '' || /^\d+(\.\d+)?$/.test(value)) { 
       if (name === 'usageLimit' && value !== '' && !/^\d+$/.test(value)) {
-        // usageLimit must be integer, don't update state if not
         return;
       }
       setFormData(prev => ({
@@ -577,26 +574,57 @@ function VoucherManagementPage() {
   };
 
   const handleSaveVoucher = async (voucherData) => {
-    try {
-      // voucherData đã có định dạng đúng nhờ xử lý trong Modal component
-      if (voucherData.id) {
-        const voucherRef = doc(db, 'vouchers', voucherData.id);
-        const { id, ...dataToUpdate } = voucherData;
-        // Firestore Timestamp được lưu tự động khi dùng Date object
-        await updateDoc(voucherRef, dataToUpdate); // updatedAt đã được thêm trong modal
-        console.log("Voucher updated successfully:", voucherData.id);
-      } else {
-        // usedCount và timestamps đã được thêm trong modal cho document mới
-        await addDoc(collection(db, 'vouchers'), voucherData);
-        console.log("Voucher added successfully");
+  try {
+    if (voucherData.id) {
+      // Logic cho việc CẬP NHẬT voucher (đã đúng)
+      const voucherRef = doc(db, 'vouchers', voucherData.id);
+      const { id, ...dataToUpdate } = voucherData; // Tách id ra
+      await updateDoc(voucherRef, dataToUpdate);
+      console.log("Voucher updated successfully:", voucherData.id);
+
+    } else {
+      // Logic cho việc THÊM MỚI voucher
+      // Tạo một bản sao của voucherData và loại bỏ trường 'id' nếu nó tồn tại
+      const { id, ...dataToAdd } = voucherData; // Đảm bảo trường id (nếu có) bị loại bỏ
+
+      await addDoc(collection(db, 'vouchers'), dataToAdd); // Sử dụng dataToAdd
+      console.log("Voucher added successfully");
+
+      // --- Gửi thông báo đến backend để thông báo voucher mới ---
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const response = await fetch(`${backendUrl}/notify-new-voucher`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            voucherCode: dataToAdd.code, // Sử dụng dataToAdd
+            voucherDescription: dataToAdd.description,
+            discountType: dataToAdd.discountType,
+            discountValue: dataToAdd.discountValue,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('New voucher notification sent to backend:', result);
+        } else {
+          const errorResult = await response.json();
+          console.error('Failed to send new voucher notification to backend:', errorResult);
+        }
+      } catch (notificationError) {
+        console.error('Error sending new voucher notification request:', notificationError);
       }
-      setError(null); // Clear any previous error
-      handleCloseModals(); // Close modal on successful save
-    } catch (err) {
-      console.error("Error saving voucher:", err);
-      throw err; // Rethrow error to be caught by the modal's try/catch
+      // --- Kết thúc gửi thông báo ---
     }
-  };
+    setError(null);
+    handleCloseModals();
+  } catch (err) {
+    console.error("Error saving voucher:", err);
+    throw err;
+  }
+};
 
   const handleDeleteVoucher = async () => {
     if (!selectedVoucher || !selectedVoucher.id) return;
@@ -927,7 +955,7 @@ function VoucherManagementPage() {
           open={openEditModal}
           onClose={handleCloseModals}
           onSave={handleSaveVoucher}
-          voucherData={selectedVoucher} // Pass selected voucher data for edit mode
+          voucherData={selectedVoucher}
         />
       )}
       {selectedVoucher && (
@@ -935,7 +963,7 @@ function VoucherManagementPage() {
           open={openDeleteConfirm}
           onClose={handleCloseModals}
           onConfirm={handleDeleteVoucher}
-          itemName={selectedVoucher.code} // Use voucher code as item name
+          itemName={selectedVoucher.code}
           itemType="voucher"
         />
       )}
