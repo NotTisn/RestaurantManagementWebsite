@@ -1,0 +1,323 @@
+/* src/pages/category/CategoryManagement.css */
+
+/* Giữ nguyên các style cũ của bạn ở đây */
+
+/* --- Modal Styles (giữ nguyên) --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px; /* Tăng chiều rộng max cho modal Add/Edit */
+    text-align: center;
+    transform: scale(0.95);
+    animation: zoomIn 0.2s ease-out forwards;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.6em;
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.modal-content form { /* Styles for the form inside the modal */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left; /* Căn lề trái cho label/input trong form modal */
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px; /* Thêm khoảng cách với form */
+}
+
+.modal-actions button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.modal-actions button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.modal-actions .confirm-button { /* Dành cho modal delete */
+    background-color: #dc3545;
+    color: white;
+}
+
+.modal-actions .confirm-button:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+.modal-actions .cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.modal-actions .cancel-button:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+/* New: Styles for Add/Edit Modal buttons */
+.modal-actions button[type="submit"] {
+    background-color: #007bff; /* Màu xanh dương cho Add/Update */
+    color: white;
+}
+.modal-actions button[type="submit"]:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.modal-content .error-message {
+    font-size: 0.95em;
+    padding: 8px 15px;
+    margin-bottom: 20px; /* Thêm khoảng cách với form */
+}
+
+.image-required-note {
+    font-size: 0.9em;
+    color: #007bff; /* Màu xanh dương để gợi ý */
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* --- Toast/Snackbar Styles (giữ nguyên) --- */
+.toast-notification {
+    /* Thay đổi các thuộc tính này để đẩy lên góc trên bên phải */
+    position: fixed; /* Giữ cố định trên màn hình */
+    top: 30px; /* Cách lề trên 30px */
+    right: 30px; /* Cách lề phải 30px */
+    left: auto; /* Bỏ căn giữa theo chiều ngang */
+    transform: translateX(0); /* Bỏ transform để không còn căn giữa */
+
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    font-size: 1.1em;
+    z-index: 1001; /* Đảm bảo toast nằm trên tất cả */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    animation: fadeInOut 3.5s forwards; /* Giữ animation fade in/out */
+}
+
+.toast-notification.success {
+    background-color: #28a745;
+}
+
+.toast-notification.error {
+    background-color: #dc3545;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+/* --- General Component Styles (giữ nguyên) --- */
+.category-management-container {
+    padding: 20px;
+    background-color: #f5f7fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 20px auto;
+}
+
+.category-management-container h2,
+.category-list-section h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* New: Styles for the "Add New Category" button */
+.add-new-button {
+    display: block;
+    width: fit-content; /* Hoặc 100% nếu bạn muốn nó rộng */
+    margin: 0 auto 30px auto; /* Canh giữa và tạo khoảng cách dưới */
+    padding: 12px 25px;
+    background-color: #28a745; /* Màu xanh lá cho nút thêm */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-new-button:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.add-new-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* List Section */
+.category-list-section {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.category-item:last-child {
+    border-bottom: none;
+}
+
+.category-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.category-name {
+    flex-grow: 1;
+    font-size: 1.1em;
+    color: #333;
+    font-weight: 500;
+}
+
+.category-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+}
+
+.category-actions button:first-child {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.category-actions button:first-child:hover {
+    background-color: #e0a800;
+}
+
+.category-actions button:last-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+.category-actions button:last-child:hover {
+    background-color: #c82333;
+}
+
+/* New: Image Preview in Modal */
+.image-preview-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.image-preview-container p {
+    font-size: 0.95em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.image-preview {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: contain; /* Giữ nguyên tỷ lệ ảnh, không cắt */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px;
+    background-color: #f9f9f9;
+}
+
+.current-image-note {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}

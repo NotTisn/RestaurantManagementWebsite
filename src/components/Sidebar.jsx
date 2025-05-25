@@ -9,9 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-// Import Firebase auth instance của bạn
-// Giả sử bạn đã khởi tạo Firebase và export auth instance
-import { auth } from '../firebaseConfig'; // Thay đổi đường dẫn này nếu cần
+import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
 
 import './Sidebar.css'; 
@@ -30,6 +28,7 @@ function Sidebar() {
     { path: '/app/orders', text: 'Orders', icon: <ShoppingCartIcon /> },
     { path: '/app/statistics', text: 'Statistics', icon: <AssessmentIcon /> },
     { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
+    { path: '/app/categories', text: 'Categories', icon: <LocalOfferIcon /> },
   ];
 
   const handleLogout = async () => { // Thêm async vì signOut là bất đồng bộ
