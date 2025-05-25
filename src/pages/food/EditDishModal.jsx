@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './EditDishModal.css';
 
 // State khởi tạo rỗng cho lỗi validation
-const initialValidationErrors = {}; // << Thêm này
+const initialValidationErrors = {};
 
 function EditDishModal({
     isOpen,
@@ -20,10 +20,13 @@ function EditDishModal({
     const [formData, setFormData] = useState({name: '', price: '', description: '', imageUrl: '', star: '', time: '', categoryName: '', isPopular: false });
     // State loading cho nút lưu
     const [isSaving, setIsSaving] = useState(false);
-     // State cho lỗi validation (giống AddDishModal)
-    const [validationErrors, setValidationErrors] = useState(initialValidationErrors); // << Thêm này
+    // State cho lỗi validation
+    const [validationErrors, setValidationErrors] = useState(initialValidationErrors);
     // Ref cho thẻ dialog
     const dialogRef = useRef(null);
+
+    // Regex để kiểm tra URL hợp lệ (giống AddDishModal)
+    const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
     // useEffect để điều khiển đóng/mở dialog, lắng nghe sự kiện 'close', và reset state khi mở
     useEffect(() => {
@@ -37,17 +40,17 @@ function EditDishModal({
         if (isOpen) {
             // Reset trạng thái lưu và lỗi validation khi mở modal
             setIsSaving(false);
-            setValidationErrors(initialValidationErrors); // << Reset lỗi validation
+            setValidationErrors(initialValidationErrors);
             dialogNode.showModal();
             dialogNode.addEventListener('close', handleDialogClose);
 
-             // Tự động focus vào trường input đầu tiên
-             try {
-                 const firstInput = dialogNode.querySelector('input, select, textarea');
-                 if (firstInput) {
-                     firstInput.focus();
-                 }
-             } catch (e) { console.error("Error focusing first input:", e); }
+            // Tự động focus vào trường input đầu tiên
+            try {
+                const firstInput = dialogNode.querySelector('input, select, textarea');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            } catch (e) { console.error("Error focusing first input:", e); }
 
 
         } else {
@@ -55,9 +58,9 @@ function EditDishModal({
         }
 
         return () => {
-             if (dialogNode) {
-                 dialogNode.removeEventListener('close', handleDialogClose);
-             }
+            if (dialogNode) {
+                dialogNode.removeEventListener('close', handleDialogClose);
+            }
         };
 
     }, [isOpen, onClose]);
@@ -65,8 +68,8 @@ function EditDishModal({
     // useEffect để cập nhật formData khi prop `dish` thay đổi
     useEffect(() => {
         if (isOpen && dish){ // Chỉ cập nhật khi modal mở và có dish
-             // Dùng || '' thay vì ?? '' để đảm bảo các giá trị undefined/null/false
-             // được set thành chuỗi rỗng hoặc false ban đầu
+            // Dùng || '' thay vì ?? '' để đảm bảo các giá trị undefined/null/false
+            // được set thành chuỗi rỗng hoặc false ban đầu
             setFormData({
                 name: dish.name || '',
                 price: dish.price || '', // Giá 0 vẫn hiển thị '0'
@@ -77,8 +80,8 @@ function EditDishModal({
                 categoryName: dish.categoryName || '',
                 isPopular: dish.isPopular || false // isPopular false vẫn hiển thị false
             });
-             // Không reset isSaving/validationErrors ở đây để tránh giật giao diện
-             // Việc reset đã được làm trong useEffect mở modal
+            // Không reset isSaving/validationErrors ở đây để tránh giật giao diện
+            // Việc reset đã được làm trong useEffect mở modal
         }
     }, [isOpen, dish]); // Phụ thuộc isOpen và dish
 
@@ -89,25 +92,55 @@ function EditDishModal({
             ...prevData,
             [name]: type === 'checkbox' ? checked : (type === 'number' ? (value === '' ? '' : Number(value)) : value)
         }));
-         // Xóa lỗi validation cho trường vừa thay đổi
-        setValidationErrors(prev => ({ ...prev, [name]: '' })); // << Xóa lỗi khi gõ
+        // Xóa lỗi validation cho trường vừa thay đổi
+        setValidationErrors(prev => ({ ...prev, [name]: '' }));
     };
 
-     // Hàm VALIDATE FORM (Giống AddDishModal)
+    // Hàm VALIDATE FORM (Đã cập nhật đầy đủ)
     const validateForm = () => {
         const errors = {};
         const priceValue = Number.parseFloat(formData.price);
         const starValue = Number.parseFloat(formData.star);
 
+        // Validate Tên món ăn
         if (!formData.name.trim()) {
             errors.name = 'Dish Name is required.';
+        } else if (formData.name.trim().length < 3) {
+            errors.name = 'Dish Name must be at least 3 characters long.';
+        } else if (formData.name.trim().length > 100) {
+            errors.name = 'Dish Name cannot exceed 100 characters.';
         }
-        if (formData.price === '' || isNaN(priceValue) || priceValue < 0) {
-            errors.price = 'Price is required and must be a non-negative number.';
+
+        // Validate Giá
+        if (formData.price === '' || Number.isNaN(priceValue)) {
+            errors.price = 'Price is required and must be a number.';
+        } else if (priceValue < 0) {
+            errors.price = 'Price cannot be negative.';
+        } else if (priceValue > 999999999) { // Giới hạn giá trị lớn nhất, ví dụ 1 tỷ
+            errors.price = 'Price is too high.';
         }
-        if (formData.star !== '' && (isNaN(starValue) || starValue < 0 || starValue > 5)) {
+
+        // Validate Mô tả
+        if (formData.description && formData.description.length > 500) {
+            errors.description = 'Description cannot exceed 500 characters.';
+        }
+
+        // Validate URL Hình ảnh
+        if (formData.imageUrl && !urlRegex.test(formData.imageUrl)) {
+            errors.imageUrl = 'Please enter a valid URL for the image.';
+        }
+
+        // Validate Đánh giá (Star)
+        if (formData.star !== '' && (Number.isNaN(starValue) || starValue < 0 || starValue > 5)) {
             errors.star = 'Rating must be a number between 0 and 5.';
         }
+
+        // Validate Thời gian chuẩn bị (Time)
+        if (formData.time && formData.time.length > 50) {
+            errors.time = 'Time cannot exceed 50 characters.';
+        }
+
+        // Validate Danh mục
         if (!formData.categoryName) {
             errors.categoryName = 'Category is required.';
         }
@@ -129,7 +162,7 @@ function EditDishModal({
         setIsSaving(true); // Bắt đầu loading
         const updatedData = {
             name: formData.name.trim(), // Trim khoảng trắng
-            price: Number.parseFloat(formData.price), // Đã là số
+            price: Number.parseFloat(formData.price),
             description: formData.description,
             imageUrl: formData.imageUrl,
             star: formData.star === '' ? 0 : Number.parseFloat(formData.star), // Nếu rỗng thì set 0, không thì chuyển đổi
@@ -139,16 +172,16 @@ function EditDishModal({
         };
 
         try {
-             await onSave(dish.id, updatedData);
-             // onSave (ở component cha) sẽ xử lý toast và đóng modal nếu thành công
-         } catch (error) {
-             // Lỗi từ Firestore (updateError) đã được set ở component cha
-              console.error("Error during save:", error); // Log lỗi chi tiết hơn
-             // updateError prop sẽ tự hiển thị trong modal
-             // isSaving sẽ được set lại thành false ở finally block
-         } finally {
-             setIsSaving(false);
-         }
+            await onSave(dish.id, updatedData);
+            // onSave (ở component cha) sẽ xử lý toast và đóng modal nếu thành công
+        } catch (error) {
+            // Lỗi từ Firestore (updateError) đã được set ở component cha
+            console.error("Error during save:", error); // Log lỗi chi tiết hơn
+            // updateError prop sẽ tự hiển thị trong modal
+            // isSaving sẽ được set lại thành false ở finally block
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Hàm xử lý click vào backdrop của dialog
@@ -166,11 +199,12 @@ function EditDishModal({
             onClick={handleBackdropClick}
             onKeyDown={(e) => {
                 // Close dialog on Space or Enter press on backdrop (Accessibility)
-                if (e.key === 'Enter' || e.key === ' ') {
+                // Chỉ cho phép đóng nếu không đang lưu
+                if ((e.key === 'Enter' || e.key === ' ') && e.target === dialogRef.current && !isSaving) {
                   handleBackdropClick(e);
                 }
-              }}
-             onCancel={(e) => e.preventDefault()} // Tắt sự kiện cancel mặc định (ESC)
+            }}
+            onCancel={(e) => e.preventDefault()} // Tắt sự kiện cancel mặc định (ESC)
             aria-labelledby="editDishModalTitle"
         >
             <div className='modal-content'>
@@ -195,106 +229,104 @@ function EditDishModal({
                             aria-describedby={validationErrors.name ? 'editDishNameError' : undefined} // Accessibility
                             aria-invalid={!!validationErrors.name} // Accessibility
                         />
-                         {/* Hiển thị lỗi validation */}
-                         {validationErrors.name && <p id="editDishNameError" className="validation-error">{validationErrors.name}</p>} {/* << Thêm này */}
+                        {/* Hiển thị lỗi validation */}
+                        {validationErrors.name && <p id="editDishNameError" className="validation-error">{validationErrors.name}</p>}
                     </div>
 
                     {/* ----- Price ----- */}
                     <div className="form-group">
-                         <label htmlFor="editDishPrice">Price ($):*</label>
+                        <label htmlFor="editDishPrice">Price ($):*</label>
                         <input
                             type="number"
                             id="editDishPrice"
                             name="price"
                             value={formData.price}
                             onChange={handleChange}
-                             disabled={isSaving}
-                             aria-describedby={validationErrors.price ? 'editDishPriceError' : undefined} // Accessibility
-                             aria-invalid={!!validationErrors.price} // Accessibility
+                            disabled={isSaving}
+                            aria-describedby={validationErrors.price ? 'editDishPriceError' : undefined} // Accessibility
+                            aria-invalid={!!validationErrors.price} // Accessibility
                         />
-                         {/* Hiển thị lỗi validation */}
-                        {validationErrors.price && <p id="editDishPriceError" className="validation-error">{validationErrors.price}</p>} {/* << Thêm này */}
+                        {/* Hiển thị lỗi validation */}
+                        {validationErrors.price && <p id="editDishPriceError" className="validation-error">{validationErrors.price}</p>}
                     </div>
 
-                     {/* ----- Description ----- */}
-                     <div className="form-group">
-                         <label htmlFor="editDishDesc">Description:</label>
-                         <textarea
+                    {/* ----- Description ----- */}
+                    <div className="form-group">
+                        <label htmlFor="editDishDesc">Description:</label>
+                        <textarea
                             id="editDishDesc"
                             name="description"
                             rows="3"
                             value={formData.description}
                             onChange={handleChange}
                             disabled={isSaving}
-                             aria-describedby={validationErrors.description ? 'editDishDescError' : undefined}
-                             aria-invalid={!!validationErrors.description}
+                            aria-describedby={validationErrors.description ? 'editDishDescError' : undefined}
+                            aria-invalid={!!validationErrors.description}
                         />
-                         {/* {validationErrors.description && <p id="editDishDescError" className="validation-error">{validationErrors.description}</p>} */}
+                        {validationErrors.description && <p id="editDishDescError" className="validation-error">{validationErrors.description}</p>}
                     </div>
 
                     {/* ----- Image URL ----- */}
                     <div className="form-group">
-                         <label htmlFor="editDishImageUrl">Image URL:</label>
-                         <input
+                        <label htmlFor="editDishImageUrl">Image URL:</label>
+                        <input
                             type="text"
                             id="editDishImageUrl"
                             name="imageUrl"
                             value={formData.imageUrl}
                             onChange={handleChange}
                             disabled={isSaving}
-                             aria-describedby={validationErrors.imageUrl ? 'editDishImageUrlError' : undefined}
+                            aria-describedby={validationErrors.imageUrl ? 'editDishImageUrlError' : undefined}
                             aria-invalid={!!validationErrors.imageUrl}
-                         />
-                         {/* {validationErrors.imageUrl && <p id="editDishImageUrlError" className="validation-error">{validationErrors.imageUrl}</p>} */}
+                        />
+                        {validationErrors.imageUrl && <p id="editDishImageUrlError" className="validation-error">{validationErrors.imageUrl}</p>}
                     </div>
 
                     {/* ----- Star Rating ----- */}
                     <div className="form-group">
-                         <label htmlFor="editDishStar">Star Rating:</label>
-                         <input
-                             type="number"
-                             id="editDishStar"
-                             name="star"
-                             value={formData.star}
-                             onChange={handleChange}
-                             min="0" max="5" step="0.1"
-                             disabled={isSaving}
-                             aria-describedby={validationErrors.star ? 'editDishStarError' : undefined} // Accessibility
-                             aria-invalid={!!validationErrors.star} // Accessibility
-                         />
-                         {/* Hiển thị lỗi validation */}
-                        {validationErrors.star && <p id="editDishStarError" className="validation-error">{validationErrors.star}</p>} {/* << Thêm này */}
+                        <label htmlFor="editDishStar">Rating (0-5):</label>
+                        <input
+                            type="number"
+                            id="editDishStar"
+                            name="star"
+                            value={formData.star}
+                            onChange={handleChange}
+                            disabled={isSaving}
+                            aria-describedby={validationErrors.star ? 'editDishStarError' : undefined} // Accessibility
+                            aria-invalid={!!validationErrors.star} // Accessibility
+                        />
+                        {/* Hiển thị lỗi validation */}
+                        {validationErrors.star && <p id="editDishStarError" className="validation-error">{validationErrors.star}</p>}
                     </div>
 
-                     {/* ----- Time ----- */}
-                     <div className="form-group">
-                          <label htmlFor="editDishTime">Time:</label>
-                          <input
-                             type="text"
-                             id="editDishTime"
-                             name="time"
-                             value={formData.time}
-                             onChange={handleChange}
-                             placeholder="e.g. 15-20 minutes"
-                             disabled={isSaving}
-                             aria-describedby={validationErrors.time ? 'editDishTimeError' : undefined}
-                             aria-invalid={!!validationErrors.time}
-                         />
-                         {/* {validationErrors.time && <p id="editDishTimeError" className="validation-error">{validationErrors.time}</p>} */}
-                     </div>
+                    {/* ----- Time ----- */}
+                    <div className="form-group">
+                        <label htmlFor="editDishTime">Time:</label>
+                        <input
+                            type="text"
+                            id="editDishTime"
+                            name="time"
+                            value={formData.time}
+                            onChange={handleChange}
+                            placeholder="e.g. 15-20 minutes"
+                            disabled={isSaving}
+                            aria-describedby={validationErrors.time ? 'editDishTimeError' : undefined}
+                            aria-invalid={!!validationErrors.time}
+                        />
+                        {validationErrors.time && <p id="editDishTimeError" className="validation-error">{validationErrors.time}</p>}
+                    </div>
 
                     {/* ----- Category ----- */}
                     <div className="form-group">
-                         <label htmlFor="editDishCategory">Category:*</label>
-                         <select
+                        <label htmlFor="editDishCategory">Category:*</label>
+                        <select
                             id="editDishCategory"
                             name="categoryName"
                             value={formData.categoryName}
                             onChange={handleChange}
-                             // Disable khi đang tải loại hoặc đang lưu
                             disabled={categoryLoading || isSaving}
-                             aria-describedby={validationErrors.categoryName ? 'editDishCategoryError' : undefined} // Accessibility
-                             aria-invalid={!!validationErrors.categoryName} // Accessibility
+                            aria-describedby={validationErrors.categoryName ? 'editDishCategoryError' : undefined} // Accessibility
+                            aria-invalid={!!validationErrors.categoryName} // Accessibility
                         >
                             <option value="" disabled>
                                 {categoryLoading ? 'Loading categories...' : categoryError ? 'Error loading categories' : '-- Select category --'}
@@ -304,26 +336,26 @@ function EditDishModal({
                             ))}
                         </select>
                         {/* Hiển thị lỗi category từ fetch HOẶC lỗi validation */}
-                         {(categoryError || validationErrors.categoryName) && <p className="error-message" id="editDishCategoryError">{categoryError || validationErrors.categoryName}</p>} {/* << Cập nhật */}
+                        {(categoryError || validationErrors.categoryName) && <p className="error-message" id="editDishCategoryError">{categoryError || validationErrors.categoryName}</p>}
                     </div>
 
-                     {/* ----- Popular? ----- */}
-                     <div className="form-group form-group-checkbox">
-                          <input
-                             type="checkbox"
-                             id="editDishIsPopular" // ID riêng cho checkbox sửa
-                             name="isPopular"
-                             checked={formData.isPopular} // checked dựa vào state
-                             onChange={handleChange} // Dùng chung handleChange
-                             disabled={isSaving}
-                         />
-                          <label htmlFor="editDishIsPopular">Popular?</label>
-                     </div>
+                    {/* ----- Popular? ----- */}
+                    <div className="form-group form-group-checkbox">
+                        <input
+                            type="checkbox"
+                            id="editDishIsPopular" // ID riêng cho checkbox sửa
+                            name="isPopular"
+                            checked={formData.isPopular} // checked dựa vào state
+                            onChange={handleChange} // Dùng chung handleChange
+                            disabled={isSaving}
+                        />
+                        <label htmlFor="editDishIsPopular">Popular?</label>
+                    </div>
 
                     {/* ----- Save and Cancel Buttons ----- */}
                     <div className="modal-actions">
                         <button type="submit" className="action-button save-button" disabled={isSaving}>
-                             {isSaving ? 'Saving...' : 'Save Changes'}
+                            {isSaving ? 'Saving...' : 'Save Changes'}
                         </button>
                         <button type="button" className="action-button cancel-button" onClick={onClose} disabled={isSaving}>
                             Cancel
