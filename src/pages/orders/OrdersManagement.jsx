@@ -1,434 +1,262 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  collection, 
-  onSnapshot, 
-  doc, 
-  updateDoc, 
-  getDocs, 
-  query, 
-  where, 
-  documentId, 
-  orderBy, 
-  limit, 
-  startAfter, 
-  endBefore, 
+import React, { useEffect, useState, useCallback, useRef } from 'react'; // Import useRef
+import {
+  collection,
+  doc,
+  updateDoc,
+  getDocs,
+  query,
+  where,
+  documentId,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
   limitToLast,
-  Timestamp // Import Timestamp from firebase/firestore
-} from 'firebase/firestore'; 
+  Timestamp,
+  onSnapshot
+} from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import styles from './OrdersManagement.module.css';
 
-// Import Material-UI components and icons for a better UI/UX
+// Material-UI components và icons
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress'; // For loading indicator
+import CircularProgress from '@mui/material/CircularProgress';
 
-// Icons for tabs
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ListAltIcon from '@mui/icons-material/ListAlt'; // For 'All Orders' tab
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
-const ORDERS_PER_PAGE = 6; // Số lượng đơn hàng hiển thị trên mỗi trang
+const ORDERS_PER_PAGE = 6;
 
 function OrdersManagement() {
   const [orders, setOrders] = useState([]);
   const [usersMap, setUsersMap] = useState({});
-  const [currentTab, setCurrentTab] = useState('pending'); // Mặc định hiển thị tab 'pending'
-  const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại (0-indexed)
-  const [lastVisible, setLastVisible] = useState(null); // Document cuối cùng của trang hiện tại
-  const [firstVisible, setFirstVisible] = useState(null); // Document đầu tiên của trang hiện tại
-  const [hasMoreNext, setHasMoreNext] = useState(false); // Cờ kiểm tra có trang kế tiếp hay không
-  const [hasMorePrev, setHasMorePrev] = useState(false); // Cờ kiểm tra có trang trước đó hay không
-  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
-  const [error, setError] = useState(null); // Trạng thái lỗi
+  const [currentTab, setCurrentTab] = useState('pending');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [firstVisible, setFirstVisible] = useState(null);
+  const [hasMoreNext, setHasMoreNext] = useState(false);
+  const [hasMorePrev, setHasMorePrev] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Hàm xử lý khi người dùng chuyển đổi tab
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
-    setCurrentPage(0); // Reset về trang đầu tiên khi chuyển tab
-    setLastVisible(null); // Reset điểm bắt đầu/kết thúc phân trang
-    setFirstVisible(null);
-    setHasMoreNext(false);
-    setHasMorePrev(false);
-    setOrders([]); // Xóa dữ liệu cũ để tránh nhấp nháy
-    setLoading(true); // Đặt loading về true để hiển thị spinner
-    setError(null); // Xóa lỗi cũ
-  };
+  // Sử dụng useRef để lưu trữ hàm unsubscribe của listener hiện tại
+  const unsubscribeRef = useRef(null);
 
-  // Effect chính để fetch dữ liệu đơn hàng
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError(null); // Reset lỗi trước mỗi lần fetch
+  // Hàm chính để thiết lập listener cho orders, sử dụng onSnapshot
+  const setupOrdersListener = useCallback(async (direction = 'initial', startDoc = null, pageNumber = 0) => {
+    // Nếu có listener cũ, hủy nó đi trước khi thiết lập cái mới
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null; // Reset ref
+    }
 
-      const ordersCollectionRef = collection(db, 'orders');
-      let baseQuery;
+    setLoading(true);
+    setError(null);
+    setOrders([]); // Xóa dữ liệu cũ trước khi tải dữ liệu mới
 
-      // Xây dựng truy vấn cơ bản dựa trên tab hiện tại
-      if (currentTab === 'all') {
-        baseQuery = query(ordersCollectionRef, orderBy('timestamp', 'desc'));
-      } else {
-        baseQuery = query(ordersCollectionRef, 
-          where('status', '==', currentTab), 
-          orderBy('timestamp', 'desc')
-        );
+    const ordersCollectionRef = collection(db, 'orders');
+    let baseQueryDefinition;
+
+    if (currentTab === 'all') {
+      baseQueryDefinition = query(ordersCollectionRef, orderBy('timestamp', 'desc'));
+    } else {
+      baseQueryDefinition = query(
+        ordersCollectionRef,
+        where('status', '==', currentTab),
+        orderBy('timestamp', 'desc')
+      );
+    }
+
+    let q;
+    if (direction === 'next' && startDoc) {
+      q = query(baseQueryDefinition, startAfter(startDoc), limit(ORDERS_PER_PAGE));
+    } else if (direction === 'prev' && startDoc) {
+      q = query(baseQueryDefinition, endBefore(startDoc), limitToLast(ORDERS_PER_PAGE));
+    } else { // 'initial' or 'reset'
+      q = query(baseQueryDefinition, limit(ORDERS_PER_PAGE));
+    }
+
+    const newUnsubscribe = onSnapshot(q, async (snapshot) => {
+      const ordersData = [];
+      const uniqueUserIds = new Set();
+
+      if (snapshot.empty) {
+        setOrders([]);
+        setUsersMap({});
+        setLastVisible(null);
+        setFirstVisible(null);
+        setHasMoreNext(false);
+        setHasMorePrev(pageNumber > 0);
+        setLoading(false);
+        return;
       }
 
-      // Xây dựng truy vấn phân trang ban đầu (hoặc sau khi reset trang)
-      let q = query(baseQuery, limit(ORDERS_PER_PAGE));
-      
-      // Lắng nghe sự thay đổi realtime từ Firestore
-      const unsub = onSnapshot(q, async (snapshot) => {
-        const ordersData = [];
-        const uniqueUserIds = new Set();
+      setFirstVisible(snapshot.docs[0]);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
 
-        if (snapshot.empty) {
-          setOrders([]);
-          setUsersMap({});
-          setLastVisible(null);
-          setFirstVisible(null);
-          setHasMoreNext(false);
-          setHasMorePrev(false);
-          setLoading(false);
-          return;
-        }
-
-        // Lưu document đầu tiên và cuối cùng của trang hiện tại để phân trang
-        setFirstVisible(snapshot.docs[0]);
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-
-        // biome-ignore lint/complexity/noForEach: <explanation>
-        snapshot.forEach((docSnap) => {
-          const d = docSnap.data();
-          
-          let formattedTimestamp = 'N/A';
-          if (d.timestamp instanceof Timestamp) {
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        let formattedTimestamp = 'N/A';
+        if (d.timestamp instanceof Timestamp) {
+          formattedTimestamp = d.timestamp.toDate().toLocaleString();
+        } else if (d.timestamp && typeof d.timestamp === 'object' && d.timestamp.toDate) {
             formattedTimestamp = d.timestamp.toDate().toLocaleString();
-          } else if (d.timestamp) {
-            console.warn(`Timestamp for order ${docSnap.id} is not a Firestore Timestamp object:`, d.timestamp);
-          }
-
-          const order = {
-            id: docSnap.id,
-            items: d.items || [],
-            total: d.total || 0,
-            voucherCode: d.voucherCode || [],
-            userId: d.userId || 'Unknown',
-            status: d.status || 'pending',
-            timestamp: formattedTimestamp,
-          };
-          ordersData.push(order);
-          if (order.userId && order.userId !== 'Unknown') {
-            uniqueUserIds.add(order.userId);
-          }
-        });
-
-        // --- Fetch user data based on unique user IDs ---
-        const userIdsArray = Array.from(uniqueUserIds);
-        const fetchedUsersMap = {};
-
-        if (userIdsArray.length > 0) {
-          const chunkSize = 10; 
-          const userIdChunks = [];
-          for (let i = 0; i < userIdsArray.length; i += chunkSize) {
-            userIdChunks.push(userIdsArray.slice(i, i + chunkSize));
-          }
-
-          const userPromises = userIdChunks.map(chunk => {
-            const userQuery = query(collection(db, 'users'), where(documentId(), 'in', chunk));
-            return getDocs(userQuery);
-          });
-
-          try {
-            const userSnapshots = await Promise.all(userPromises);
-            // biome-ignore lint/complexity/noForEach: <explanation>
-            userSnapshots.forEach(userSnapshot => {
-              // biome-ignore lint/complexity/noForEach: <explanation>
-              userSnapshot.forEach(userDocSnap => {
-                const userData = userDocSnap.data();
-                fetchedUsersMap[userDocSnap.id] = userData;
-              });
-            });
-          } catch (fetchUserError) {
-            console.error("Error fetching user data:", fetchUserError);
-            setError("Error fetching user data. Please try again.");
-          }
+        } else if (d.timestamp) {
+            formattedTimestamp = new Date(d.timestamp).toLocaleString();
         }
-        setUsersMap(fetchedUsersMap);
 
-        // Kết hợp dữ liệu đơn hàng với tên người dùng đã fetch
-        const ordersWithUserNames = ordersData.map(order => {
-          const user = fetchedUsersMap[order.userId];
-          return {
-            ...order,
-            userName: user?.name || 'Unknown User',
-          };
-        });
-
-        setOrders(ordersWithUserNames);
-
-        // Kiểm tra xem có trang tiếp theo không
-        const checkNextQuery = query(baseQuery, 
-          startAfter(snapshot.docs[snapshot.docs.length - 1]), 
-          limit(1)
-        );
-        const nextSnapshot = await getDocs(checkNextQuery);
-        setHasMoreNext(!nextSnapshot.empty);
-
-        // Kiểm tra xem có trang trước đó không (chỉ cần nếu không phải trang đầu tiên)
-        setHasMorePrev(currentPage > 0);
-        
-        setLoading(false); // Tắt loading spinner
-      }, (onSnapshotError) => {
-        // Xử lý lỗi từ onSnapshot (bao gồm lỗi index)
-        console.error("Error fetching orders in onSnapshot:", onSnapshotError);
-        setError(`Error fetching orders: ${onSnapshotError.message}. ${onSnapshotError.code === 'failed-precondition' ? 'Please ensure required Firestore indexes are created.' : ''}`);
-        setLoading(false);
+        const order = {
+          id: docSnap.id,
+          items: d.items || [],
+          total: d.total || 0,
+          voucherCode: d.voucherCode || [],
+          userId: d.userId || 'Unknown',
+          status: d.status || 'pending',
+          timestamp: formattedTimestamp,
+        };
+        ordersData.push(order);
+        if (order.userId && order.userId !== 'Unknown') {
+          uniqueUserIds.add(order.userId);
+        }
       });
 
-    return () => unsub(); // Cleanup the listener when component unmounts or dependencies change
+      const userIdsArray = Array.from(uniqueUserIds);
+      const fetchedUsersMap = {};
+
+      if (userIdsArray.length > 0) {
+        const chunkSize = 10;
+        const userIdChunks = [];
+        for (let i = 0; i < userIdsArray.length; i += chunkSize) {
+          userIdChunks.push(userIdsArray.slice(i, i + chunkSize));
+        }
+
+        try {
+          const userPromises = userIdChunks.map(chunk => {
+            const userQuery = query(collection(db, 'users'), where(documentId(), 'in', chunk));
+            return getDocs(userQuery);
+          });
+          const userSnapshots = await Promise.all(userPromises);
+          userSnapshots.forEach(userSnapshot => {
+            userSnapshot.forEach(userDocSnap => {
+              const userData = userDocSnap.data();
+              fetchedUsersMap[userDocSnap.id] = userData;
+            });
+          });
+        } catch (fetchUserError) {
+          console.error("Error fetching user data:", fetchUserError);
+          setError("Error fetching user data. Please try again.");
+        }
+      }
+      setUsersMap(fetchedUsersMap);
+
+      const ordersWithUserNames = ordersData.map(order => {
+        const user = fetchedUsersMap[order.userId];
+        return {
+          ...order,
+          userName: user?.name || 'Unknown User',
+        };
+      });
+
+      setOrders(ordersWithUserNames);
+
+      const checkNextQuery = query(
+        baseQueryDefinition,
+        startAfter(snapshot.docs[snapshot.docs.length - 1]),
+        limit(1)
+      );
+      const nextSnapshot = await getDocs(checkNextQuery);
+      setHasMoreNext(!nextSnapshot.empty);
+
+      setHasMorePrev(pageNumber > 0);
+      setLoading(false);
+    }, (onSnapshotError) => {
+      console.error("Error setting up onSnapshot listener:", onSnapshotError);
+      setError(`Error fetching orders: ${onSnapshotError.message}. ${onSnapshotError.code === 'failed-precondition' ? 'Please ensure required Firestore indexes are created for your queries.' : ''}`);
+      setLoading(false);
+    });
+
+    // Lưu hàm unsubscribe vào ref
+    unsubscribeRef.current = newUnsubscribe;
+
+  }, [currentTab]); // setupOrdersListener chỉ phụ thuộc vào currentTab
+
+  // --- useEffect để quản lý việc fetch dữ liệu khi component mount hoặc tab thay đổi ---
+  useEffect(() => {
+    setCurrentPage(0); // Luôn reset về trang đầu tiên khi tab đổi hoặc component mount
+    setupOrdersListener('initial', null, 0); // Bắt đầu lắng nghe
+
+    // Cleanup function: hủy bỏ lắng nghe khi component unmount
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
     };
+  }, [currentTab, setupOrdersListener]); // currentTab và setupOrdersListener là dependencies
 
-    fetchOrders(); // Gọi hàm fetchOrders khi component mount hoặc dependencies thay đổi
-  }, [currentTab, currentPage, db]); // Dependencies for useEffect
-
-  // Hàm xử lý chuyển đến trang tiếp theo
-  const handleNextPage = async () => {
-    if (lastVisible && hasMoreNext) {
-      setLoading(true);
-      setError(null);
-
-      const ordersCollectionRef = collection(db, 'orders');
-      let baseQuery;
-      if (currentTab === 'all') {
-        baseQuery = query(ordersCollectionRef, orderBy('timestamp', 'desc'));
-      } else {
-        baseQuery = query(ordersCollectionRef, 
-          where('status', '==', currentTab), 
-          orderBy('timestamp', 'desc')
-        );
-      }
-
-      const nextPageQuery = query(baseQuery, startAfter(lastVisible), limit(ORDERS_PER_PAGE));
-
-      try {
-        const snapshot = await getDocs(nextPageQuery);
-        if (snapshot.empty) {
-          setHasMoreNext(false); // Không còn đơn hàng nào nữa
-          setLoading(false);
-          return;
-        }
-
-        const newOrdersData = [];
-        const uniqueUserIds = new Set();
-        setFirstVisible(snapshot.docs[0]);
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-
-        // biome-ignore lint/complexity/noForEach: <explanation>
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
-          let formattedTimestamp = 'N/A';
-          if (d.timestamp instanceof Timestamp) {
-            formattedTimestamp = d.timestamp.toDate().toLocaleString();
-          } else if (d.timestamp) {
-            console.warn(`Timestamp for order ${docSnap.id} is not a Firestore Timestamp object:`, d.timestamp);
-          }
-
-          const order = {
-            id: docSnap.id,
-            items: d.items || [],
-            total: d.total || 0,
-            voucherCode: d.voucherCode || [],
-            userId: d.userId || 'Unknown',
-            status: d.status || 'pending',
-            timestamp: formattedTimestamp,
-          };
-          newOrdersData.push(order);
-          if (order.userId && order.userId !== 'Unknown') {
-            uniqueUserIds.add(order.userId);
-          }
-        });
-
-        const userIdsArray = Array.from(uniqueUserIds);
-        const fetchedUsersMap = {};
-        if (userIdsArray.length > 0) {
-          const chunkSize = 10;
-          const userIdChunks = [];
-          for (let i = 0; i < userIdsArray.length; i += chunkSize) {
-            userIdChunks.push(userIdsArray.slice(i, i + chunkSize));
-          }
-          const userPromises = userIdChunks.map(chunk => {
-            const userQuery = query(collection(db, 'users'), where(documentId(), 'in', chunk));
-            return getDocs(userQuery);
-          });
-          const userSnapshots = await Promise.all(userPromises);
-          // biome-ignore lint/complexity/noForEach: <explanation>
-          userSnapshots.forEach(userSnapshot => {
-            // biome-ignore lint/complexity/noForEach: <explanation>
-            userSnapshot.forEach(userDocSnap => {
-              fetchedUsersMap[userDocSnap.id] = userDocSnap.data();
-            });
-          });
-        }
-        setUsersMap(fetchedUsersMap);
-
-        const ordersWithUserNames = newOrdersData.map(order => {
-          const user = fetchedUsersMap[order.userId];
-          return { ...order, userName: user?.name || 'Unknown User' };
-        });
-
-        setOrders(ordersWithUserNames);
-        setCurrentPage(prev => prev + 1);
-
-        // Kiểm tra lại có trang tiếp theo không
-        const checkNextQuery = query(baseQuery, 
-          startAfter(snapshot.docs[snapshot.docs.length - 1]), 
-          limit(1)
-        );
-        const checkNextSnapshot = await getDocs(checkNextQuery);
-        setHasMoreNext(!checkNextSnapshot.empty);
-        setHasMorePrev(true); // Luôn có trang trước đó khi đã bấm next (trừ khi là trang đầu)
-
-      } catch (pageError) {
-        console.error("Error fetching next page:", pageError);
-        setError(`Error fetching next page: ${pageError.message}`);
-      } finally {
-        setLoading(false);
-      }
+  // --- Xử lý sự kiện thay đổi tab ---
+  const handleTabChange = (event, newValue) => {
+    if (newValue !== currentTab) {
+      setCurrentTab(newValue);
+      // Khi currentTab thay đổi, useEffect sẽ tự động gọi setupOrdersListener lại và xử lý cleanup
     }
   };
 
-  // Hàm xử lý chuyển đến trang trước đó
-  const handlePrevPage = async () => {
-    if (firstVisible && currentPage > 0) {
-      setLoading(true);
-      setError(null);
-
-      const ordersCollectionRef = collection(db, 'orders');
-      let baseQuery;
-      if (currentTab === 'all') {
-        baseQuery = query(ordersCollectionRef, orderBy('timestamp', 'desc'));
-      } else {
-        baseQuery = query(ordersCollectionRef, 
-          where('status', '==', currentTab), 
-          orderBy('timestamp', 'desc')
-        );
-      }
-
-      const prevPageQuery = query(baseQuery, endBefore(firstVisible), limitToLast(ORDERS_PER_PAGE));
-
-      try {
-        const snapshot = await getDocs(prevPageQuery);
-        if (snapshot.empty) {
-          setHasMorePrev(false);
-          setLoading(false);
-          return;
-        }
-
-        const newOrdersData = [];
-        const uniqueUserIds = new Set();
-        setFirstVisible(snapshot.docs[0]);
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-
-        // biome-ignore lint/complexity/noForEach: <explanation>
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
-          let formattedTimestamp = 'N/A';
-          if (d.timestamp instanceof Timestamp) {
-            formattedTimestamp = d.timestamp.toDate().toLocaleString();
-          } else if (d.timestamp) {
-            console.warn(`Timestamp for order ${docSnap.id} is not a Firestore Timestamp object:`, d.timestamp);
-          }
-
-          const order = {
-            id: docSnap.id,
-            items: d.items || [],
-            total: d.total || 0,
-            voucherCode: d.voucherCode || [],
-            userId: d.userId || 'Unknown',
-            status: d.status || 'pending',
-            timestamp: formattedTimestamp,
-          };
-          newOrdersData.push(order);
-          if (order.userId && order.userId !== 'Unknown') {
-            uniqueUserIds.add(order.userId);
-          }
-        });
-
-        const userIdsArray = Array.from(uniqueUserIds);
-        const fetchedUsersMap = {};
-        if (userIdsArray.length > 0) {
-          const chunkSize = 10;
-          const userIdChunks = [];
-          for (let i = 0; i < userIdsArray.length; i += chunkSize) {
-            userIdChunks.push(userIdsArray.slice(i, i + chunkSize));
-          }
-          const userPromises = userIdChunks.map(chunk => {
-            const userQuery = query(collection(db, 'users'), where(documentId(), 'in', chunk));
-            return getDocs(userQuery);
-          });
-          const userSnapshots = await Promise.all(userPromises);
-          // biome-ignore lint/complexity/noForEach: <explanation>
-          userSnapshots.forEach(userSnapshot => {
-            // biome-ignore lint/complexity/noForEach: <explanation>
-            userSnapshot.forEach(userDocSnap => {
-              fetchedUsersMap[userDocSnap.id] = userDocSnap.data();
-            });
-          });
-        }
-        setUsersMap(fetchedUsersMap);
-
-        const ordersWithUserNames = newOrdersData.map(order => {
-          const user = fetchedUsersMap[order.userId];
-          return { ...order, userName: user?.name || 'Unknown User' };
-        });
-
-        setOrders(ordersWithUserNames);
-        setCurrentPage(prev => prev - 1);
-
-        setHasMorePrev(currentPage - 1 > 0); 
-        setHasMoreNext(true); // Khi bấm prev, chắc chắn có trang tiếp theo (trừ khi là trang cuối cùng của dataset)
-
-      } catch (pageError) {
-        console.error("Error fetching previous page:", pageError);
-        setError(`Error fetching previous page: ${pageError.message}`);
-      } finally {
-        setLoading(false);
-      }
+  // --- Xử lý chuyển đến trang tiếp theo ---
+  const handleNextPage = () => {
+    if (lastVisible && hasMoreNext && !loading) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      // Gọi trực tiếp setupOrdersListener để cập nhật dữ liệu cho trang mới
+      setupOrdersListener('next', lastVisible, nextPage);
     }
   };
 
-  // Hàm xử lý khi đánh dấu đơn hàng hoàn thành
+  // --- Xử lý chuyển đến trang trước đó ---
+  const handlePrevPage = () => {
+    if (firstVisible && currentPage > 0 && !loading) {
+      const prevPage = currentPage - 1;
+      setCurrentPage(prevPage);
+      // Gọi trực tiếp setupOrdersListener để cập nhật dữ liệu cho trang mới
+      setupOrdersListener('prev', firstVisible, prevPage);
+    }
+  };
+
+  // --- Hàm xử lý khi đánh dấu đơn hàng hoàn thành (giữ nguyên) ---
   const handleMarkCompleted = async (orderId, userId) => {
     const orderRef = doc(db, 'orders', orderId);
     try {
       await updateDoc(orderRef, { status: 'completed' });
+      // Sau khi cập nhật, onSnapshot listener sẽ tự động nhận diện thay đổi và cập nhật UI.
+      // Không cần gọi lại setupOrdersListener ở đây.
 
-      // Gửi notification qua API
-      const backendUrl = 'http://localhost:4000/notify-order-completed'; // Cần thay đổi cho môi trường deploy
+      // Gọi API backend để gửi notification
+      const backendUrl = 'http://localhost:4000/notify-order-completed';
       fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, orderId }),
       })
-      .then(response => {
-        if (!response.ok) {
-          console.error('Notification API call failed:', response.status, response.statusText);
-        } else {
-          console.log('Notification API call successful');
-        }
-      })
-      .catch(fetchError => {
-        console.error('Notification API call failed:', fetchError);
-      });
+        .then(response => {
+          if (!response.ok) {
+            console.error('Notification API call failed:', response.status, response.statusText);
+          } else {
+            console.log('Notification API call successful');
+          }
+        })
+        .catch(fetchError => {
+          console.error('Notification API call failed:', fetchError);
+        });
 
     } catch (firestoreError) {
       console.error("Error updating order status in Firestore:", firestoreError);
-      alert(`Failed to update order status: ${firestoreError.message}`); // Hiển thị thông báo lỗi cho người dùng
+      alert(`Failed to update order status: ${firestoreError.message}`);
     }
   };
 
@@ -448,11 +276,11 @@ function OrdersManagement() {
 
       {/* Tabs để chuyển đổi trạng thái đơn hàng */}
       <Box sx={{ width: '100%', borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
-        <Tabs 
-          value={currentTab} 
-          onChange={handleTabChange} 
-          aria-label="order status tabs" 
-          centered // Canh giữa các tab
+        <Tabs
+          value={currentTab}
+          onChange={handleTabChange}
+          aria-label="order status tabs"
+          centered
         >
           <Tab label="All Orders" value="all" icon={<ListAltIcon />} iconPosition="start" />
           <Tab label="Pending" value="pending" icon={<PendingActionsIcon />} iconPosition="start" />
@@ -478,7 +306,7 @@ function OrdersManagement() {
         </Box>
       ) : (
         <>
-          {orders.length === 0 && !error ? ( // Chỉ hiển thị "No orders" nếu không có lỗi và không có đơn hàng
+          {orders.length === 0 && !error ? (
             <Typography variant="h6" sx={{ textAlign: 'center', mt: 4 }}>
               No orders found for this status.
             </Typography>
@@ -507,7 +335,7 @@ function OrdersManagement() {
                         <div className={styles.itemDetails}>
                           <div><strong>{item.name}</strong></div>
                           <div>Quantity: {item.quantity}</div>
-                          <div>Price: {item.price?.toLocaleString() || 0} VND</div> {/* Đảm bảo price tồn tại */}
+                          <div>Price: {item.price?.toLocaleString() || 0} VND</div>
                           <div>Total: {(item.quantity * (item.price || 0)).toLocaleString()} VND</div>
                         </div>
                       </div>
@@ -517,13 +345,13 @@ function OrdersManagement() {
                   <p className={styles.orderTotal}>
                     <strong>🧮 Order Total:</strong> {order.total.toLocaleString()} VND
                   </p>
-                  
+
                   <div className={styles.statusActionSection}>
                     {order.status === 'pending' ? (
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => handleMarkCompleted(order.id, order.userId)} 
+                        onClick={() => handleMarkCompleted(order.id, order.userId)}
                         sx={{ mt: 1 }}
                       >
                         ✅ Mark Completed
@@ -550,20 +378,20 @@ function OrdersManagement() {
 
           {/* Pagination Controls */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 3, gap: 2 }}>
-            <Button 
-              variant="outlined" 
-              onClick={handlePrevPage} 
-              disabled={!hasMorePrev || loading} // Nút Previous disabled nếu không có trang trước hoặc đang tải
+            <Button
+              variant="outlined"
+              onClick={handlePrevPage}
+              disabled={!hasMorePrev || loading}
             >
               Previous
             </Button>
             <Typography variant="body1" sx={{ alignSelf: 'center' }}>
               Page {currentPage + 1}
             </Typography>
-            <Button 
-              variant="outlined" 
-              onClick={handleNextPage} 
-              disabled={!hasMoreNext || loading} // Nút Next disabled nếu không có trang kế tiếp hoặc đang tải
+            <Button
+              variant="outlined"
+              onClick={handleNextPage}
+              disabled={!hasMoreNext || loading}
             >
               Next
             </Button>
