@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'; // Import useRef
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   collection,
   doc,
@@ -25,18 +25,28 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Badge from '@mui/material/Badge';
+import IconButton from '@mui/material/IconButton';
+import Snackbar from '@mui/material/Snackbar'; // Import Snackbar
+import MuiAlert from '@mui/material/Alert'; // Import Alert
 
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const ORDERS_PER_PAGE = 6;
+
+// Helper component cho Alert trong Snackbar
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 function OrdersManagement() {
   const [orders, setOrders] = useState([]);
   const [usersMap, setUsersMap] = useState({});
-  const [currentTab, setCurrentTab] = useState('pending');
+  const [currentTab, setCurrentTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [lastVisible, setLastVisible] = useState(null);
   const [firstVisible, setFirstVisible] = useState(null);
@@ -45,20 +55,28 @@ function OrdersManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Sử dụng useRef để lưu trữ hàm unsubscribe của listener hiện tại
+  // States mới cho thông báo
+  const [newOrdersCount, setNewOrdersCount] = useState(0); // Số lượng hiển thị trên badge
+  const [totalPendingOrders, setTotalPendingOrders] = useState(0); // Tổng số đơn pending hiện tại
+  const lastAcknowledgedPendingCountRef = useRef(0); // Số lượng pending đã xem lần cuối
+
+  // States cho Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
   const unsubscribeRef = useRef(null);
+  const unsubscribeNewOrdersRef = useRef(null);
 
   // Hàm chính để thiết lập listener cho orders, sử dụng onSnapshot
   const setupOrdersListener = useCallback(async (direction = 'initial', startDoc = null, pageNumber = 0) => {
-    // Nếu có listener cũ, hủy nó đi trước khi thiết lập cái mới
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
-      unsubscribeRef.current = null; // Reset ref
+      unsubscribeRef.current = null;
     }
 
     setLoading(true);
     setError(null);
-    setOrders([]); // Xóa dữ liệu cũ trước khi tải dữ liệu mới
+    setOrders([]);
 
     const ordersCollectionRef = collection(db, 'orders');
     let baseQueryDefinition;
@@ -106,9 +124,9 @@ function OrdersManagement() {
         if (d.timestamp instanceof Timestamp) {
           formattedTimestamp = d.timestamp.toDate().toLocaleString();
         } else if (d.timestamp && typeof d.timestamp === 'object' && d.timestamp.toDate) {
-            formattedTimestamp = d.timestamp.toDate().toLocaleString();
+          formattedTimestamp = d.timestamp.toDate().toLocaleString();
         } else if (d.timestamp) {
-            formattedTimestamp = new Date(d.timestamp).toLocaleString();
+          formattedTimestamp = new Date(d.timestamp).toLocaleString();
         }
 
         const order = {
@@ -181,62 +199,114 @@ function OrdersManagement() {
       setLoading(false);
     });
 
-    // Lưu hàm unsubscribe vào ref
     unsubscribeRef.current = newUnsubscribe;
 
-  }, [currentTab]); // setupOrdersListener chỉ phụ thuộc vào currentTab
+  }, [currentTab]);
+
+  // --- useEffect để quản lý listener cho đơn hàng mới (pending) ---
+  useEffect(() => {
+    if (unsubscribeNewOrdersRef.current) {
+      unsubscribeNewOrdersRef.current();
+      unsubscribeNewOrdersRef.current = null;
+    }
+
+    const pendingOrdersQuery = query(
+      collection(db, 'orders'),
+      where('status', '==', 'pending')
+    );
+
+    const newOrdersUnsubscribe = onSnapshot(pendingOrdersQuery, (snapshot) => {
+      const currentPendingCount = snapshot.size;
+      setTotalPendingOrders(currentPendingCount); // Cập nhật tổng số pending
+
+      // Nếu người dùng đang ở tab 'pending', coi như đã xem hết
+      if (currentTab === 'pending') {
+        setNewOrdersCount(0); // Reset badge count
+        lastAcknowledgedPendingCountRef.current = currentPendingCount; // Cập nhật số lượng đã acknowledge
+      } else {
+        // Nếu có đơn hàng pending và số lượng hiện tại lớn hơn số đã xem trước đó
+        if (currentPendingCount > lastAcknowledgedPendingCountRef.current) {
+          const newlyArrivedOrders = currentPendingCount - lastAcknowledgedPendingCountRef.current;
+          setNewOrdersCount(newlyArrivedOrders);
+
+          // Hiển thị Snackbar khi có đơn hàng mới đến và không ở tab pending
+          setSnackbarMessage(`🔔 Bạn có ${newlyArrivedOrders} đơn hàng đang chờ mới!`);
+          setSnackbarOpen(true);
+        } else {
+          // Nếu số lượng pending giảm hoặc bằng (có thể do đơn hàng được xử lý từ nơi khác),
+          // hoặc không có đơn hàng pending nào mới
+          setNewOrdersCount(0);
+        }
+      }
+
+    }, (error) => {
+      console.error("Lỗi khi lắng nghe đơn hàng pending mới:", error);
+    });
+
+    unsubscribeNewOrdersRef.current = newOrdersUnsubscribe;
+
+    return () => {
+      if (unsubscribeNewOrdersRef.current) {
+        unsubscribeNewOrdersRef.current();
+        unsubscribeNewOrdersRef.current = null;
+      }
+    };
+  }, [currentTab]); // Chỉ phụ thuộc vào currentTab
 
   // --- useEffect để quản lý việc fetch dữ liệu khi component mount hoặc tab thay đổi ---
   useEffect(() => {
-    setCurrentPage(0); // Luôn reset về trang đầu tiên khi tab đổi hoặc component mount
-    setupOrdersListener('initial', null, 0); // Bắt đầu lắng nghe
+    setCurrentPage(0);
+    setupOrdersListener('initial', null, 0);
 
-    // Cleanup function: hủy bỏ lắng nghe khi component unmount
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
         unsubscribeRef.current = null;
       }
     };
-  }, [currentTab, setupOrdersListener]); // currentTab và setupOrdersListener là dependencies
+  }, [currentTab, setupOrdersListener]);
 
   // --- Xử lý sự kiện thay đổi tab ---
   const handleTabChange = (event, newValue) => {
     if (newValue !== currentTab) {
       setCurrentTab(newValue);
-      // Khi currentTab thay đổi, useEffect sẽ tự động gọi setupOrdersListener lại và xử lý cleanup
+      if (newValue === 'pending') {
+        setNewOrdersCount(0); // Reset count
+        lastAcknowledgedPendingCountRef.current = totalPendingOrders; // Đánh dấu đã xem tất cả
+      }
     }
   };
 
-  // --- Xử lý chuyển đến trang tiếp theo ---
+  // --- Xử lý khi click vào biểu tượng thông báo ---
+  const handleNotificationClick = () => {
+    if (currentTab !== 'pending') {
+      setCurrentTab('pending'); // Chuyển sang tab pending khi click vào chuông
+    }
+    setNewOrdersCount(0); // Reset số đếm
+    lastAcknowledgedPendingCountRef.current = totalPendingOrders; // Đánh dấu đã xem tất cả
+  };
+
   const handleNextPage = () => {
     if (lastVisible && hasMoreNext && !loading) {
       const nextPage = currentPage + 1;
       setCurrentPage(nextPage);
-      // Gọi trực tiếp setupOrdersListener để cập nhật dữ liệu cho trang mới
       setupOrdersListener('next', lastVisible, nextPage);
     }
   };
 
-  // --- Xử lý chuyển đến trang trước đó ---
   const handlePrevPage = () => {
     if (firstVisible && currentPage > 0 && !loading) {
       const prevPage = currentPage - 1;
       setCurrentPage(prevPage);
-      // Gọi trực tiếp setupOrdersListener để cập nhật dữ liệu cho trang mới
       setupOrdersListener('prev', firstVisible, prevPage);
     }
   };
 
-  // --- Hàm xử lý khi đánh dấu đơn hàng hoàn thành (giữ nguyên) ---
   const handleMarkCompleted = async (orderId, userId) => {
     const orderRef = doc(db, 'orders', orderId);
     try {
       await updateDoc(orderRef, { status: 'completed' });
-      // Sau khi cập nhật, onSnapshot listener sẽ tự động nhận diện thay đổi và cập nhật UI.
-      // Không cần gọi lại setupOrdersListener ở đây.
 
-      // Gọi API backend để gửi notification
       const backendUrl = 'http://localhost:4000/notify-order-completed';
       fetch(backendUrl, {
         method: 'POST',
@@ -260,7 +330,6 @@ function OrdersManagement() {
     }
   };
 
-  // Helper để lấy className cho trạng thái
   const getStatusClassName = (status) => {
     switch (status) {
       case 'pending': return styles.statusPending;
@@ -272,9 +341,20 @@ function OrdersManagement() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.heading}>Order Management</h1>
+      <div className={styles.headerWithNotifications}>
+        <h1 className={styles.heading}>Order Management</h1>
+        <IconButton
+          color="inherit"
+          aria-label="show new orders"
+          onClick={handleNotificationClick}
+          sx={{ ml: 'auto' }}
+        >
+          <Badge badgeContent={newOrdersCount} color="error">
+            <NotificationsIcon sx={{ fontSize: 30 }} />
+          </Badge>
+        </IconButton>
+      </div>
 
-      {/* Tabs để chuyển đổi trạng thái đơn hàng */}
       <Box sx={{ width: '100%', borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
         <Tabs
           value={currentTab}
@@ -289,7 +369,6 @@ function OrdersManagement() {
         </Tabs>
       </Box>
 
-      {/* Hiển thị lỗi nếu có */}
       {error && (
         <Box sx={{ my: 2, p: 2, backgroundColor: '#ffebee', color: '#d32f2f', borderRadius: '8px' }}>
           <Typography variant="body1">
@@ -298,7 +377,6 @@ function OrdersManagement() {
         </Box>
       )}
 
-      {/* Loading indicator */}
       {loading ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
           <CircularProgress size={50} />
@@ -376,7 +454,6 @@ function OrdersManagement() {
             </div>
           )}
 
-          {/* Pagination Controls */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 3, gap: 2 }}>
             <Button
               variant="outlined"
@@ -398,6 +475,21 @@ function OrdersManagement() {
           </Box>
         </>
       )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="info"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

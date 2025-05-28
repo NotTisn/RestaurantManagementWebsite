@@ -157,3 +157,10 @@
     background-color: #e3f2fd; /* light blue */
     color: #2196f3; /* blue */
 }
+
+.headerWithNotifications {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Đảm bảo khoảng cách giữa tiêu đề và chuông */
+  margin-bottom: 20px; /* Thêm khoảng trống dưới header */
+}
