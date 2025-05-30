@@ -1,171 +1,166 @@
 /* OrdersManagement.module.css */
 
-/* Container chính của toàn bộ trang */
 .container {
-    padding: 20px; /* Khoảng cách lề xung quanh nội dung */
-    max-width: 1200px; /* Chiều rộng tối đa của nội dung */
-    margin: 0 auto; /* Canh giữa khối nội dung */
-    font-family: sans-serif; /* Chọn font chữ dễ đọc */
-    background-color: #f4f7f6; /* Màu nền nhẹ cho trang */
+    padding: 20px;
+    background-color: #f4f7f6;
+    min-height: 100vh;
 }
 
-/* Tiêu đề chính */
 .heading {
-    text-align: center; /* Canh giữa tiêu đề */
-    color: #333; /* Màu chữ xám đậm */
-    margin-bottom: 30px; /* Khoảng cách dưới tiêu đề */
-    text-transform: uppercase; /* Chuyển chữ in hoa */
-    letter-spacing: 1px; /* Khoảng cách giữa các chữ */
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    font-weight: 700;
 }
 
-/* Container hiển thị lưới các thẻ đơn hàng */
 .ordersGrid {
     display: grid;
-    /* Tạo cột tự động, mỗi cột rộng tối thiểu 300px và tối đa 1fr (phần còn lại) */
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px; /* Khoảng cách giữa các thẻ đơn hàng */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive grid */
+    gap: 25px;
+    margin-top: 20px;
 }
 
-/* Thẻ đơn hàng */
 .orderCard {
-    border: 1px solid #ddd; /* Viền thẻ */
-    border-radius: 8px; /* Bo góc */
-    padding: 20px; /* Khoảng cách lề bên trong thẻ */
-    background-color: #fff; /* Nền trắng cho thẻ */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Đổ bóng nhẹ */
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px;
     display: flex;
-    flex-direction: column; /* Các phần tử con xếp dọc */
-    justify-content: space-between; /* Dãn cách các phần tử con */
-    transition: transform 0.2s ease-in-out; /* Hiệu ứng khi hover */
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease-in-out;
 }
 
-/* Hiệu ứng khi di chuột qua thẻ */
 .orderCard:hover {
-    transform: translateY(-5px); /* Nhấc nhẹ thẻ lên */
+    transform: translateY(-5px);
 }
 
-/* Tiêu đề trong thẻ (Mã đơn hàng) */
 .orderCard h3 {
-    color: #555;
-    margin-top: 0;
+    color: #1976d2;
     margin-bottom: 15px;
-    border-bottom: 1px solid #eee; /* Đường kẻ dưới */
-    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
 }
 
-/* Phần thông tin đơn hàng (Khách, Mã giảm giá) */
 .orderInfo p {
     margin-bottom: 8px;
-    color: #666;
-    font-size: 0.95em;
+    font-size: 0.95rem;
+    color: #555;
 }
 
-/* Container danh sách sản phẩm */
+.orderInfo p strong {
+    color: #333;
+}
+
 .itemsList {
     margin-top: 15px;
+    border-top: 1px solid #eee;
     padding-top: 15px;
-    border-top: 1px solid #eee; /* Đường kẻ trên */
 }
 
 .itemsList h4 {
-    margin-top: 0;
+    color: #666;
     margin-bottom: 10px;
-    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-/* Mỗi dòng sản phẩm trong danh sách */
 .itemRow {
-    display: flex; /* Dùng flexbox để xếp ảnh và thông tin ngang hàng */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: #f9f9f9; /* Nền nhẹ cho mỗi dòng sản phẩm */
-    border-radius: 4px;
-    border: 1px solid #eee; /* Viền nhẹ */
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Xóa margin dưới cho dòng sản phẩm cuối cùng */
-.itemRow:last-child {
-    margin-bottom: 0;
-}
-
-/* Ảnh sản phẩm */
 .itemImage {
-    margin-right: 15px; /* Khoảng cách với thông tin */
-    border-radius: 5px;
-    object-fit: cover; /* Đảm bảo ảnh không bị méo */
-    border: 1px solid #ddd; /* Viền ảnh */
+    border-radius: 6px;
+    margin-right: 15px;
+    object-fit: cover;
 }
 
-/* Container thông tin chi tiết sản phẩm */
 .itemDetails {
-    flex-grow: 1; /* Cho phép phần này chiếm hết không gian còn lại */
+    flex-grow: 1;
+    font-size: 0.9rem;
+    color: #444;
 }
 
 .itemDetails div {
-    margin-bottom: 4px; /* Khoảng cách giữa các dòng thông tin */
-    color: #666;
-    font-size: 0.9em;
+    margin-bottom: 3px;
 }
 
-.itemDetails strong {
-    color: #333; /* Chữ đậm màu sẫm hơn */
-    font-size: 1em;
+.itemDetails div strong {
+    font-size: 1rem;
+    color: #222;
 }
 
-/* Tổng đơn hàng */
 .orderTotal {
-    margin-top: 15px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #333;
-    border-top: 1px dashed #eee; /* Đường kẻ đứt */
-    padding-top: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ddd;
+    text-align: right;
+    font-size: 1.1rem;
+    color: #000;
 }
 
-/* Phần hiển thị trạng thái hoặc button hành động */
-/* Sử dụng một class chung cho phần này */
+.orderTotal strong {
+    color: #000;
+    font-weight: bold;
+}
+
 .statusActionSection {
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px dashed #eee;
-    text-align: right; /* Canh phải */
+    margin-top: 20px;
+    text-align: center;
 }
 
-
-/* Button hành động (Đánh dấu làm xong) */
 .actionButton {
-    padding: 10px 15px;
-    background-color: #4CAF50; /* Nền xanh lá */
-    color: white; /* Chữ trắng */
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
     border: none;
-    border-radius: 5px;
-    cursor: pointer; /* Hiển thị con trỏ là bàn tay */
-    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
     font-weight: bold;
-    transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu khi hover */
+    transition: background-color 0.3s ease;
 }
 
-/* Hiệu ứng khi di chuột qua button */
 .actionButton:hover {
-    background-color: #388E3C; /* Màu xanh đậm hơn khi hover */
+    background-color: #43a047;
 }
 
-/* Trạng thái button bị vô hiệu hóa */
-.actionButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed; /* Con trỏ không cho phép */
-}
-
-/* Text hiển thị trạng thái khi không có button */
 .statusMessage {
-    font-style: italic;
-    color: #666; /* Màu chữ mặc định */
-    /* text-align: right; -> Đã set ở .statusActionSection */
-    /* margin-top/padding-top/border-top -> Đã set ở .statusActionSection */
+    padding: 8px 15px;
+    border-radius: 5px;
+    display: inline-block;
+    font-weight: bold;
+    text-transform: capitalize;
 }
 
-/* Các màu cho trạng thái cụ thể */
-.status-pending { color: #ff9800; /* Màu cam cho Pending */ }
-.status-completed { color: #2196f3; /* Màu xanh dương cho Completed */ }
-.status-delivered { color: #4caf50; /* Màu xanh lá cho Delivered */ }
+.statusPending {
+    background-color: #fff3e0; /* light orange */
+    color: #ff9800; /* orange */
+}
+
+.statusCompleted {
+    background-color: #e8f5e9; /* light green */
+    color: #4caf50; /* green */
+}
+
+.statusDelivered {
+    background-color: #e3f2fd; /* light blue */
+    color: #2196f3; /* blue */
+}
+
+.headerWithNotifications {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Đảm bảo khoảng cách giữa tiêu đề và chuông */
+  margin-bottom: 20px; /* Thêm khoảng trống dưới header */
+}

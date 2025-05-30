@@ -5,7 +5,7 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const {login, userRole } = useAuth(); // Lấy thông tin người dùng hiện tại
+  const {login, userRole } = useAuth(); 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,14 +18,12 @@ export default function Login() {
     try {
       setError("");
       setLoading(true);
-      // console.log(emailRef.current.value, passwordRef.current.value)
       await login(emailRef.current.value, passwordRef.current.value);
       console.log(userRole)
       if (userRole === "restaurantOwner") {
-        navigate("/app"); // Chuyển hướng đến trang chính sau khi đăng nhập thành công
+        navigate("/app"); 
       }
       else {
-        // Xử lý trường hợp không xác định vai trò hoặc vai trò không được phép truy cập
         setError("Bạn không có quyền truy cập trang này.");
       }
     } catch (err) {
@@ -69,7 +67,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#f3f4f6", // xám nhạt nền
+    backgroundColor: "#f3f4f6", 
   },
   card: {
     backgroundColor: "#fff",

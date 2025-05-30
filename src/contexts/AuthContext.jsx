@@ -24,8 +24,8 @@ export function AuthProvider({ children }) {
     const userCredential = await createUserWithEmailAndPassword(projectAuth, email, password);
     setCurrentUser(userCredential.user);
     console.log(userCredential)
-    console.log("User credetial UID: " + userCredential.uid)
-    console.log("User UID: " + userCredential.user.uid)
+    console.log(`User credetial UID: ${userCredential.uid}`)
+    console.log(`User UID: ${userCredential.user.uid}`)
     return userCredential.user;
   }
 
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
       const user = userCredential.user;
 
       console.log(user)
-      console.log(user.uid) //1spBicavC8TjSPlWiz4oAwgX7Ek2
+      console.log(user.uid)
       console.log(user.role)
 
       const userDocRef = doc(projectFirestore, "users", user.uid);
@@ -49,7 +49,6 @@ export function AuthProvider({ children }) {
         setUserRole(docSnap.data().role);
       } else {
         console.error("User document not found in Firestore");
-        // throw new Error;
         setUserRole(null);
       }
 

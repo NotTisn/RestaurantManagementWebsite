@@ -1,39 +1,37 @@
 // src/pages/FoodManagement.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-// Import các hàm Firestore cần thiết VÀO ĐÂY
 import { collection, onSnapshot, addDoc, getDocs, doc, updateDoc, query, where } from "firebase/firestore";
-import { db } from '../../firebaseConfig'; // <<< Import db vào đây
-import './FoodManagement.css'; // <<< THÊM DÒNG IMPORT FILE CSS
+import { db } from '../../firebaseConfig'; 
+import './FoodManagement.css'; 
 import EditDishModal from './EditDishModal';
 import AddDishModal from './AddDishModal';
 import ImagePreviewModal from './ImagePreviewModal';
+import ConfirmationModal from './ConfirmationModal'; // <<< IMPORT MODAL MỚI
 import toast from 'react-hot-toast';
 import debounce from 'lodash.debounce';
 import { Pagination, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-// Tên collection món ăn và categories được định nghĩa ở đây
 const DISHES_COLLECTION_NAME = 'food';
 const CATEGORIES_COLLECTION_NAME = 'categories';
 
-// Hàm không dấu (đặt bên ngoài component hoặc import từ utils)
 function removeDiacritics(str) {
     if (!str) return '';
     return str
         .normalize('NFD')
-        // biome-ignore lint/suspicious/noMisleadingCharacterClass: <explanation>
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/đ/g, 'd')
         .replace(/Đ/g, 'D');
 }
+
 function FoodManagement() {
     // === State quản lý dữ liệu món ăn ===
     const [dishes, setDishes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // Lỗi chung (tải danh sách, tải loại)
+    const [error, setError] = useState(null); 
 
     // === State cho việc thêm món ăn ===
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [addError, setAddError] = useState(null); // Lỗi riêng cho việc thêm món
+    const [addError, setAddError] = useState(null); 
 
     // === State cho việc fetch categories ===
     const [categories, setCategories] = useState([]);
@@ -42,24 +40,27 @@ function FoodManagement() {
 
     // === State cho việc sửa món ăn ===
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingDish, setEditingDish] = useState(null); // Lưu thông tin món đang sửa
-    const [updateError, setUpdateError] = useState(null) // Lỗi riêng cho việc cập nhật
+    const [editingDish, setEditingDish] = useState(null); 
+    const [updateError, setUpdateError] = useState(null); 
 
     // === State cho việc preview ảnh món ăn ===
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [selectedImageUrl, setSelectedImageUrl] = useState(null);
     const [selectedImageAlt, setSelectedImageAlt] = useState('');
 
+    // === State cho modal xác nhận xóa ===
+    const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
+    const [dishToDelete, setDishToDelete] = useState(null); // Lưu món ăn cần xóa
+
     // State cho search và filter
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredDishes, setFilteredDishes] = useState([]);
-
-    const [internalSearchTerm, setInternalSearchTerm] = useState(''); // Giá trị search đã debounce
+    const [internalSearchTerm, setInternalSearchTerm] = useState(''); 
     const [selectedCategory, setSelectedCategory] = useState('');
 
     // === State cho phân trang ===
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5) // Số lượng món ăn trên mỗi trang
+    const [itemsPerPage, setItemsPerPage] = useState(5); 
 
     // === useEffect LẤY DỮ LIỆU MÓN ĂN ===
     useEffect(() => {
@@ -67,7 +68,7 @@ function FoodManagement() {
         setError(null);
         const q = query(
             collection(db, DISHES_COLLECTION_NAME),
-            where("isDeleted", "==", false) // Chỉ lấy những document có isDeleted = false
+            where("isDeleted", "==", false) 
         );
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const dishesData = querySnapshot.docs.map(doc => ({
@@ -80,7 +81,7 @@ function FoodManagement() {
             console.log("FoodManagement: Realtime dishes update:", dishesData);
         }, (err) => {
             console.error("FoodManagement: Error listening to dishes collection: ", err);
-            setError("Không thể tải danh sách món ăn.");
+            setError("Can't load dishes. Please try again later.");
             setLoading(false);
         });
 
@@ -107,7 +108,7 @@ function FoodManagement() {
                 console.log("FoodManagement: Fetched categories:", categoriesData);
             } catch (err) {
                 console.error("FoodManagement: Error fetching categories: ", err);
-                setCategoryError("Không thể tải danh sách loại món ăn.");
+                setCategoryError("Can't load categories. Please try again later.");
             } finally {
                 setCategoryLoading(false);
             }
@@ -115,7 +116,7 @@ function FoodManagement() {
         fetchCategories();
     }, []);
 
-    // === Debounce Function (Giữ nguyên) ===
+    // === Debounce Function ===
     const debouncedSearch = useCallback(
         debounce((term) => {
             setInternalSearchTerm(term);
@@ -124,42 +125,33 @@ function FoodManagement() {
     );
 
     useEffect(() => {
-        // Chỉ lọc khi không loading và có dữ liệu gốc
         if (!loading) {
-            let result = dishes; // Bắt đầu với toàn bộ danh sách gốc
+            let result = dishes; 
 
-            // --- Bước 1: Lọc theo Danh mục ---
-            if (selectedCategory) { // Nếu đã chọn một danh mục (khác rỗng)
+            if (selectedCategory) { 
                 const selectedCatName = categories.find(c => c.id === selectedCategory)?.name;
                 if (selectedCatName) {
                     result = result.filter(dish => dish.categoryName === selectedCatName);
                 }
             }
 
-            // --- Bước 2: Lọc theo Từ khóa tìm kiếm (trên kết quả đã lọc theo danh mục) ---
             if (internalSearchTerm.trim()) {
                 const normalizedSearchTerm = removeDiacritics(internalSearchTerm.toLowerCase().trim());
                 result = result.filter(dish => {
                     const normalizedName = removeDiacritics(dish.name?.toLowerCase() || '');
-                    // const normalizedDesc = removeDiacritics(dish.description?.toLowerCase() || '');
-                    // Thêm các trường khác nếu muốn tìm kiếm rộng hơn
                     return normalizedName.includes(normalizedSearchTerm);
                 });
             }
 
-            // --- Bước 3: Sắp xếp kết quả cuối cùng ---
             result.sort((a, b) => a.name.localeCompare(b.name));
 
-            setFilteredDishes(result); // Cập nhật state để hiển thị
+            setFilteredDishes(result); 
             console.log(`FoodManagement: Filtered dishes (Category: ${selectedCategory || 'All'}, Search: ${internalSearchTerm})`, result);
 
-            // Reset về trang đầu tiên khi bộ lọc thay đổi
             setCurrentPage(1);
-
         } else {
-            setFilteredDishes([]); // Nếu đang loading thì hiển thị rỗng
+            setFilteredDishes([]); 
         }
-        // *** Thêm selectedCategory vào dependency array ***
     }, [dishes, internalSearchTerm, loading, selectedCategory, categories]);
 
     // Lấy danh sách món ăn cho trang hiện tại
@@ -176,13 +168,12 @@ function FoodManagement() {
 
     // === HÀM XỬ LÝ KHI CHỌN CATEGORY TỪ DROPDOWN ===
     const handleCategoryChange = (event) => {
-        setSelectedCategory(event.target.value); // Cập nhật state category đã chọn
+        setSelectedCategory(event.target.value); 
     };
-
 
     // === HÀM THÊM MÓN ĂN ===
     const handleAddDish = async (newDishData) => {
-        setAddError(null); // Reset lỗi cập nhật cũ
+        setAddError(null); 
         try {
             const dishesCollectionRef = collection(db, DISHES_COLLECTION_NAME);
             await addDoc(dishesCollectionRef, {
@@ -190,143 +181,135 @@ function FoodManagement() {
                 isDeleted: false
             });
             console.log("FoodManagement: Document added successfully!")
-            toast.success('Thêm món ăn mới thành công!');
-            handleCloseAddModal(); // Đóng modal sau khi thêm thành công
-            // onSnapshot sẽ tự cập nhật danh sách
+            toast.success('Added new dish successfully!');
+            handleCloseAddModal(); 
         } catch (error) {
             console.error("FoodManagement: Error adding document: ", error);
-            setAddError("Lỗi khi thêm món ăn. Vui lòng thử lại."); // Set lỗi để hiển thị trong modal
-            const errorMsg = "Lỗi khi thêm món ăn. Vui lòng thử lại.";
-            // Không đóng modal nếu có lỗi
-            // Ném lỗi ra để modal biết và dừng trạng thái isSaving
+            setAddError("Error adding dish. Please try again."); 
+            const errorMsg = "Error adding dish. Please try again.";
             toast.error(errorMsg);
         }
     };
 
     // === HÀM SỬA THÔNG TIN MÓN ĂN ===
     const handleUpdateDish = async (dishId, updatedData) => {
-        setUpdateError(null); // Reset lỗi cập nhật cũ
+        setUpdateError(null); 
         const dishDocRef = doc(db, DISHES_COLLECTION_NAME, dishId)
         try {
             await updateDoc(dishDocRef, updatedData);
             console.log("FoodManagement: Document updated with ID: ", dishId)
-            toast.success('Cập nhật món ăn thành công!');
-            handleCloseEditModal(); // Đóng modal sau khi cập nhật thành công
+            toast.success('Updated dish successfully!');
+            handleCloseEditModal(); 
         }
         catch(error){
             console.error("FoodManagement: Error updating document: ", error);
-            setUpdateError("Lỗi khi cập nhật món ăn."); // Set lỗi riêng cho việc cập nhật
-            // Không đóng modal nếu có lỗi để người dùng thấy thông báo
-            const errorMsg = "Lỗi khi cập nhật món ăn.";
+            setUpdateError("Error updating dish. Please try again."); 
+            const errorMsg = "Error updating dish. Please try again.";
             toast.error(errorMsg);
         }
-    }
+    };
 
-    // === HÀM XÓA MÓN ĂN ===
-    const handleSoftDelete = async (dishId, dishName) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa món "${dishName}" không? Món ăn sẽ được ẩn đi và có thể khôi phục sau.`)) {
-            return; // Không làm gì nếu người dùng hủy
-        }
-        setError(null); // Reset lỗi cập nhật cũ
-        const dishDocRef = doc(db, DISHES_COLLECTION_NAME, dishId);
+    // === HÀM SOFT DELETE MÓN ĂN (SỬ DỤNG MODAL XÁC NHẬN MỚI) ===
+    const confirmSoftDelete = async () => {
+        if (!dishToDelete) return; // Đảm bảo có món ăn để xóa
+
+        setError(null); 
+        const dishDocRef = doc(db, DISHES_COLLECTION_NAME, dishToDelete.id);
         try {
             await updateDoc(dishDocRef, { isDeleted: true });
-            console.log(`Dish soft deleted successfully: ${dishId}`);
-            toast.success(`Đã xóa món "${dishName}"!`);
+            console.log(`Dish soft deleted successfully: ${dishToDelete.id}`);
+            toast.success(`Deleted dish "${dishToDelete.name}" successfully!`);
+            handleCloseConfirmDeleteModal(); // Đóng modal xác nhận
         }
         catch(error){
             console.error("Error soft deleting dish: ", error);
-            setError("Đã xảy ra lỗi khi xóa món ăn."); // Hiển thị lỗi chung
-            toast.error("Đã xảy ra lỗi khi xóa món ăn.");
+            setError("Error deleting dish. Please try again."); 
+            toast.error("Error deleting dish. Please try again.");
+            handleCloseConfirmDeleteModal(); // Đóng modal ngay cả khi có lỗi
         }
-    }
+    };
+
+    // === HÀM MỞ MODAL XÁC NHẬN XÓA ===
+    const handleOpenConfirmDeleteModal = (dish) => {
+        setDishToDelete(dish);
+        setIsConfirmDeleteModalOpen(true);
+    };
+
+    // === HÀM ĐÓNG MODAL XÁC NHẬN XÓA ===
+    const handleCloseConfirmDeleteModal = () => {
+        setIsConfirmDeleteModalOpen(false);
+        setDishToDelete(null);
+    };
+
 
     // === HÀM MỞ MODAL THÊM MÓN ĂN ===
     const handleOpenAddModal = () => {
-        setAddError(null); // Reset lỗi cập nhật cũ khi mở modal
-        setIsAddModalOpen(true); // Mở modal
+        setAddError(null); 
+        setIsAddModalOpen(true); 
     }
 
     // === HÀM ĐÓNG MODAL THÊM MÓN ĂN ===
     const handleCloseAddModal = () => {
-        setIsAddModalOpen(false); // Đóng modal
-        setAddError(null);     // Reset lỗi cập nhật (nếu có)
+        setIsAddModalOpen(false); 
+        setAddError(null); 
     }
 
     // === HÀM MỞ MODAL SỬA ===
     const handleEditClick = (dish) => {
-        setEditingDish(dish) // Lưu món ăn cần sửa vào state
-        setUpdateError(null) // Reset lỗi cập nhật cũ khi mở modal
-        setIsEditModalOpen(true) // Mở modal
+        setEditingDish(dish); 
+        setUpdateError(null); 
+        setIsEditModalOpen(true); 
     }
-    // === HÀM ĐÓNG MODAL SỬA === <<<< THÊM HÀM NÀY
+    // === HÀM ĐÓNG MODAL SỬA === 
     const handleCloseEditModal = () => {
-        setIsEditModalOpen(false); // Đóng modal
-        setEditingDish(null);     // Reset món ăn đang sửa
-        setUpdateError(null);     // Reset lỗi cập nhật (nếu có)
+        setIsEditModalOpen(false); 
+        setEditingDish(null); 
+        setUpdateError(null); 
     };
 
     // === HÀM MỞ MODAL XEM ẢNH ===
     const handleImageClick = (imageUrl, altText) => {
         setSelectedImageUrl(imageUrl);
-        setSelectedImageAlt(altText || 'Hình ảnh món ăn'); // Dùng alt text mặc định nếu cần
+        setSelectedImageAlt(altText || 'Dish image'); 
         setIsImageModalOpen(true);
     };
 
     // === HÀM ĐÓNG MODAL XEM ẢNH ===
     const handleCloseImageModal = () => {
         setIsImageModalOpen(false);
-        // Không cần reset URL/Alt ngay lập tức, sẽ bị ẩn đi
-        // Reset khi mở lần sau hoặc trong useEffect của modal xem ảnh nếu cần
-        // setSelectedImageUrl(null);
-        // setSelectedImageAlt('');
     };
 
     // Tính toán số trang
     const totalPages = Math.ceil(filteredDishes.length / itemsPerPage);
 
-    // Tạo mảng số trang để hiển thị
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-    }
-
     // --- Phần JSX để render ---
     return (
         <div>
-            <h1>Quản lý Món ăn</h1>
+            <h1>Dishes Management</h1>
 
-            {loading && <p>Đang tải...</p>}
-            {/* Hiển thị lỗi tải danh sách hoặc loại */}
-            {error && <p style={{ color: 'red' }}>Lỗi: {error}</p>}
-            {categoryError && <p style={{ color: 'red' }}>Lỗi: {categoryError}</p>}
+            {loading && <p>Loading...</p>}
+            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+            {categoryError && <p style={{ color: 'red' }}>Error: {categoryError}</p>}
 
             {!loading && !categoryLoading && (
                 <>
-
-
                     <div className='actions-bar'>
-                        {/* Ô Search */}
                         <input
                             type='text'
-                            placeholder='Tìm kiếm món ăn then tên...'
+                            placeholder='Search dishes by name...'
                             value={searchTerm}
                             onChange={handleSearchChange}
                             className='search-input'
-                            disabled={isAddModalOpen || isEditModalOpen}
+                            disabled={isAddModalOpen || isEditModalOpen || isConfirmDeleteModalOpen || isImageModalOpen}
                         />
 
-                        {/* === DROPDOWN LỌC CATEGORY === */}
                         <select
                             value={selectedCategory}
-                            onChange={handleCategoryChange} // <<< Gọi hàm xử lý mới
-                            className="filter-select" // Dùng class đã tạo ở bước trước
-                            disabled={isAddModalOpen || isEditModalOpen || categoryLoading}
+                            onChange={handleCategoryChange} 
+                            className="filter-select" 
+                            disabled={isAddModalOpen || isEditModalOpen || categoryLoading || isConfirmDeleteModalOpen || isImageModalOpen}
                         >
-                            {/* Option mặc định */}
-                            <option value="">Tất cả Danh mục</option>
-
-                            {/* Render các options từ state categories */}
+                            <option value="">All Categories</option>
                             {categories.map(cat => (
                                 <option key={cat.id} value={cat.id}>
                                     {cat.name}
@@ -334,84 +317,87 @@ function FoodManagement() {
                             ))}
                         </select>
 
-
-                        {/* Nút mở form thêm (MODAL) */}
-                        {/* Luôn hiển thị nút này nếu không loading và không có modal nào đang mở */}
-                        {!isEditModalOpen && !isAddModalOpen && (
+                        {!isEditModalOpen && !isAddModalOpen && !isConfirmDeleteModalOpen && !isImageModalOpen && (
                             <button
                                 type="button"
                                 onClick={handleOpenAddModal}
-                                className="action-button add-button" // Thêm class để style
+                                className="action-button add-button" 
                             >
-                                Thêm món ăn mới
+                                Add New Dish
                             </button>
                         )}
-
                     </div>
 
-                    {/* Bảng hiển thị danh sách món ăn (Giữ nguyên) */}
                     <div style={{ overflowX: 'auto' }} className='table-container'>
                         <table className="food-table">
-                            {/* ... thead và tbody ... */}
                             <thead>
                                 <tr>
-                                    <th>Tên Món ăn</th>
-                                    <th>Giá (VNĐ)</th>
-                                    <th>Mô tả</th>
-                                    <th>Loại</th>
-                                    <th>Ảnh</th>
-                                    <th className="col-star">Sao</th>
-                                    <th>Thời gian</th>
-                                    <th>Phổ biến</th>
-                                    <th className="col-actions">Hành động</th>
+                                    <th>Dish Name</th>
+                                    <th>Price ($)</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Image</th>
+                                    <th className="col-star">Star</th>
+                                    <th>Time</th>
+                                    <th>Popular</th>
+                                    <th className="col-actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentDishes.length > 0 ? (
                                     currentDishes.map((dish) => (
                                         <tr key={dish.id}>
-                                            {/* Các td giữ nguyên */}
                                             <td>{dish.name}</td>
                                             <td>{dish.price?.toLocaleString('vi-VN')}</td>
                                             <td>{dish.description}</td>
                                             <td>{dish.categoryName}</td>
                                             <td>
-                                               {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-                                                {dish.imageUrl ? (<img src={dish.imageUrl} alt={dish.name}className="dish-image clickable"
-                                                onClick={() => handleImageClick(dish.imageUrl, dish.name)}
-                                                onError={() => { /*...*/ }} />) : (<span className="no-image-text">Không có ảnh</span>)}
+                                                {dish.imageUrl ? (
+                                                <img 
+                                                    src={dish.imageUrl} 
+                                                    alt={dish.name} 
+                                                    className="dish-image clickable"
+                                                    onClick={() => handleImageClick(dish.imageUrl, dish.name)}
+                                                    onError={(e) => { 
+                                                        e.target.onerror = null; 
+                                                        e.target.src = '/path/to/placeholder-image.jpg'; // fallback image
+                                                        e.target.alt = 'Image not found';
+                                                    }} 
+                                                />) : (
+                                                <span className="no-image-text">No image</span>
+                                                )}
                                             </td>
                                             <td className="col-star">{dish.star} ⭐</td>
                                             <td>{dish.time}</td>
                                             <td style={{ textAlign: 'center' }}>
                                                <span className={`status-badge ${dish.isPopular ? 'popular' : ''}`}>
-                                                    {dish.isPopular ? 'Phổ biến' : 'Không'}
+                                                    {dish.isPopular ? 'Popular' : 'Not'}
                                                 </span>
                                             </td>
                                             <td className="col-actions">
                                                 <button type='button'
                                                     className="action-button edit-button"
                                                     onClick={() => handleEditClick(dish)}
-                                                    disabled={isAddModalOpen || isEditModalOpen}
+                                                    disabled={isAddModalOpen || isEditModalOpen || isConfirmDeleteModalOpen || isImageModalOpen}
                                                 >
-                                                    Sửa
+                                                    Edit
                                                 </button>
                                                 <button
                                                     type='button'
                                                     className="action-button delete-button"
-                                                    disabled={isAddModalOpen || isEditModalOpen}
-                                                    onClick={() => handleSoftDelete(dish.id, dish.name)}
+                                                    disabled={isAddModalOpen || isEditModalOpen || isConfirmDeleteModalOpen || isImageModalOpen}
+                                                    // Thay thế handleSoftDelete trực tiếp bằng handleOpenConfirmDeleteModal
+                                                    onClick={() => handleOpenConfirmDeleteModal(dish)} 
                                                 >
-                                                    Xóa
+                                                    Delete
                                                 </button>
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
-                                    // Hiển thị thông báo khi không có kết quả
                                     <tr>
                                         <td colSpan="9" style={{ textAlign: 'center' }}>
-                                            {searchTerm ? 'Không tìm thấy món ăn nào phù hợp.' : 'Chưa có món ăn nào.'}
+                                            {searchTerm ? 'No matching dishes found.' : 'No dishes found.'}
                                         </td>
                                     </tr>
                                 )}
@@ -419,28 +405,26 @@ function FoodManagement() {
                         </table>
                     </div>
 
-                    {/* === Pagination === */}
                     {filteredDishes.length > 0 && (
                         <div className="pagination">
-                            {/* Đoạn code phân trang cũ sẽ bị thay thế */}
                             <Pagination
-                                count={totalPages} // Tổng số trang
-                                page={currentPage} // Trang hiện tại
+                                count={totalPages} 
+                                page={currentPage} 
                                 onChange={(event, value) => {
-                                    setCurrentPage(value); // Cập nhật state currentPage khi trang thay đổi
+                                    setCurrentPage(value); 
                                 }}
-                                color="primary" // Màu sắc của pagination (tùy chọn)
-                                shape="rounded" // Hình dạng của các nút (tùy chọn)
+                                color="primary" 
+                                shape="rounded" 
                             />
                             <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                                <InputLabel id="items-per-page-label">Số món/trang</InputLabel>
+                                <InputLabel id="items-per-page-label">Items per page</InputLabel>
                                 <Select
                                     labelId="items-per-page-label"
                                     id="itemsPerPage"
                                     value={itemsPerPage}
-                                    label="Số món/trang"
+                                    label="Items per page"
                                     onChange={(e) => {
-                                        setItemsPerPage(Number.parseInt(e.target.value, 5))
+                                        setItemsPerPage(Number.parseInt(e.target.value, 10))
                                         setCurrentPage(1);
                                     }}
                                 >
@@ -451,25 +435,24 @@ function FoodManagement() {
                                 </Select>
                             </FormControl>
                         </div>
-)}
+                    )}
                 </>
             )}
 
-             {/* === MODAL THÊM MÓN ĂN === */}
+            {/* === MODAL THÊM MÓN ĂN === */}
             {isAddModalOpen && (
                 <AddDishModal
                     isOpen={isAddModalOpen}
                     onClose={handleCloseAddModal}
-                    onSave={handleAddDish} // Hàm thêm vào Firestore
+                    onSave={handleAddDish} 
                     categories={categories}
                     categoryLoading={categoryLoading}
                     categoryError={categoryError}
-                    addError={addError} // Lỗi riêng của việc thêm
+                    addError={addError} 
                 />
             )}
 
-
-            {/* === MODAL SỬA MÓN ĂN === (Giữ nguyên) */}
+            {/* === MODAL SỬA MÓN ĂN === */}
             {isEditModalOpen && editingDish && (
                 <EditDishModal
                     isOpen={isEditModalOpen}
@@ -492,8 +475,20 @@ function FoodManagement() {
                     altText={selectedImageAlt}
                 />
             )}
-        </div>
 
+            {/* === MODAL XÁC NHẬN XÓA MỚI === */}
+            {isConfirmDeleteModalOpen && dishToDelete && (
+                <ConfirmationModal
+                    isOpen={isConfirmDeleteModalOpen}
+                    onClose={handleCloseConfirmDeleteModal}
+                    onConfirm={confirmSoftDelete} // Hàm sẽ thực hiện xóa
+                    title="Confirm Deletion"
+                    message={`Are you sure you want to delete "${dishToDelete.name}"? This action cannot be undone.`}
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                />
+            )}
+        </div>
     );
 }
 
