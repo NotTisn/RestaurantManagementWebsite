@@ -1,5 +1,5 @@
 import React from 'react'
-import ChatSidebar from '../components/ChatSideBar'; // ✅ Đã sửa chữ 'B' thành HOA
+import ChatSidebar from '../../components/ChatSidebar';
 import Chat from '../../components/Chat'
 
 
