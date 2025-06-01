@@ -136,6 +136,8 @@ function OrdersManagement() {
           voucherCode: d.voucherCode || [],
           userId: d.userId || 'Unknown',
           status: d.status || 'pending',
+          paymentStatus: d.paymentStatus,
+          paymentMethod: d.paymentMethod,
           timestamp: formattedTimestamp,
         };
         ordersData.push(order);
@@ -307,7 +309,7 @@ function OrdersManagement() {
     try {
       await updateDoc(orderRef, { status: 'completed' });
 
-      const backendUrl = 'http://localhost:4000/notify-order-completed';
+      const backendUrl = 'http://localhost:8080/notify-order-completed';
       fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -396,6 +398,8 @@ function OrdersManagement() {
                   <div className={styles.orderInfo}>
                     <p><strong>Customer:</strong> {order.userName || 'Fetching Name...'}</p>
                     <p><strong>Order Time:</strong> {order.timestamp}</p>
+                    <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
+                    <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
                     <p><strong>Voucher Code:</strong> {order.voucherCode && order.voucherCode.length > 0 ? order.voucherCode.join(', ') : 'None'}</p>
                   </div>
 

@@ -481,7 +481,7 @@ function FoodManagement() {
                 <ConfirmationModal
                     isOpen={isConfirmDeleteModalOpen}
                     onClose={handleCloseConfirmDeleteModal}
-                    onConfirm={confirmSoftDelete} // Hàm sẽ thực hiện xóa
+                    onConfirm={confirmSoftDelete}
                     title="Confirm Deletion"
                     message={`Are you sure you want to delete "${dishToDelete.name}"? This action cannot be undone.`}
                     confirmText="Delete"
