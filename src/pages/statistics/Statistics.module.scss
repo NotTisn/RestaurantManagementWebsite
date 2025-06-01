@@ -1,0 +1,106 @@
+/* Statistics.module.scss */
+
+/* Page background & container */
+:global(body) {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: #f4f7f6;
+}
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+}
+
+/* Main heading */
+.heading {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.8rem;
+}
+
+/* Controls (year/month/day selectors) */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+.controls label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #555;
+}
+.controls input,
+.controls select {
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+/* Chart wrapper */
+.chart {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+/* Panels grid */
+.panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.panel {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+.panel h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+.panel ol {
+  padding-left: 1.2rem;
+}
+.panel li {
+  margin-bottom: 0.5rem;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+/* Small utility classes if you like */
+.text-center { text-align: center; }
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.itemImage {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 0.75rem;
+  border: 1px solid #ddd;
+}
+
+.itemDetails {
+  display: flex;
+  flex-direction: column;
+}
