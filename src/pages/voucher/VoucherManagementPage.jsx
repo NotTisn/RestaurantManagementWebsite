@@ -592,7 +592,7 @@ function VoucherManagementPage() {
 
       // --- Gửi thông báo đến backend để thông báo voucher mới ---
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://foodappfcm.onrender.com';
         const response = await fetch(`${backendUrl}/notify-new-voucher`, {
           method: 'POST',
           headers: {

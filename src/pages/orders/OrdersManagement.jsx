@@ -309,7 +309,7 @@ function OrdersManagement() {
     try {
       await updateDoc(orderRef, { status: 'completed' });
 
-      const backendUrl = 'http://localhost:8080/notify-order-completed';
+      const backendUrl = 'https://foodappfcm.onrender.com/notify-order-completed';
       fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
