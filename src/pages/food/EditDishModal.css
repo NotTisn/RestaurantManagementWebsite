@@ -1,21 +1,17 @@
-/* --- EditDishModal.css --- */
-
-/* Style cho thẻ dialog */
 .edit-dish-modal {
-    border: none; /* Loại bỏ viền mặc định của dialog */
-    padding: 0; /* Bỏ padding mặc định */
-    border-radius: 10px; /* Bo góc mềm mại hơn */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* Bóng đổ nổi bật hơn */
-    max-width: 550px; /* Tăng nhẹ chiều rộng tối đa */
-    width: 95%; /* Đảm bảo responsive tốt hơn */
-    max-height: 90vh; /* Chiều cao tối đa 90% viewport height */
-    overflow: visible; /* Cho phép các phần tử con vượt ra ngoài (như nút đóng) */
-    box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng */
-    background-color: #fff; /* Đặt nền trắng rõ ràng cho dialog */
-    animation: fadeInScale 0.3s ease-out forwards; /* Thêm hiệu ứng mở */
+    border: none; 
+    padding: 0; 
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); 
+    max-width: 550px; 
+    width: 95%; 
+    max-height: 90vh; 
+    overflow: visible; 
+    box-sizing: border-box; 
+    background-color: #fff; 
+    animation: fadeInScale 0.3s ease-out forwards; 
 }
 
-/* Hiệu ứng khi dialog mở */
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -27,70 +23,64 @@
     }
 }
 
-/* Style cho backdrop (nền mờ phía sau) của dialog */
 .edit-dish-modal::backdrop {
-    background-color: rgba(0, 0, 0, 0.7); /* Nền tối hơn để tập trung vào modal */
-    backdrop-filter: blur(4px); /* Hiệu ứng làm mờ nền */
-    animation: fadeInBackdrop 0.3s ease-out forwards; /* Hiệu ứng mở cho backdrop */
+    background-color: rgba(0, 0, 0, 0.7); 
+    backdrop-filter: blur(4px);
+    animation: fadeInBackdrop 0.3s ease-out forwards; 
 }
 
-/* Hiệu ứng khi backdrop mở */
 @keyframes fadeInBackdrop {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 
-/* Style cho .modal-content bên trong dialog */
 .edit-dish-modal .modal-content {
-    padding: 30px; /* Tăng padding để nội dung thoáng đãng hơn */
-    position: relative; /* Quan trọng: Để định vị nút đóng X */
-    max-height: calc(90vh - 60px); /* Trừ đi padding trên dưới của content */
-    overflow-y: auto; /* Cuộn nếu nội dung dài */
+    padding: 30px; 
+    position: relative; 
+    max-height: calc(90vh - 60px);
+    overflow-y: auto; 
 }
 
-/* Tiêu đề modal */
 .modal-content h2 {
     margin-top: 0;
-    margin-bottom: 25px; /* Khoảng cách dưới tiêu đề */
-    color: #2c3e50; /* Màu chữ đậm hơn, chuyên nghiệp hơn */
-    font-size: 1.6rem; /* Kích thước chữ lớn hơn */
-    text-align: center; /* Căn giữa tiêu đề */
+    margin-bottom: 25px; 
+    color: #2c3e50;
+    font-size: 1.6rem;
+    text-align: center; 
     padding-bottom: 15px;
-    border-bottom: 1px solid #eee; /* Đường kẻ dưới tiêu đề */
+    border-bottom: 1px solid #eee; 
 }
 
-/* Nút đóng (dấu X) */
 .modal-content .modal-close-button {
     position: absolute;
-    top: 15px; /* Di chuyển xuống một chút */
-    right: 20px; /* Di chuyển vào một chút */
+    top: 15px;
+    right: 20px;
     background: none;
     border: none;
-    font-size: 2rem; /* Kích thước lớn hơn */
-    font-weight: 300; /* Font mỏng hơn */
-    color: #888; /* Màu xám nhẹ */
+    font-size: 2rem; 
+    font-weight: 300; 
+    color: #888; 
     cursor: pointer;
     line-height: 1;
     z-index: 10;
-    transition: color 0.2s ease, transform 0.2s ease; /* Thêm hiệu ứng chuyển động */
+    transition: color 0.2s ease, transform 0.2s ease; 
 }
 .modal-content .modal-close-button:hover {
-    color: #e74c3c; /* Đổi màu khi hover */
-    transform: rotate(90deg); /* Xoay khi hover */
+    color: #e74c3c; 
+    transform: rotate(90deg); 
 }
 
-/* Style chung cho các nhóm form trong modal */
 .modal-content .form-group {
-    margin-bottom: 20px; /* Tăng khoảng cách giữa các nhóm */
+    margin-bottom: 20px;
 }
 
 .modal-content .form-group label {
     display: block;
-    margin-bottom: 8px; /* Khoảng cách dưới label */
-    font-weight: 600; /* Đậm hơn một chút */
-    font-size: 0.95rem; /* Kích thước chữ tăng nhẹ */
-    color: #34495e; /* Màu chữ đậm hơn */
+    margin-bottom: 8px; 
+    font-weight: 600; 
+    font-size: 0.95rem;
+    color: #34495e; 
 }
 
 .modal-content .form-group input[type="text"],
@@ -98,119 +88,113 @@
 .modal-content .form-group textarea,
 .modal-content .form-group select {
     width: 100%;
-    padding: 12px; /* Tăng padding cho input */
-    border: 1px solid #dcdcdc; /* Viền sáng hơn */
-    border-radius: 6px; /* Bo góc input mềm mại hơn */
+    padding: 12px; 
+    border: 1px solid #dcdcdc; 
+    border-radius: 6px;
     box-sizing: border-box;
-    font-size: 1rem; /* Kích thước chữ chuẩn */
-    transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Thêm hiệu ứng focus */
-    background-color: #f8f8f8; /* Nền input hơi xám */
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+    background-color: #f8f8f8; 
 }
 
 .modal-content .form-group input[type="text"]:focus,
 .modal-content .form-group input[type="number"]:focus,
 .modal-content .form-group textarea:focus,
 .modal-content .form-group select:focus {
-    border-color: #007bff; /* Viền xanh khi focus */
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Bóng đổ nhẹ khi focus */
-    outline: none; /* Bỏ outline mặc định của trình duyệt */
-    background-color: #fff; /* Nền trắng khi focus */
+    border-color: #007bff; 
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); 
+    outline: none; 
+    background-color: #fff; 
 }
 
 .modal-content .form-group textarea {
-    resize: vertical; /* Cho phép thay đổi chiều cao */
-    min-height: 80px; /* Chiều cao tối thiểu */
+    resize: vertical; 
+    min-height: 80px;
 }
 
-/* Placeholder style */
 .modal-content .form-group input::placeholder,
 .modal-content .form-group textarea::placeholder {
     color: #a0a0a0;
 }
 
-/* Checkbox group */
 .form-group-checkbox {
     display: flex;
     align-items: center;
-    gap: 10px; /* Khoảng cách giữa checkbox và label */
-    margin-top: 25px; /* Tăng khoảng cách trên */
+    gap: 10px;
+    margin-top: 25px; 
 }
 
 .form-group-checkbox input[type="checkbox"] {
-    width: 18px; /* Kích thước checkbox */
+    width: 18px; 
     height: 18px;
-    accent-color: #007bff; /* Màu sắc của checkbox khi được chọn */
+    accent-color: #007bff; 
     cursor: pointer;
 }
 
 .form-group-checkbox label {
-    margin-bottom: 0; /* Bỏ margin dưới của label */
-    font-weight: normal; /* Đặt lại font-weight cho label checkbox */
+    margin-bottom: 0; 
+    font-weight: normal; 
     font-size: 1rem;
     color: #34495e;
     cursor: pointer;
 }
 
-/* Nút hành động trong modal */
 .modal-actions {
-    margin-top: 30px; /* Tăng khoảng cách trên */
+    margin-top: 30px;
     display: flex;
     justify-content: flex-end;
-    gap: 12px; /* Khoảng cách giữa các nút */
+    gap: 12px; 
     padding-top: 20px;
-    border-top: 1px solid #eee; /* Đường kẻ trên nút hành động */
+    border-top: 1px solid #eee; 
 }
 
-/* Style chung cho nút */
 .modal-actions .action-button {
-    padding: 10px 20px; /* Tăng padding cho nút */
+    padding: 10px 20px; 
     border: none;
-    border-radius: 5px; /* Bo góc nút mềm mại hơn */
+    border-radius: 5px; 
     cursor: pointer;
-    font-size: 1rem; /* Kích thước chữ chuẩn */
-    font-weight: 500; /* Đậm hơn một chút */
-    transition: background-color 0.2s ease, transform 0.1s ease; /* Thêm hiệu ứng hover */
+    font-size: 1rem; 
+    font-weight: 500; 
+    transition: background-color 0.2s ease, transform 0.1s ease; 
 }
 
 .modal-actions .action-button:disabled {
-    opacity: 0.5; /* Giảm độ trong suốt khi disabled */
+    opacity: 0.5;
     cursor: not-allowed;
-    background-color: #cccccc !important; /* Đảm bảo màu xám khi disabled */
+    background-color: #cccccc !important; 
     color: #666 !important;
 }
 
 .modal-actions .save-button {
-    background-color: #28a745; /* Màu xanh lá cây cho nút lưu */
+    background-color: #28a745; 
     color: white;
 }
 .modal-actions .save-button:hover:not(:disabled) {
-    background-color: #218838; /* Màu xanh đậm hơn khi hover */
-    transform: translateY(-1px); /* Nút nhích lên một chút */
+    background-color: #218838;
+    transform: translateY(-1px); 
 }
 
 .modal-actions .cancel-button {
-    background-color: #dc3545; /* Màu đỏ cho nút hủy */
+    background-color: #dc3545; 
     color: white;
 }
 .modal-actions .cancel-button:hover:not(:disabled) {
-    background-color: #c82333; /* Màu đỏ đậm hơn khi hover */
-    transform: translateY(-1px); /* Nút nhích lên một chút */
+    background-color: #c82333; 
+    transform: translateY(-1px); 
 }
 
-/* Thông báo lỗi validation */
 .validation-error,
 .error-message {
-    color: #e74c3c; /* Màu đỏ nổi bật */
-    font-size: 0.85rem; /* Kích thước chữ nhỏ hơn */
+    color: #e74c3c; 
+    font-size: 0.85rem; 
     margin-top: 5px;
-    margin-bottom: -10px; /* Giảm khoảng cách để lỗi gần input hơn */
-    font-style: italic; /* Chữ nghiêng */
+    margin-bottom: -10px; 
+    font-style: italic;
 }
 
-/* Khi input có lỗi, đổi màu viền input */
 .form-group input.aria-invalid[aria-invalid="true"],
 .form-group textarea.aria-invalid[aria-invalid="true"],
 .form-group select.aria-invalid[aria-invalid="true"] {
-    border-color: #e74c3c; /* Viền đỏ khi có lỗi */
-    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.25); /* Bóng đổ đỏ nhẹ */
+    border-color: #e74c3c; 
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.25); 
 }

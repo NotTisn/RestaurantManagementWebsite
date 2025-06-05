@@ -7,13 +7,13 @@ import Chats from "./Chats";
 import '../style.scss';
 
 export default function ChatSidebar() {
-  const { updateChat } = useChat(); // ✅ sửa tại đây
+  const { updateChat } = useChat(); 
 
   return (
     <div className="sidebar">
       <Navbar />
       <Search />
-      <Chats onSelect={updateChat} /> {/* ✅ sửa tại đây */}
+      <Chats onSelect={updateChat} /> 
     </div>
   );
 }

@@ -1,18 +1,17 @@
-// src/contexts/ChatContext.jsx
 import { createContext, useContext, useState } from "react";
 
 export const ChatContext = createContext();
 
 export const ChatContextProvider = ({ children }) => {
   const [data, setData] = useState({
-    user: null,        // người dùng đang chat
-    chatId: null,      // chatId chính là "restaurant"
+    user: null,        
+    chatId: null,    
   });
 
   const updateChat = (user) => {
     setData({
       user,
-      chatId: "restaurant", // cố định vì user -> restaurant
+      chatId: "restaurant",
     });
   };
 

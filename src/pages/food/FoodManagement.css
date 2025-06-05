@@ -1,66 +1,55 @@
-/* FoodManagement.css */
-
-/* ----- Tổng thể bảng ----- */
   .food-table {
     width: 100%;
-    border-collapse: collapse; /* Gộp đường viền */
+    border-collapse: collapse; 
     margin-top: 20px;
-    font-size: 0.9em; /* Có thể giảm nhẹ font nếu cần thêm không gian */
+    font-size: 0.9em; 
   }
   
-  /* ----- Tiêu đề bảng (th) ----- */
   .food-table th {
-    background-color: #f2f2f2; /* Màu nền nhẹ cho tiêu đề */
+    background-color: #f2f2f2; 
     border: 1px solid #ddd;
-    padding: 12px 10px; /* Tăng padding */
-    text-align: left; /* Căn lề trái (hoặc center tùy ý) */
+    padding: 12px 10px; 
+    text-align: left; 
     font-weight: bold;
-    white-space: nowrap; /* Không xuống dòng tiêu đề */
+    white-space: nowrap; 
   }
 
-  .table-container { /* <<< Thêm class này vào div bao quanh table nếu chưa có */
-    overflow-x: auto; /* Cho phép cuộn ngang */
+  .table-container { 
+    overflow-x: auto; 
     margin-top: 20px;
-    border-radius: 8px; /* Bo góc container */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Bóng đổ mềm mại */
-    background-color: #fff; /* Nền trắng cho container */
+    border-radius: 8px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+    background-color: #fff; 
   }
   
-  /* ----- Ô dữ liệu (td) ----- */
   .food-table td {
-    border: none; /* <<< Bỏ viền mặc định */
-    border-bottom: 1px solid #e9ecef; /* <<< Chỉ giữ đường kẻ dưới mờ */
-    padding: 12px 12px; /* Tăng padding */
+    border: none; 
+    border-bottom: 1px solid #e9ecef;
+    padding: 12px 12px;
     vertical-align: middle;
-    color: #495057; /* Màu chữ */
+    color: #495057;
   }
   
-  /* ----- Zebra striping (màu xen kẽ cho các dòng) ----- */
   .food-table tbody tr:last-child() td {
     border-bottom: none;
   }
   
-/* Loại bỏ border-bottom cho dòng cuối cùng */
   .food-table tbody tr:hover {
     background-color: #f1f1f1;
   }
-/* ----- Zebra striping (màu xen kẽ) - tinh tế hơn ----- */
 .food-table tbody tr:nth-child(even) {
-  background-color: #fdfdfd; /* Màu nền rất nhạt */
+  background-color: #fdfdfd;
 }
   
-/* ----- Hover effect (hiệu ứng khi di chuột qua dòng)*/
 .food-table tbody tr:hover {
-  background-color: #f1f5f9; /* Màu nền thay đổi nhẹ khi hover */
-  /* transition: background-color 0.15s ease-in-out; <<< Thêm hiệu ứng chuyển đổi */
+  background-color: #f1f5f9;
 }
-  /* ----- Hình ảnh món ăn ----- */
   .food-table .dish-image {
-    max-width: 50px; /* Có thể giảm nhẹ */
+    max-width: 50px;
     height: 50px;
     object-fit: cover;
     border-radius: 4px;
-    vertical-align: middle; /* Đảm bảo căn giữa */
+    vertical-align: middle; 
   }
 
   .food-table .no-image-text {
@@ -70,59 +59,52 @@
   }
   
   
-  /* ----- Cột Đánh giá (Sao) ----- */
   .food-table .col-star {
-    white-space: nowrap; /* Quan trọng: Ngăn không cho số và sao xuống dòng */
+    white-space: nowrap;
     text-align: center;
-    min-width: 70px; /* Đặt chiều rộng tối thiểu nếu cần */
+    min-width: 70px; 
   }
   
-  /* ----- Cột Hành động ----- */
   .food-table .col-actions {
-    white-space: nowrap; /* Quan trọng: Ngăn các nút xuống dòng */
-    text-align: center; /* Căn giữa các nút */
-    min-width: 120px; /* Đặt chiều rộng tối thiểu để chứa vừa 2 nút */
+    white-space: nowrap;
+    text-align: center; 
+    min-width: 120px;
   }
-  /* ----- Badge cho cột "Phổ biến" ----- */
 .status-badge {
   display: inline-block;
-  padding: 4px 10px; /* Padding nhỏ hơn */
-  font-size: 0.8em;  /* Chữ nhỏ hơn */
+  padding: 4px 10px; 
+  font-size: 0.8em;  
   font-weight: 600;
-  border-radius: 12px; /* Bo tròn nhiều hơn */
+  border-radius: 12px; 
   text-align: center;
   white-space: nowrap;
 }
 
 .status-badge.popular {
-  background-color: #d1e7dd; /* Màu nền xanh lá nhạt */
-  color: #0f5132; /* Màu chữ xanh lá đậm */
-  border: 1px solid #a3cfbb; /* Viền nhẹ (tùy chọn) */
+  background-color: #d1e7dd; 
+  color: #0f5132; 
+  border: 1px solid #a3cfbb; 
 }
 
 .status-badge.not-popular {
-  background-color: #f8d7da; /* Màu nền đỏ nhạt */
-  color: #58151c; /* Màu chữ đỏ đậm */
-   border: 1px solid #f1aeae; /* Viền nhẹ (tùy chọn) */
-   /* Hoặc dùng màu xám */
-  /* background-color: #e9ecef;
-  color: #495057;
-  border: 1px solid #dee2e6; */
+  background-color: #f8d7da; 
+  color: #58151c; 
+   border: 1px solid #f1aeae; 
+
 }
   
-  /* ----- Nút Sửa/Xóa ----- */
   .food-table .action-button {
     padding: 5px 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9em;
-    margin: 0 3px; /* Tạo khoảng cách nhỏ giữa các nút */
-    transition: background-color 0.2s ease; /* Hiệu ứng chuyển màu */
+    margin: 0 3px; 
+    transition: background-color 0.2s ease; 
   }
   
   .food-table .edit-button {
-    background-color: #4CAF50; /* Màu xanh lá */
+    background-color: #4CAF50; 
     color: white;
   }
   .food-table .edit-button:hover {
@@ -130,18 +112,16 @@
   }
   
   .food-table .delete-button {
-    background-color: #f44336; /* Màu đỏ */
+    background-color: #f44336; 
     color: white;
   }
   .food-table .delete-button:hover {
       background-color: #da190b;
   }
   
-  /* ----- Responsive (Tùy chọn, nếu muốn bảng hiển thị tốt hơn trên mobile) ----- */
   @media screen and (max-width: 768px) {
-    /* Có thể ẩn bớt cột không quan trọng hoặc thay đổi cách hiển thị */
     .food-table th, .food-table td {
-      font-size: 0.85em; /* Giảm font trên màn hình nhỏ hơn */
+      font-size: 0.85em; 
       padding: 8px 5px;
     }
     .food-table .dish-image {
@@ -158,42 +138,39 @@
 
   .modal-content .form-group-checkbox {
     display: flex;
-    align-items: center; /* Căn giữa checkbox và label theo chiều dọc */
-    gap: 8px; /* Khoảng cách giữa checkbox và label */
-    margin-top: 20px; /* Thêm khoảng cách phía trên */
+    align-items: center; 
+    gap: 8px; 
+    margin-top: 20px; 
   }
   
   .modal-content .form-group-checkbox input[type="checkbox"] {
-    width: auto; /* Reset width mặc định */
+    width: auto; 
     cursor: pointer;
-    /* Tùy chỉnh kích thước checkbox nếu muốn */
-    /* transform: scale(1.2); */
   }
   
   .modal-content .form-group-checkbox label {
-    margin-bottom: 0; /* Bỏ margin bottom mặc định của label */
-    font-weight: normal; /* Bỏ bold nếu muốn */
+    margin-bottom: 0; 
+    font-weight: normal; 
     cursor: pointer;
   }
 
   .action-button {
-    display: inline-flex; /* Để căn chỉnh icon và text dễ hơn nếu có icon */
+    display: inline-flex; 
     align-items: center;
     justify-content: center;
-    padding: 8px 15px;   /* Padding cơ bản */
-    border: none;         /* Không viền */
-    border-radius: 4px;   /* Bo góc */
+    padding: 8px 15px;   
+    border: none;       
+    border-radius: 4px;   
     cursor: pointer;
-    font-size: 0.95em;    /* Cỡ chữ */
-    font-weight: 500;     /* Độ đậm vừa phải */
+    font-size: 0.95em;    
+    font-weight: 500;     
     text-align: center;
     vertical-align: middle;
-    transition: background-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease; /* Hiệu ứng chuyển đổi */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Thêm bóng đổ nhẹ */
+    transition: background-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
 }
 
 
-// Add Button
 .action-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -203,22 +180,21 @@
 
 
 .add-button:hover:not(:disabled) {
-  background-color: #0056b3; /* Màu đậm hơn khi hover */
+  background-color: #0056b3; 
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 .add-button:active:not(:disabled) {
-  background-color: #004085; /* Màu đậm hơn nữa khi nhấn */
+  background-color: #004085; 
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-// Search feature
 .actions-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 20px; /* Có thể tăng margin dưới nếu muốn cách xa bảng hơn */
-  flex-wrap: wrap;     /* Giữ lại để xuống dòng trên màn hình nhỏ */
-  gap: 15px;           /* Khoảng cách giữa các input, select, button */
+  margin-bottom: 20px; 
+  flex-wrap: wrap;    
+  gap: 15px;           
 }
 
 .search-input {
@@ -226,7 +202,7 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
-  min-width: 280px;     /* Giữ độ rộng tối thiểu */
+  min-width: 280px;     
   margin-right: 15px;
 }
 
@@ -235,7 +211,7 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
-  min-width: 200px; /* Điều chỉnh độ rộng nếu cần */
+  min-width: 200px; 
   background-color: white;
   cursor: pointer;
   margin-right: 15px;
@@ -248,25 +224,20 @@
 }
 
 .actions-bar .add-button {
-  /* Style cơ bản */
-  padding: 10px 20px;       /* Padding lớn hơn chút cho nút chính */
+  padding: 10px 20px;       
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;          /* Đồng bộ font-size */
-  font-weight: bold;        /* Chữ đậm */
-  white-space: nowrap;      /* Không xuống dòng chữ */
-  transition: background-color 0.2s ease, box-shadow 0.2s ease; /* Thêm transition cho shadow */
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Bóng đổ nhẹ */
-
+  font-size: 1rem;          
+  font-weight: bold;      
+  white-space: nowrap;      
+  transition: background-color 0.2s ease, box-shadow 0.2s ease; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   margin-left: auto;
-
-
 }
 
-/* Hover & Active states cho nút Add */
 .actions-bar .add-button:hover:not(:disabled) {
   background-color: #0056b3;
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
@@ -277,13 +248,12 @@
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* Style khi các control bị disable */
 .search-input:disabled,
 .filter-select:disabled,
 .actions-bar .add-button:disabled {
   background-color: #e9ecef;
   cursor: not-allowed;
   opacity: 0.7;
-  box-shadow: none; /* Bỏ shadow khi disable */
+  box-shadow: none; 
 }
 

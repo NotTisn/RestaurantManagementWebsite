@@ -7,7 +7,7 @@ import './CategoryManagement.css';
 const CategoryManagement = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [globalError, setGlobalError] = useState(''); // Lỗi hiển thị ngoài modal
+    const [globalError, setGlobalError] = useState(''); 
 
     // State cho Modal xác nhận xóa
     const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -227,7 +227,7 @@ const CategoryManagement = () => {
                 Add New Category
             </button>
 
-            {globalError && <p className="error-message">{globalError}</p>} {/* Hiển thị lỗi chung bên ngoài modal */}
+            {globalError && <p className="error-message">{globalError}</p>} 
             {loading && <p>Loading...</p>}
 
             {/* List of Categories */}
@@ -257,7 +257,7 @@ const CategoryManagement = () => {
                 <div className="modal-backdrop">
                     <div className="modal-content">
                         <h3>{currentCategory ? 'Edit Category' : 'Add New Category'}</h3>
-                        {modalFormError && <p className="error-message">{modalFormError}</p>} {/* Hiển thị lỗi form trong modal */}
+                        {modalFormError && <p className="error-message">{modalFormError}</p>} 
                         <form onSubmit={handleAddEditSubmit}>
                             <div className="form-group">
                                 <label htmlFor="modalCategoryName">Category Name:</label>
@@ -267,7 +267,7 @@ const CategoryManagement = () => {
                                     value={modalCategoryName}
                                     onChange={(e) => setModalCategoryName(e.target.value)}
                                     placeholder="Enter category name"
-                                    required // Thẻ required HTML có thể hữu ích nhưng chúng ta vẫn nên dùng JS validate
+                                    required 
                                 />
                             </div>
                             <div className="form-group">
@@ -275,7 +275,7 @@ const CategoryManagement = () => {
                                 <input
                                     type="file"
                                     id="modalCategoryImage"
-                                    accept="image/*" // Chỉ chấp nhận file ảnh
+                                    accept="image/*" 
                                     onChange={handleModalFileChange}
                                 />
                                 {(modalPreviewImageUrl || (currentCategory?.imageUrl)) && (
@@ -287,7 +287,6 @@ const CategoryManagement = () => {
                                 {currentCategory && !modalCategoryFile && (
                                     <p className="current-image-note">Leave blank to keep current image.</p>
                                 )}
-                                {/* Hiển thị gợi ý nếu đang thêm mới và chưa có ảnh */}
                                 {!currentCategory && !modalCategoryFile && (
                                     <p className="image-required-note">Image is required for new categories.</p>
                                 )}
@@ -305,7 +304,6 @@ const CategoryManagement = () => {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal (giữ nguyên) */}
             {showDeleteConfirmModal && (
                 <div className="modal-backdrop">
                     <div className="modal-content">
@@ -323,7 +321,6 @@ const CategoryManagement = () => {
                 </div>
             )}
 
-            {/* Toast/Snackbar Notification (giữ nguyên) */}
             {toast.show && (
                 <div className={`toast-notification ${toast.type}`}>
                     {toast.message}

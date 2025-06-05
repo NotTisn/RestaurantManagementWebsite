@@ -1,4 +1,3 @@
-// src/components/Chats.jsx
 import React, { useState, useEffect } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
@@ -28,7 +27,7 @@ export default function Chats() {
           <img src={user.photoURL} alt="" />
           <div className="userChatInfo">
             <span>{user.displayName}</span>
-            <p>{user.lastMessage?.text || "Tin nhắn..."}</p>
+            <p>{user.lastMessage?.text || "Message..."}</p>
           </div>
         </div>
       ))}

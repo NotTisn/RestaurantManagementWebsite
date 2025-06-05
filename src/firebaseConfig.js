@@ -1,4 +1,3 @@
-// src/firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -25,7 +24,4 @@ const projectFirestore = getFirestore(app);
 
 export const auth = getAuth();
 export const storage = getStorage(app);
-//export const db = getFirestore()
-// Export the instances you need
-export { db, projectAuth, projectFirestore }; // Chỉ export db nếu chỉ cần Firestore
-// export { db, auth, storage }; // Export nhiều hơn nếu cần
+export { db, projectAuth, projectFirestore }; 

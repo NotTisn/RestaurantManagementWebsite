@@ -24,10 +24,10 @@ export default function Login() {
         navigate("/app"); 
       }
       else {
-        setError("Bạn không có quyền truy cập trang này.");
+        setError("You do not have permission to access this page.");
       }
     } catch (err) {
-      setError(`Đăng nhập thất bại! ${err.message}`);
+      setError(`Login failed: ${err.message}`);
     }
     setLoading(false);
   }

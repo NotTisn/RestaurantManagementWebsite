@@ -8,6 +8,6 @@ export async function saveFcmToken(userId) {
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, { fcmToken: token });
   } catch (err) {
-    console.error('Lỗi lưu FCM token:', err);
+    console.error('Error saving FCM token:', err);
   }
 }

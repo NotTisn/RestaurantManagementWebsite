@@ -1,4 +1,3 @@
-// File: src/pages/statistics/Statistics.jsx
 import React, { useContext, useState, useEffect } from 'react';
 import { StatsContext } from '../../contexts/StatsContext';
 import {

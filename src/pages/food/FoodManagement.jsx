@@ -1,4 +1,3 @@
-// src/pages/FoodManagement.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, onSnapshot, addDoc, getDocs, doc, updateDoc, query, where } from "firebase/firestore";
 import { db } from '../../firebaseConfig'; 
@@ -6,7 +5,7 @@ import './FoodManagement.css';
 import EditDishModal from './EditDishModal';
 import AddDishModal from './AddDishModal';
 import ImagePreviewModal from './ImagePreviewModal';
-import ConfirmationModal from './ConfirmationModal'; // <<< IMPORT MODAL MỚI
+import ConfirmationModal from './ConfirmationModal'; 
 import toast from 'react-hot-toast';
 import debounce from 'lodash.debounce';
 import { Pagination, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
@@ -24,45 +23,36 @@ function removeDiacritics(str) {
 }
 
 function FoodManagement() {
-    // === State quản lý dữ liệu món ăn ===
     const [dishes, setDishes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null); 
 
-    // === State cho việc thêm món ăn ===
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addError, setAddError] = useState(null); 
 
-    // === State cho việc fetch categories ===
     const [categories, setCategories] = useState([]);
     const [categoryLoading, setCategoryLoading] = useState(false);
     const [categoryError, setCategoryError] = useState(null);
 
-    // === State cho việc sửa món ăn ===
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingDish, setEditingDish] = useState(null); 
     const [updateError, setUpdateError] = useState(null); 
 
-    // === State cho việc preview ảnh món ăn ===
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [selectedImageUrl, setSelectedImageUrl] = useState(null);
     const [selectedImageAlt, setSelectedImageAlt] = useState('');
 
-    // === State cho modal xác nhận xóa ===
     const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
-    const [dishToDelete, setDishToDelete] = useState(null); // Lưu món ăn cần xóa
+    const [dishToDelete, setDishToDelete] = useState(null);
 
-    // State cho search và filter
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredDishes, setFilteredDishes] = useState([]);
     const [internalSearchTerm, setInternalSearchTerm] = useState(''); 
     const [selectedCategory, setSelectedCategory] = useState('');
 
-    // === State cho phân trang ===
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5); 
 
-    // === useEffect LẤY DỮ LIỆU MÓN ĂN ===
     useEffect(() => {
         setLoading(true);
         setError(null);
@@ -91,7 +81,6 @@ function FoodManagement() {
         };
     }, []);
 
-    // === useEffect fetch categories ===
     useEffect(() => {
         const fetchCategories = async () => {
             setCategoryLoading(true);
@@ -116,7 +105,6 @@ function FoodManagement() {
         fetchCategories();
     }, []);
 
-    // === Debounce Function ===
     const debouncedSearch = useCallback(
         debounce((term) => {
             setInternalSearchTerm(term);
@@ -154,24 +142,20 @@ function FoodManagement() {
         }
     }, [dishes, internalSearchTerm, loading, selectedCategory, categories]);
 
-    // Lấy danh sách món ăn cho trang hiện tại
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentDishes = filteredDishes.slice(indexOfFirstItem, indexOfLastItem);
 
-    // Hàm xử lý khi input search thay đổi
     const handleSearchChange = (event) => {
         const newSearchTerm = event.target.value;
         setSearchTerm(newSearchTerm);
         debouncedSearch(newSearchTerm);
     }
 
-    // === HÀM XỬ LÝ KHI CHỌN CATEGORY TỪ DROPDOWN ===
     const handleCategoryChange = (event) => {
         setSelectedCategory(event.target.value); 
     };
 
-    // === HÀM THÊM MÓN ĂN ===
     const handleAddDish = async (newDishData) => {
         setAddError(null); 
         try {
@@ -191,7 +175,6 @@ function FoodManagement() {
         }
     };
 
-    // === HÀM SỬA THÔNG TIN MÓN ĂN ===
     const handleUpdateDish = async (dishId, updatedData) => {
         setUpdateError(null); 
         const dishDocRef = doc(db, DISHES_COLLECTION_NAME, dishId)
@@ -209,9 +192,8 @@ function FoodManagement() {
         }
     };
 
-    // === HÀM SOFT DELETE MÓN ĂN (SỬ DỤNG MODAL XÁC NHẬN MỚI) ===
     const confirmSoftDelete = async () => {
-        if (!dishToDelete) return; // Đảm bảo có món ăn để xóa
+        if (!dishToDelete) return;
 
         setError(null); 
         const dishDocRef = doc(db, DISHES_COLLECTION_NAME, dishToDelete.id);
@@ -219,70 +201,60 @@ function FoodManagement() {
             await updateDoc(dishDocRef, { isDeleted: true });
             console.log(`Dish soft deleted successfully: ${dishToDelete.id}`);
             toast.success(`Deleted dish "${dishToDelete.name}" successfully!`);
-            handleCloseConfirmDeleteModal(); // Đóng modal xác nhận
+            handleCloseConfirmDeleteModal(); 
         }
         catch(error){
             console.error("Error soft deleting dish: ", error);
             setError("Error deleting dish. Please try again."); 
             toast.error("Error deleting dish. Please try again.");
-            handleCloseConfirmDeleteModal(); // Đóng modal ngay cả khi có lỗi
+            handleCloseConfirmDeleteModal(); 
         }
     };
 
-    // === HÀM MỞ MODAL XÁC NHẬN XÓA ===
     const handleOpenConfirmDeleteModal = (dish) => {
         setDishToDelete(dish);
         setIsConfirmDeleteModalOpen(true);
     };
 
-    // === HÀM ĐÓNG MODAL XÁC NHẬN XÓA ===
     const handleCloseConfirmDeleteModal = () => {
         setIsConfirmDeleteModalOpen(false);
         setDishToDelete(null);
     };
 
 
-    // === HÀM MỞ MODAL THÊM MÓN ĂN ===
     const handleOpenAddModal = () => {
         setAddError(null); 
         setIsAddModalOpen(true); 
     }
 
-    // === HÀM ĐÓNG MODAL THÊM MÓN ĂN ===
     const handleCloseAddModal = () => {
         setIsAddModalOpen(false); 
         setAddError(null); 
     }
 
-    // === HÀM MỞ MODAL SỬA ===
     const handleEditClick = (dish) => {
         setEditingDish(dish); 
         setUpdateError(null); 
         setIsEditModalOpen(true); 
     }
-    // === HÀM ĐÓNG MODAL SỬA === 
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false); 
         setEditingDish(null); 
         setUpdateError(null); 
     };
 
-    // === HÀM MỞ MODAL XEM ẢNH ===
     const handleImageClick = (imageUrl, altText) => {
         setSelectedImageUrl(imageUrl);
         setSelectedImageAlt(altText || 'Dish image'); 
         setIsImageModalOpen(true);
     };
 
-    // === HÀM ĐÓNG MODAL XEM ẢNH ===
     const handleCloseImageModal = () => {
         setIsImageModalOpen(false);
     };
 
-    // Tính toán số trang
     const totalPages = Math.ceil(filteredDishes.length / itemsPerPage);
 
-    // --- Phần JSX để render ---
     return (
         <div>
             <h1>Dishes Management</h1>
@@ -360,7 +332,7 @@ function FoodManagement() {
                                                     onClick={() => handleImageClick(dish.imageUrl, dish.name)}
                                                     onError={(e) => { 
                                                         e.target.onerror = null; 
-                                                        e.target.src = '/path/to/placeholder-image.jpg'; // fallback image
+                                                        e.target.src = '/path/to/placeholder-image.jpg'; 
                                                         e.target.alt = 'Image not found';
                                                     }} 
                                                 />) : (
@@ -386,7 +358,6 @@ function FoodManagement() {
                                                     type='button'
                                                     className="action-button delete-button"
                                                     disabled={isAddModalOpen || isEditModalOpen || isConfirmDeleteModalOpen || isImageModalOpen}
-                                                    // Thay thế handleSoftDelete trực tiếp bằng handleOpenConfirmDeleteModal
                                                     onClick={() => handleOpenConfirmDeleteModal(dish)} 
                                                 >
                                                     Delete
@@ -439,7 +410,6 @@ function FoodManagement() {
                 </>
             )}
 
-            {/* === MODAL THÊM MÓN ĂN === */}
             {isAddModalOpen && (
                 <AddDishModal
                     isOpen={isAddModalOpen}
@@ -452,7 +422,6 @@ function FoodManagement() {
                 />
             )}
 
-            {/* === MODAL SỬA MÓN ĂN === */}
             {isEditModalOpen && editingDish && (
                 <EditDishModal
                     isOpen={isEditModalOpen}
@@ -466,7 +435,6 @@ function FoodManagement() {
                 />
             )}
 
-            {/* === MODAL XEM ẢNH MÓN ĂN === */}
             {isImageModalOpen && (
                 <ImagePreviewModal
                     isOpen={isImageModalOpen}
@@ -476,7 +444,6 @@ function FoodManagement() {
                 />
             )}
 
-            {/* === MODAL XÁC NHẬN XÓA MỚI === */}
             {isConfirmDeleteModalOpen && dishToDelete && (
                 <ConfirmationModal
                     isOpen={isConfirmDeleteModalOpen}

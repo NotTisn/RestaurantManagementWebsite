@@ -31,14 +31,13 @@ function Sidebar() {
     { path: '/app/categories', text: 'Categories', icon: <LocalOfferIcon /> },
   ];
 
-  const handleLogout = async () => { // Thêm async vì signOut là bất đồng bộ
+  const handleLogout = async () => { 
     try {
-      await signOut(auth); // Gọi hàm signOut từ Firebase
+      await signOut(auth); 
       console.log('User logged out successfully from Firebase');
-      navigate('/'); // Điều hướng về trang login/home sau khi logout thành công
+      navigate('/'); 
     } catch (error) {
       console.error('Error signing out:', error.message);
-      // Xử lý lỗi nếu có
     }
   };
 

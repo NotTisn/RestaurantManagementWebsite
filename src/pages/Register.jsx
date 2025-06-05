@@ -1,18 +1,17 @@
-// src/components/Register.jsx
 import React, { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { db } from "../firebaseConfig"; // Import the Firebase database instance
-import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
+import { db } from "../firebaseConfig"; 
+import { doc, setDoc } from "firebase/firestore"; 
 
 export default function Register() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const restaurantNameRef = useRef(); // Thêm ref cho tên nhà hàng
-  const phoneRef = useRef(); // Thêm ref cho số điện thoại
-  const addressRef = useRef(); // Thêm ref cho địa chỉ
-  const { signup } = useAuth(); // Get currentUser from AuthContext
+  const restaurantNameRef = useRef(); 
+  const phoneRef = useRef(); 
+  const addressRef = useRef(); 
+  const { signup } = useAuth(); 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ export default function Register() {
     e.preventDefault();
 
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      return setError("Mật khẩu không khớp");
+      return setError("Passwords do not match");
     }
 
     try {
@@ -29,30 +28,25 @@ export default function Register() {
       setLoading(true);
       const currentUser = await signup(emailRef.current.value, passwordRef.current.value);
 
-      // const user = currentUser.user;
-      // console.log(currentUser);
-      // console.log(currentUser.uid)
 
-      // Sau khi đăng ký thành công, lưu thêm thông tin nhà hàng vào Firestore
       const restaurantData = {
         name: restaurantNameRef.current.value,
         phoneNumber: phoneRef.current.value,
         address: addressRef.current.value,
-        uid: currentUser.uid, // Lưu userId để liên kết với tài khoản người dùng
-        role: "restaurantOwner", // Lưu vai trò để xác định quyền truy cập
+        uid: currentUser.uid, 
+        role: "restaurantOwner", 
         email: emailRef.current.value
       };
-      console.log("Thông tin nhà hàng:", restaurantData);
+      console.log("Restaurant data:", restaurantData);
 
-      // Tạo một document trong collection "restaurants" với ID là UID của người dùng
       const restaurantDocRef = doc(db, "users", currentUser.uid);
       await setDoc(restaurantDocRef, restaurantData);
-      console.log("Thông tin nhà hàng đã được lưu vào Firestore");
+      console.log("Restaurant data saved to Firestore");
 
       await setDoc(doc(db, "userChats", currentUser.uid), {});
       navigate("/");
     } catch (err) {
-      setError(`Tạo tài khoản thất bại! ${err.message}`);
+      setError(`Failed to register: ${err.message}`);
     }
     setLoading(false);
   }
@@ -60,22 +54,19 @@ export default function Register() {
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Đăng ký</h2>
+        <h2 style={styles.title}>Register</h2>
         {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label>Email</label>
             <input type="email" ref={emailRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Mật khẩu</label>
+            <label>Password</label>
             <input type="password" ref={passwordRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Xác nhận mật khẩu</label>
+            <label>Confirm Password</label>
             <input
               type="password"
               ref={passwordConfirmRef}
@@ -84,26 +75,23 @@ export default function Register() {
             />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Tên nhà hàng</label>
+            <label>Name</label>
             <input type="text" ref={restaurantNameRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Số điện thoại nhà hàng</label>
+            <label>Phone Number</label>
             <input type="tel" ref={phoneRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Địa chỉ nhà hàng</label>
+            <label>Address</label>
             <input type="text" ref={addressRef} required style={styles.input} />
           </div>
           <button disabled={loading} type="submit" style={styles.button}>
-            Đăng ký
+            Register
           </button>
         </form>
         <p style={styles.footerText}>
-          Đã có tài khoản? <Link to="/">Đăng nhập</Link>
+          Alread had an account? <Link to="/">Login</Link>
         </p>
       </div>
     </div>

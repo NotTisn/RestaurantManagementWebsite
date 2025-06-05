@@ -25,7 +25,6 @@ export default function Input() {
     let url = null;
 
     try {
-      // Upload image if exists
       if (img) {
         const sref = ref(storage, uuid());
         const uploadTask = uploadBytesResumable(sref, img);

@@ -1,6 +1,5 @@
-// src/pages/ConfirmationModal.jsx
 import React, { useEffect, useRef } from 'react';
-import './ConfirmationModal.css'; // Sẽ tạo file CSS này ở bước 2
+import './ConfirmationModal.css'; 
 
 function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Delete', cancelText = 'Cancel' }) {
     const dialogRef = useRef(null);
@@ -9,22 +8,20 @@ function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, confirm
         const dialogElement = dialogRef.current;
         if (dialogElement) {
             if (isOpen) {
-                dialogElement.showModal(); // Hiển thị dialog
+                dialogElement.showModal(); 
             } else {
-                dialogElement.close(); // Đóng dialog
+                dialogElement.close(); 
             }
         }
     }, [isOpen]);
 
-    // Xử lý khi người dùng bấm nút xác nhận
     const handleConfirm = () => {
         onConfirm();
-        onClose(); // Đóng modal sau khi xác nhận
+        onClose(); 
     };
 
-    // Xử lý khi người dùng bấm nút hủy hoặc click backdrop
     const handleClose = () => {
-        onClose(); // Đóng modal
+        onClose(); 
     };
 
     return (

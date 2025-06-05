@@ -1,6 +1,5 @@
-// src/contexts/StatsContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';           // ← forward slash
+import { db } from '../firebaseConfig';           
 import { collection, getDocs } from 'firebase/firestore';
 
 export const StatsContext = createContext();

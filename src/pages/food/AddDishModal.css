@@ -1,33 +1,28 @@
-/* src/pages/AddDishModal.css */
-
-/* Backdrop và Modal Container */
 .add-dish-modal {
     border: none;
     padding: 0;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    max-width: 500px; /* Giới hạn chiều rộng của modal */
-    width: 90%; /* Chiều rộng linh hoạt */
+    max-width: 500px; 
+    width: 90%; 
     background-color: #fff;
     position: relative;
-    max-height: 90vh; /* Giới hạn chiều cao */
-    overflow-y: auto; /* Cuộn nếu nội dung quá dài */
+    max-height: 90vh; 
+    overflow-y: auto; 
 }
 
 .add-dish-modal::backdrop {
     background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(3px); /* Hiệu ứng làm mờ nền */
+    backdrop-filter: blur(3px); 
 }
 
-/* Modal Content */
 .add-dish-modal .modal-content {
     padding: 30px;
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Khoảng cách giữa các phần tử */
+    gap: 15px;
 }
 
-/* Tiêu đề */
 .add-dish-modal h2 {
     font-size: 1.8em;
     color: #333;
@@ -36,14 +31,13 @@
     font-weight: 600;
 }
 
-/* Form Group */
 .add-dish-modal .form-group {
     margin-bottom: 15px;
-    text-align: left; /* Căn chỉnh lại nhãn và input */
+    text-align: left;
 }
 
 .add-dish-modal label {
-    display: block; /* Mỗi label trên một dòng */
+    display: block; 
     margin-bottom: 8px;
     font-weight: 500;
     color: #555;
@@ -54,14 +48,14 @@
 .add-dish-modal input[type="number"],
 .add-dish-modal textarea,
 .add-dish-modal select {
-    width: calc(100% - 20px); /* Đảm bảo padding không làm tràn */
+    width: calc(100% - 20px); 
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 1em;
     color: #333;
     transition: border-color 0.2s, box-shadow 0.2s;
-    -webkit-appearance: none; /* Reset kiểu mặc định của input/select trên một số trình duyệt */
+    -webkit-appearance: none; 
     -moz-appearance: none;
     appearance: none;
 }
@@ -70,60 +64,55 @@
 .add-dish-modal input[type="number"]:focus,
 .add-dish-modal textarea:focus,
 .add-dish-modal select:focus {
-    border-color: #007bff; /* Màu xanh khi focus */
+    border-color: #007bff; 
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     outline: none;
 }
 
 .add-dish-modal textarea {
-    resize: vertical; /* Cho phép thay đổi chiều cao */
+    resize: vertical; 
     min-height: 80px;
 }
 
-/* Checkbox specific styling */
 .add-dish-modal .form-group-checkbox {
     display: flex;
     align-items: center;
-    gap: 10px; /* Khoảng cách giữa checkbox và label */
-    margin-top: 10px; /* Khoảng cách trên */
+    gap: 10px; 
+    margin-top: 10px; 
     margin-bottom: 20px;
 }
 
 .add-dish-modal input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    /* Tùy chỉnh thêm kiểu cho checkbox nếu muốn */
-    -webkit-appearance: checkbox; /* Đảm bảo hiển thị đúng trên các trình duyệt */
+    -webkit-appearance: checkbox; 
     -moz-appearance: checkbox;
     appearance: checkbox;
 }
 
 .add-dish-modal .form-group-checkbox label {
-    margin-bottom: 0; /* Bỏ margin dưới cho label của checkbox */
+    margin-bottom: 0; 
     font-weight: normal;
     color: #333;
     cursor: pointer;
 }
 
 
-/* Validation Error Messages */
 .add-dish-modal .validation-error {
-    color: #dc3545; /* Màu đỏ cho lỗi */
+    color: #dc3545;
     font-size: 0.85em;
     margin-top: 5px;
     text-align: left;
-    padding-left: 2px; /* Dịch vào một chút */
+    padding-left: 2px; 
 }
 
-/* Input error state */
 .add-dish-modal input[aria-invalid="true"],
 .add-dish-modal textarea[aria-invalid="true"],
 .add-dish-modal select[aria-invalid="true"] {
-    border-color: #dc3545; /* Viền đỏ khi có lỗi */
+    border-color: #dc3545; 
     box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
 }
 
-/* Error message from parent component (e.g., Firestore error) */
 .add-dish-modal .error-message {
     color: #dc3545;
     background-color: #f8d7da;
@@ -135,11 +124,10 @@
     font-size: 0.9em;
 }
 
-/* Action Buttons */
 .add-dish-modal .modal-actions {
     display: flex;
-    justify-content: flex-end; /* Căn phải các nút */
-    gap: 15px; /* Khoảng cách giữa các nút */
+    justify-content: flex-end;
+    gap: 15px; 
     margin-top: 20px;
 }
 
@@ -151,11 +139,11 @@
     font-size: 1em;
     font-weight: 600;
     transition: background-color 0.2s, opacity 0.2s;
-    min-width: 100px; /* Chiều rộng tối thiểu cho các nút */
+    min-width: 100px; 
 }
 
 .add-dish-modal .action-button.save-button {
-    background-color: #28a745; /* Màu xanh lá cho nút Save */
+    background-color: #28a745; 
     color: #fff;
 }
 
@@ -164,7 +152,7 @@
 }
 
 .add-dish-modal .action-button.cancel-button {
-    background-color: #6c757d; /* Màu xám cho nút Cancel */
+    background-color: #6c757d;
     color: #fff;
 }
 
@@ -177,7 +165,6 @@
     cursor: not-allowed;
 }
 
-/* Close Button (X) */
 .add-dish-modal .modal-close-button {
     position: absolute;
     top: 15px;

@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
@@ -35,17 +34,15 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
-// Import Firebase Firestore functions
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig'; 
 
-// --- Modal Components ---
 const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   const isEditing = !!voucherData;
   const [formData, setFormData] = useState({
     code: '',
     description: '',
-    discountType: 'percentage', // Default
+    discountType: 'percentage', 
     discountValue: '',
     startDate: '',
     expiryDate: '',
@@ -62,7 +59,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     if (isEditing && voucherData) {
       setFormData({
         ...voucherData,
-        // Format Date objects to 'YYYY-MM-DD' string for input type='date'
         startDate: voucherData.startDate instanceof Date && !Number.isNaN(voucherData.startDate)
           ? voucherData.startDate.toISOString().split('T')[0]
           : (typeof voucherData.startDate === 'string' ? voucherData.startDate.split('T')[0] : ''),
@@ -73,7 +69,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         minOrderValue: voucherData.minOrderValue || '',
         usageLimit: voucherData.usageLimit || '',
         usedCount: voucherData.usedCount || 0,
-        isActive: voucherData.isActive !== undefined ? voucherData.isActive : true, // Ensure isActive is boolean
+        isActive: voucherData.isActive !== undefined ? voucherData.isActive : true, 
       });
     } else {
       setFormData({
@@ -103,21 +99,17 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         [name]: type === 'checkbox' ? checked : value
       };
 
-      // --- Xử lý đặc biệt khi thay đổi discountType ---
       if (name === 'discountType') {
-        // Nếu chuyển sang loại không cần giá trị (ví dụ: free_shipping)
         if (value === 'free_shipping') {
-          newState.discountValue = '0'; // Hoặc có thể để trống '', tùy cách bạn muốn lưu
+          newState.discountValue = '0';
         } else if (prev.discountType === 'free_shipping' && newState.discountValue === '0') {
-          // Nếu chuyển từ loại không cần giá trị sang loại cần giá trị, đặt lại giá trị trống
           newState.discountValue = '';
         }
       }
-      // --- Kết thúc xử lý đặc biệt ---
 
       return newState;
     });
-    setErrors(prev => ({ ...prev, [name]: '' })); // Clear error on change
+    setErrors(prev => ({ ...prev, [name]: '' })); 
   };
 
   const handleNumberChange = (e) => {
@@ -156,7 +148,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       if (formData.startDate) {
         const start = new Date(formData.startDate);
         const expiry = new Date(formData.expiryDate);
-        // Compare dates only, ignoring time
         start.setHours(0, 0, 0, 0);
         expiry.setHours(0, 0, 0, 0);
 
@@ -168,8 +159,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       }
     }
 
-    // --- Cập nhật validation cho discountValue dựa trên discountType ---
-    if (formData.discountType !== 'free_shipping') { // Chỉ validate discountValue nếu không phải free_shipping
+    if (formData.discountType !== 'free_shipping') { 
       const discountValue = Number(formData.discountValue);
       if (formData.discountValue === '' || Number.isNaN(discountValue) || discountValue <= 0) {
         newErrors.discountValue = 'Discount value must be a positive number.';
@@ -181,18 +171,15 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         }
       }
     }
-    // --- Kết thúc cập nhật validation ---
 
 
     const minOrderValue = Number(formData.minOrderValue);
-    // minOrderValue can be 0 or positive
     if (formData.minOrderValue !== '' && (Number.isNaN(minOrderValue) || minOrderValue < 0)) {
       newErrors.minOrderValue = 'Minimum order value cannot be negative.';
       isValid = false;
     }
 
     const usageLimit = Number(formData.usageLimit);
-    // usageLimit can be 0 for unlimited, so check for negative or non-integer if not empty
     if (formData.usageLimit !== '' && (Number.isNaN(usageLimit) || !Number.isInteger(usageLimit) || usageLimit < 0)) {
       newErrors.usageLimit = 'Usage limit must be a positive integer.';
       isValid = false;
@@ -208,7 +195,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     setSaveError(null);
 
     if (!validateForm()) {
-      return; // Stop if validation fails
+      return; 
     }
 
     const dataToSave = {
@@ -222,19 +209,16 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     };
 
 
-    // Remove id from dataToSave if it's an add operation
     if (!isEditing) {
       dataToSave.id = undefined;
-      dataToSave.createdAt = new Date(); // Add creation timestamp for new doc
+      dataToSave.createdAt = new Date(); 
     }
-    dataToSave.updatedAt = new Date(); // Add update timestamp
+    dataToSave.updatedAt = new Date(); 
 
 
     setIsSaving(true);
     try {
-      // Pass dataToSave including id for update, or without id for add
       await onSave(dataToSave);
-      // onClose() is called in parent after successful save
     } catch (error) {
       console.error("Error during save process:", error);
       setSaveError(`Error while saving: ${error.message || 'Unknown error'}`);
@@ -260,7 +244,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               value={formData.code}
               onChange={handleChange}
-              disabled={isEditing || isSaving} // Disable code editing for existing vouchers
+              disabled={isEditing || isSaving} 
               required
               error={!!errors.code}
               helperText={errors.code}
@@ -292,7 +276,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
                     <MenuItem value="percentage">Percentage</MenuItem>
                     <MenuItem value="fixed">Fixed Amount</MenuItem>
                     <MenuItem value="free_shipping">Free Shipping</MenuItem>
-                    {/* ------------------------------------ */}
                 </Select>
                  {errors.discountType && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.discountType}</Typography>}
               </FormControl>
@@ -425,7 +408,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   );
 };
 
-// Delete Confirmation Modal (Giữ nguyên)
 const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName, itemType = 'item' }) => {
     return (
     <Dialog
@@ -454,53 +436,43 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName, itemType 
 
 
 const getVoucherStatus = (voucher) => {
-  // Handle cases where dates might be null or invalid
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
   const startDate = voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate) ? new Date(voucher.startDate) : null;
   const expiryDate = voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate) ? new Date(voucher.expiryDate) : null;
 
-  // Set hours to 0 for date comparison only
   if(startDate) startDate.setHours(0, 0, 0, 0);
   if(expiryDate) expiryDate.setHours(0, 0, 0, 0);
 
 
-  // If voucher is explicitly inactive
   if (!voucher.isActive) {
     return { text: 'Inactive', color: 'grey' };
   }
 
-  // If start date is in the future
   if (startDate && now < startDate) {
     return { text: 'Upcoming', color: 'orange' };
   }
 
-  // If expiry date is in the past
   if (expiryDate && now > expiryDate) {
     return { text: 'Expired', color: 'red' };
   }
 
-  // If currently active (within date range), check usage limit
   const usageLimit = Number(voucher.usageLimit || 0);
   const usedCount = Number(voucher.usedCount || 0);
 
-  // If there's a usage limit ( > 0) and it's reached or exceeded
   if (usageLimit > 0 && usedCount >= usageLimit) {
     return { text: 'Used up', color: 'red' };
   }
 
-  // If within date range and usage limit is not reached or is unlimited (usageLimit === 0)
   if (startDate && expiryDate && now >= startDate && now <= expiryDate) {
     return { text: 'Active', color: 'green' };
   }
 
-  // Fallback for any unhandled state (e.g., invalid dates)
   return { text: 'Unknown', color: 'default' };
 };
 
 
-// --- Main Voucher Management Page Component ---
 
 function VoucherManagementPage() {
   const [vouchers, setVouchers] = useState([]);
@@ -512,14 +484,12 @@ function VoucherManagementPage() {
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
 
-  // --- State for Filtering and Searching ---
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'upcoming', 'expired', 'used_up', 'inactive_switch'
+  const [filterStatus, setFilterStatus] = useState('all'); 
 
   useEffect(() => {
     const vouchersCollectionRef = collection(db, 'vouchers');
 
-    // onSnapshot lắng nghe thay đổi theo thời gian thực
     const unsubscribe = onSnapshot(vouchersCollectionRef, (snapshot) => {
       console.log("Snapshot received");
       const vouchersData = snapshot.docs.map(doc => {
@@ -527,15 +497,13 @@ function VoucherManagementPage() {
         return {
           id: doc.id,
           ...data,
-          // Convert Firestore Timestamp to JavaScript Date objects, handle null/undefined
           startDate: data.startDate?.toDate ? data.startDate.toDate() : (data.startDate || null),
           expiryDate: data.expiryDate?.toDate ? data.expiryDate.toDate() : (data.expiryDate || null),
-          // Ensure numeric fields are treated as numbers, default to 0 if null/undefined
           discountValue: Number(data.discountValue || 0),
           minOrderValue: Number(data.minOrderValue || 0),
           usageLimit: Number(data.usageLimit || 0),
           usedCount: Number(data.usedCount || 0),
-          isActive: data.isActive !== undefined ? data.isActive : true, // Default to true if not set
+          isActive: data.isActive !== undefined ? data.isActive : true,
         };
       });
       setVouchers(vouchersData);
@@ -547,9 +515,8 @@ function VoucherManagementPage() {
       setLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe(); 
   }, []);
-
 
   const handleOpenAddModal = () => {
     setSelectedVoucher(null);
@@ -576,21 +543,18 @@ function VoucherManagementPage() {
   const handleSaveVoucher = async (voucherData) => {
   try {
     if (voucherData.id) {
-      // Logic cho việc CẬP NHẬT voucher (đã đúng)
       const voucherRef = doc(db, 'vouchers', voucherData.id);
-      const { id, ...dataToUpdate } = voucherData; // Tách id ra
+      const {  ...dataToUpdate } = voucherData;
       await updateDoc(voucherRef, dataToUpdate);
       console.log("Voucher updated successfully:", voucherData.id);
 
     } else {
-      // Logic cho việc THÊM MỚI voucher
-      // Tạo một bản sao của voucherData và loại bỏ trường 'id' nếu nó tồn tại
-      const { id, ...dataToAdd } = voucherData; // Đảm bảo trường id (nếu có) bị loại bỏ
+      const {  ...dataToAdd } = voucherData; 
 
-      await addDoc(collection(db, 'vouchers'), dataToAdd); // Sử dụng dataToAdd
+      await addDoc(collection(db, 'vouchers'), dataToAdd); 
       console.log("Voucher added successfully");
 
-      // --- Gửi thông báo đến backend để thông báo voucher mới ---
+      // --- Notification to mobile that a new voucher has been released ---
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://foodappfcm.onrender.com';
         const response = await fetch(`${backendUrl}/notify-new-voucher`, {
@@ -599,7 +563,7 @@ function VoucherManagementPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            voucherCode: dataToAdd.code, // Sử dụng dataToAdd
+            voucherCode: dataToAdd.code, 
             voucherDescription: dataToAdd.description,
             discountType: dataToAdd.discountType,
             discountValue: dataToAdd.discountValue,
@@ -616,7 +580,6 @@ function VoucherManagementPage() {
       } catch (notificationError) {
         console.error('Error sending new voucher notification request:', notificationError);
       }
-      // --- Kết thúc gửi thông báo ---
     }
     setError(null);
     handleCloseModals();
@@ -629,12 +592,11 @@ function VoucherManagementPage() {
   const handleDeleteVoucher = async () => {
     if (!selectedVoucher || !selectedVoucher.id) return;
 
-    // setLoading(true); // Optional: show loading while deleting - snapshot listener handles updating state
     try {
       const voucherRef = doc(db, 'vouchers', selectedVoucher.id);
       await deleteDoc(voucherRef);
       console.log("Voucher deleted successfully:", selectedVoucher.id);
-      setError(null); // Clear any previous error
+      setError(null); 
       handleCloseModals();
     } catch (err) {
       console.error("Error deleting voucher:", err);
@@ -644,11 +606,9 @@ function VoucherManagementPage() {
     }
   };
 
-  // --- Filtering and Searching Logic (Giữ nguyên) ---
   const filteredVouchers = useMemo(() => {
     let filtered = vouchers;
 
-    // Apply Search Term
     if (searchTerm) {
       const lowerCaseSearchTerm = searchTerm.toLowerCase().trim();
       filtered = filtered.filter(voucher =>
@@ -657,7 +617,6 @@ function VoucherManagementPage() {
       );
     }
 
-    // Apply Status Filter
     if (filterStatus !== 'all') {
       filtered = filtered.filter(voucher => {
         const status = getVoucherStatus(voucher).text;
@@ -673,7 +632,7 @@ function VoucherManagementPage() {
           case 'inactive_switch':
             return status === 'Inactive';
           default:
-            return true; // Should not happen
+            return true; 
         }
       });
     }
@@ -682,7 +641,6 @@ function VoucherManagementPage() {
   }, [vouchers, searchTerm, filterStatus]);
 
 
-  // --- Hàm xử lý xuất dữ liệu CSV có BOM ---
   const escapeCsvValue = (value) => {
     if (value == null) return '';
     let stringValue = String(value);
@@ -756,9 +714,7 @@ function VoucherManagementPage() {
 
     const csvString = [headers.join(','), ...rows].join('\n');
 
-    // --- Thêm '\uFEFF' (UTF-8 BOM) vào đầu chuỗi CSV ---
     const blob = new Blob([`\uFEFF${csvString}`], { type: 'text/csv;charset=utf-8;' });
-    // ---------------------------------------------------------------------
 
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -774,10 +730,8 @@ function VoucherManagementPage() {
 
     URL.revokeObjectURL(url);
   };
-  // --- Kết thúc hàm xử lý xuất dữ liệu CSV ---
 
 
-  // Show initial loading spinner only if no data is loaded and there's no error
   if (loading && vouchers.length === 0 && !error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 120px)' }}>
@@ -792,13 +746,12 @@ function VoucherManagementPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           Voucher Management
         </Typography>
-        {/* Nhóm các nút lại */}
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
-            variant="outlined" // Dùng outlined cho hành động phụ
-            startIcon={<CloudDownloadIcon />} // Sử dụng icon xuất dữ liệu
+            variant="outlined" 
+            startIcon={<CloudDownloadIcon />} 
             onClick={handleExportCsv}
-            disabled={loading || filteredVouchers.length === 0} // Vô hiệu hóa khi đang tải hoặc không có dữ liệu để xuất
+            disabled={loading || filteredVouchers.length === 0} 
           >
             Export CSV
           </Button>
@@ -817,7 +770,6 @@ function VoucherManagementPage() {
         <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
       )}
 
-      {/* Filtering and Searching Controls (Giữ nguyên) */}
       <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
         <Grid item xs={12} sm={6} md={4}>
           <TextField
@@ -872,7 +824,6 @@ function VoucherManagementPage() {
                     maxWidth: 250
                 }}>Mô tả</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">Value</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Type</TableCell> {/* Tăng minWidth cho cột Type */}
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Start Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Expiry Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 120, maxWidth: 150 }}>Minimum Order Value</TableCell>
@@ -892,22 +843,18 @@ function VoucherManagementPage() {
                         minWidth: 150,
                         maxWidth: 250
                     }}>{voucher.description}</TableCell>
-                    {/* --- Cập nhật hiển thị cột Giá trị --- */}
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">
                       {voucher.discountType === 'percentage' ? `${voucher.discountValue}%`
                       : (voucher.discountType === 'fixed' ? `${Number(voucher.discountValue).toLocaleString('vi-VN')} $`
                       : (voucher.discountType === 'free_shipping' ? 'Free' : 'N/A'))
                       }
                     </TableCell>
-                    {/* ----------------------------------- */}
-                    {/* --- Cập nhật hiển thị cột Loại --- */}
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
                       {voucher.discountType === 'percentage' ? 'Percentage'
                       : (voucher.discountType === 'fixed' ? 'Fixed Amount'
                       : (voucher.discountType === 'free_shipping' ? 'Free Shipping' : voucher.discountType))
                       }
                     </TableCell>
-                    {/* --------------------------------- */}
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate.getTime()) ? voucher.startDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate.getTime()) ? voucher.expiryDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 120, maxWidth: 150 }}>{(Number(voucher.minOrderValue)) > 0 ? `${Number(voucher.minOrderValue).toLocaleString('vi-VN')} $` : 'N/A'}</TableCell>
@@ -943,12 +890,11 @@ function VoucherManagementPage() {
         </TableContainer>
       </Paper>
 
-      {/* Modals */}
       <VoucherFormModal
         open={openAddModal}
         onClose={handleCloseModals}
         onSave={handleSaveVoucher}
-        voucherData={null} // Null for add mode
+        voucherData={null} 
       />
       {selectedVoucher && (
         <VoucherFormModal
@@ -967,9 +913,7 @@ function VoucherManagementPage() {
           itemType="voucher"
         />
       )}
-
     </Box>
   );
 }
-
 export default VoucherManagementPage;

@@ -1,8 +1,3 @@
-import React from 'react'; // Không cần useState, useEffect ở đây nữa
-// Import các hàm Firestore không cần ở đây nữa nếu chỉ dùng trong FoodManagement
-// import { collection, onSnapshot, addDoc } from "firebase/firestore";
-// import { db } from './firebaseConfig'; // db sẽ được import trong FoodManagement
-
 import Sidebar from './components/Sidebar';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
@@ -22,7 +17,6 @@ import CategoryManagement from './pages/category/CategoryManagement';
 function App() {
   console.log("App started");
 
-  // Phần JSX để render giao diện
   return (
     
       <Routes>

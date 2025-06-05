@@ -18,7 +18,6 @@ import {
 import { db } from '../../firebaseConfig';
 import styles from './OrdersManagement.module.css';
 
-// Material-UI components và icons
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Box from '@mui/material/Box';
@@ -27,8 +26,8 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import IconButton from '@mui/material/IconButton';
-import Snackbar from '@mui/material/Snackbar'; // Import Snackbar
-import MuiAlert from '@mui/material/Alert'; // Import Alert
+import Snackbar from '@mui/material/Snackbar'; 
+import MuiAlert from '@mui/material/Alert'; 
 
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -38,14 +37,13 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const ORDERS_PER_PAGE = 6;
 
-// Helper component cho Alert trong Snackbar
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 function OrdersManagement() {
   const [orders, setOrders] = useState([]);
-  const [usersMap, setUsersMap] = useState({});
+  const [, setUsersMap] = useState({});
   const [currentTab, setCurrentTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [lastVisible, setLastVisible] = useState(null);
@@ -67,7 +65,7 @@ function OrdersManagement() {
   const unsubscribeRef = useRef(null);
   const unsubscribeNewOrdersRef = useRef(null);
 
-  // Hàm chính để thiết lập listener cho orders, sử dụng onSnapshot
+  // Hàmthiết lập listener cho orders
   const setupOrdersListener = useCallback(async (direction = 'initial', startDoc = null, pageNumber = 0) => {
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
@@ -96,7 +94,7 @@ function OrdersManagement() {
       q = query(baseQueryDefinition, startAfter(startDoc), limit(ORDERS_PER_PAGE));
     } else if (direction === 'prev' && startDoc) {
       q = query(baseQueryDefinition, endBefore(startDoc), limitToLast(ORDERS_PER_PAGE));
-    } else { // 'initial' or 'reset'
+    } else { 
       q = query(baseQueryDefinition, limit(ORDERS_PER_PAGE));
     }
 
@@ -205,7 +203,7 @@ function OrdersManagement() {
 
   }, [currentTab]);
 
-  // --- useEffect để quản lý listener cho đơn hàng mới (pending) ---
+  // state for orders (pending)
   useEffect(() => {
     if (unsubscribeNewOrdersRef.current) {
       unsubscribeNewOrdersRef.current();
@@ -219,30 +217,25 @@ function OrdersManagement() {
 
     const newOrdersUnsubscribe = onSnapshot(pendingOrdersQuery, (snapshot) => {
       const currentPendingCount = snapshot.size;
-      setTotalPendingOrders(currentPendingCount); // Cập nhật tổng số pending
+      setTotalPendingOrders(currentPendingCount); 
 
-      // Nếu người dùng đang ở tab 'pending', coi như đã xem hết
       if (currentTab === 'pending') {
-        setNewOrdersCount(0); // Reset badge count
-        lastAcknowledgedPendingCountRef.current = currentPendingCount; // Cập nhật số lượng đã acknowledge
+        setNewOrdersCount(0); 
+        lastAcknowledgedPendingCountRef.current = currentPendingCount;
       } else {
-        // Nếu có đơn hàng pending và số lượng hiện tại lớn hơn số đã xem trước đó
         if (currentPendingCount > lastAcknowledgedPendingCountRef.current) {
           const newlyArrivedOrders = currentPendingCount - lastAcknowledgedPendingCountRef.current;
           setNewOrdersCount(newlyArrivedOrders);
 
-          // Hiển thị Snackbar khi có đơn hàng mới đến và không ở tab pending
-          setSnackbarMessage(`🔔 Bạn có ${newlyArrivedOrders} đơn hàng đang chờ mới!`);
+          setSnackbarMessage(`🔔 You have ${newlyArrivedOrders} pending orders!`);
           setSnackbarOpen(true);
         } else {
-          // Nếu số lượng pending giảm hoặc bằng (có thể do đơn hàng được xử lý từ nơi khác),
-          // hoặc không có đơn hàng pending nào mới
           setNewOrdersCount(0);
         }
       }
 
     }, (error) => {
-      console.error("Lỗi khi lắng nghe đơn hàng pending mới:", error);
+      console.error("Error listening to pending orders:", error);
     });
 
     unsubscribeNewOrdersRef.current = newOrdersUnsubscribe;
@@ -253,9 +246,8 @@ function OrdersManagement() {
         unsubscribeNewOrdersRef.current = null;
       }
     };
-  }, [currentTab]); // Chỉ phụ thuộc vào currentTab
+  }, [currentTab]); 
 
-  // --- useEffect để quản lý việc fetch dữ liệu khi component mount hoặc tab thay đổi ---
   useEffect(() => {
     setCurrentPage(0);
     setupOrdersListener('initial', null, 0);
@@ -268,24 +260,23 @@ function OrdersManagement() {
     };
   }, [currentTab, setupOrdersListener]);
 
-  // --- Xử lý sự kiện thay đổi tab ---
   const handleTabChange = (event, newValue) => {
     if (newValue !== currentTab) {
       setCurrentTab(newValue);
       if (newValue === 'pending') {
-        setNewOrdersCount(0); // Reset count
-        lastAcknowledgedPendingCountRef.current = totalPendingOrders; // Đánh dấu đã xem tất cả
+        setNewOrdersCount(0);
+        lastAcknowledgedPendingCountRef.current = totalPendingOrders; 
       }
     }
   };
 
-  // --- Xử lý khi click vào biểu tượng thông báo ---
+  // ---click on notification icon ---
   const handleNotificationClick = () => {
     if (currentTab !== 'pending') {
-      setCurrentTab('pending'); // Chuyển sang tab pending khi click vào chuông
+      setCurrentTab('pending'); 
     }
-    setNewOrdersCount(0); // Reset số đếm
-    lastAcknowledgedPendingCountRef.current = totalPendingOrders; // Đánh dấu đã xem tất cả
+    setNewOrdersCount(0); 
+    lastAcknowledgedPendingCountRef.current = totalPendingOrders; 
   };
 
   const handleNextPage = () => {
@@ -304,6 +295,7 @@ function OrdersManagement() {
     }
   };
 
+  // notification to mobile that restaurant has completed an order
   const handleMarkCompleted = async (orderId, userId) => {
     const orderRef = doc(db, 'orders', orderId);
     try {
