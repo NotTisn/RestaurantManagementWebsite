@@ -37,7 +37,6 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig'; 
 
-// Component VoucherFormModal (Đã được chỉnh sửa)
 const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   const isEditing = !!voucherData;
   const [formData, setFormData] = useState({
@@ -45,7 +44,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     description: '',
     discountType: 'percentage', 
     discountValue: '',
-    startDate: '', // Sẽ được set trong useEffect hoặc khi reset
+    startDate: '', 
     expiryDate: '',
     minOrderValue: '',
     usageLimit: '',
@@ -73,15 +72,14 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         isActive: voucherData.isActive !== undefined ? voucherData.isActive : true, 
       });
     } else {
-      // Khi thêm mới, set startDate là ngày hiện tại
       const today = new Date();
-      const formattedToday = today.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
+      const formattedToday = today.toISOString().split('T')[0];
       setFormData({
         code: '',
         description: '',
         discountType: 'percentage',
         discountValue: '',
-        startDate: formattedToday, // Mặc định là ngày hiện tại
+        startDate: formattedToday, 
         expiryDate: '',
         minOrderValue: '',
         usageLimit: '',
@@ -118,9 +116,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-    // Cho phép giá trị rỗng hoặc số (nguyên hoặc thập phân)
     if (value === '' || /^\d+(\.\d+)?$/.test(value)) { 
-      // Riêng usageLimit phải là số nguyên
       if (name === 'usageLimit' && value !== '' && !/^\d+$/.test(value)) {
         return;
       }
@@ -141,17 +137,15 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       isValid = false;
     }
 
-    // Không cần validate startDate vì nó luôn được set tự động và disabled
     
     if (!formData.expiryDate) {
       newErrors.expiryDate = 'Expiry date cannot be empty.';
       isValid = false;
     } else {
-      // Đảm bảo startDate luôn là một Date object trước khi so sánh
       const start = new Date(formData.startDate);
       const expiry = new Date(formData.expiryDate);
-      start.setHours(0, 0, 0, 0); // Đặt giờ về 0 để chỉ so sánh ngày
-      expiry.setHours(0, 0, 0, 0); // Đặt giờ về 0 để chỉ so sánh ngày
+      start.setHours(0, 0, 0, 0); 
+      expiry.setHours(0, 0, 0, 0); 
 
       if (start > expiry) {
         newErrors.expiryDate = 'Expiry date cannot be before start date.';
@@ -202,17 +196,15 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       minOrderValue: Number(formData.minOrderValue || 0),
       usageLimit: Number(formData.usageLimit || 0),
       usedCount: Number(formData.usedCount || 0),
-      // Firebase lưu trữ Date object, nên cần chuyển đổi chuỗi ngày thành Date object
       startDate: formData.startDate ? new Date(formData.startDate) : null,
       expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : null,
     };
 
     if (!isEditing) {
-      dataToSave.id = undefined; // Đảm bảo không gửi id khi thêm mới
+      dataToSave.id = undefined; 
       dataToSave.createdAt = new Date(); 
-      // **Quan trọng:** Ghi đè startDate thành ngày hiện tại trước khi thêm mới
       const now = new Date();
-      now.setHours(0,0,0,0); // Đặt giờ về 0 để chỉ lấy ngày
+      now.setHours(0,0,0,0); 
       dataToSave.startDate = now; 
     }
     dataToSave.updatedAt = new Date(); 
@@ -245,7 +237,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               value={formData.code}
               onChange={handleChange}
-              disabled={isEditing || isSaving} // Không cho phép chỉnh sửa code khi edit hoặc đang lưu
+              disabled={isEditing || isSaving} 
               required
               error={!!errors.code}
               helperText={errors.code}
@@ -294,8 +286,8 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               required={formData.discountType !== 'free_shipping'} 
               error={!!errors.discountValue}
               helperText={errors.discountValue}
-              disabled={isSaving || formData.discountType === 'free_shipping'} // Disable nếu là free shipping
-              inputProps={{ min: 0, step: formData.discountType === 'percentage' ? 0.01 : 1 }} // Step cho phần trăm
+              disabled={isSaving || formData.discountType === 'free_shipping'}
+              inputProps={{ min: 0, step: formData.discountType === 'percentage' ? 0.01 : 1 }}
             />
           </Grid>
             <Grid item xs={6}>
@@ -308,11 +300,10 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               value={formData.startDate}
-              onChange={handleChange} // Vẫn cần onChange để set value, dù disabled
-              // required // Bỏ required vì nó được set tự động
+              onChange={handleChange} 
               error={!!errors.startDate}
               helperText={errors.startDate}
-              disabled={true} // Vô hiệu hóa trường này
+              disabled={true}
             />
           </Grid>
           <Grid item xs={6}>
@@ -362,7 +353,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               error={!!errors.usageLimit}
               helperText={errors.usageLimit}
               disabled={isSaving}
-              inputProps={{ min: 0, step: 1 }} // usageLimit thường là số nguyên
+              inputProps={{ min: 0, step: 1 }} 
             />
           </Grid>
           {isEditing && (
@@ -375,7 +366,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
                 fullWidth
                 variant="outlined"
                 value={formData.usedCount}
-                disabled // Used count không cho phép chỉnh sửa
+                disabled 
                 inputProps={{ min: 0, step: 1 }}
                 />
             </Grid>
@@ -409,7 +400,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   );
 };
 
-// Component DeleteConfirmationModal (Không đổi)
 const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName, itemType = 'item' }) => {
     return (
     <Dialog
@@ -436,10 +426,9 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName, itemType 
   );
 };
 
-// Hàm getVoucherStatus (Không đổi)
 const getVoucherStatus = (voucher) => {
   const now = new Date();
-  now.setHours(0, 0, 0, 0); // Đặt giờ về 0 để chỉ so sánh ngày
+  now.setHours(0, 0, 0, 0); 
 
   const startDate = voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate) ? new Date(voucher.startDate) : null;
   const expiryDate = voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate) ? new Date(voucher.expiryDate) : null;
@@ -474,7 +463,6 @@ const getVoucherStatus = (voucher) => {
 };
 
 
-// Component chính VoucherManagementPage (Đã được chỉnh sửa)
 function VoucherManagementPage() {
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -498,7 +486,6 @@ function VoucherManagementPage() {
         return {
           id: doc.id,
           ...data,
-          // Chuyển đổi Timestamp của Firebase thành Date object nếu có
           startDate: data.startDate?.toDate ? data.startDate.toDate() : (data.startDate || null),
           expiryDate: data.expiryDate?.toDate ? data.expiryDate.toDate() : (data.expiryDate || null),
           discountValue: Number(data.discountValue || 0),
@@ -589,7 +576,6 @@ function VoucherManagementPage() {
       handleCloseModals();
     } catch (err) {
       console.error("Error saving voucher:", err);
-      // Ném lỗi để VoucherFormModal có thể bắt và hiển thị
       throw err;
     }
   };
@@ -611,7 +597,6 @@ function VoucherManagementPage() {
     }
   };
 
-  // Memoize filteredVouchers để tránh re-render không cần thiết
   const filteredVouchers = useMemo(() => {
     let filtered = vouchers;
 
@@ -635,7 +620,7 @@ function VoucherManagementPage() {
             return status === 'Expired';
           case 'used_up':
             return status === 'Used up';
-          case 'inactive_switch': // Điều chỉnh tên case nếu cần, ví dụ chỉ là 'inactive'
+          case 'inactive_switch': 
             return status === 'Inactive';
           default:
             return true; 
@@ -650,8 +635,7 @@ function VoucherManagementPage() {
   const escapeCsvValue = (value) => {
     if (value == null) return '';
     let stringValue = String(value);
-    stringValue = stringValue.replace(/"/g, '""'); // Escape dấu nháy kép
-    // Nếu giá trị chứa dấu phẩy, nháy kép hoặc xuống dòng, bọc nó trong dấu nháy kép
+    stringValue = stringValue.replace(/"/g, '""'); 
     if (/[",\n]/.test(stringValue)) {
       return `"${stringValue}"`;
     }
@@ -664,7 +648,6 @@ function VoucherManagementPage() {
       return;
     }
 
-    // Các tiêu đề cột cho CSV
     const headers = [
       "Code",
       "Description",
@@ -678,7 +661,6 @@ function VoucherManagementPage() {
       "Active"
     ];
 
-    // Tạo các hàng dữ liệu
     const rows = filteredVouchers.map(voucher => {
       const {
         code,
@@ -693,25 +675,20 @@ function VoucherManagementPage() {
         isActive
       } = voucher;
 
-      // Định dạng ngày tháng thành YYYY-MM-DD
       const formattedStartDate = startDate instanceof Date && !Number.isNaN(startDate.getTime()) ? startDate.toISOString().split('T')[0] : '';
       const formattedExpiryDate = expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime()) ? expiryDate.toISOString().split('T')[0] : '';
 
-      // Xử lý giá trị rỗng/0 cho các trường số để tránh 'null' hoặc 'undefined' trong CSV
       const rawDiscountValue = discountValue || (discountValue === 0 ? 0 : '');
       const rawMinOrderValue = minOrderValue || (minOrderValue === 0 ? 0 : '');
       const rawUsageLimit = usageLimit || (usageLimit === 0 ? 0 : '');
       const rawUsedCount = usedCount || (usedCount === 0 ? 0 : '');
 
-      // Chuyển đổi discountType sang văn bản thân thiện hơn
       const discountTypeText = discountType === 'percentage' ? 'Percentage'
                                : (discountType === 'fixed' ? 'Fixed Amount'
                                : (discountType === 'free_shipping' ? 'Free Shipping' : discountType));
 
-      // Chuyển đổi isActive sang Yes/No
       const isActiveText = isActive ? 'Yes' : 'No';
 
-      // Trả về mảng các giá trị đã được escape cho hàng hiện tại
       return [
         code,
         description,
@@ -723,35 +700,29 @@ function VoucherManagementPage() {
         rawUsageLimit,
         rawUsedCount,
         isActiveText
-      ].map(value => escapeCsvValue(value)).join(','); // Nối các giá trị bằng dấu phẩy
+      ].map(value => escapeCsvValue(value)).join(','); 
     });
 
-    // Tạo chuỗi CSV hoàn chỉnh
     const csvString = [headers.join(','), ...rows].join('\n');
 
-    // Tạo Blob từ chuỗi CSV (thêm BOM để hỗ trợ tiếng Việt trong Excel)
     const blob = new Blob([`\uFEFF${csvString}`], { type: 'text/csv;charset=utf-8;' });
 
-    // Tạo link download
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
 
     link.setAttribute('href', url);
     const now = new Date();
     const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-    link.setAttribute('download', `danh_sach_voucher_xuat_${dateString}.csv`); // Tên file download
+    link.setAttribute('download', `danh_sach_voucher_xuat_${dateString}.csv`); 
 
-    // Kích hoạt download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // Giải phóng URL object
     URL.revokeObjectURL(url);
   };
 
 
-  // Hiển thị trạng thái loading ban đầu
   if (loading && vouchers.length === 0 && !error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 120px)' }}>
@@ -790,7 +761,6 @@ function VoucherManagementPage() {
         <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
       )}
 
-      {/* Bộ lọc và tìm kiếm */}
       <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
         <Grid item xs={12} sm={6} md={4}>
           <TextField
@@ -830,7 +800,6 @@ function VoucherManagementPage() {
         </Grid>
       </Grid>
 
-      {/* Bảng hiển thị danh sách voucher */}
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer sx={{ maxHeight: 'calc(100vh - 300px)', overflowX: 'auto' }}>
           <Table stickyHeader aria-label="sticky table voucher">
@@ -845,12 +814,11 @@ function VoucherManagementPage() {
                     maxWidth: 250
                 }}>Mô tả</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">Value</TableCell>
-                {/* Dựa vào hình ảnh, không có cột Discount Type riêng biệt trong bảng chính */}
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Start Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Expiry Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 120, maxWidth: 150 }}>Minimum Order Value</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 80, maxWidth: 100 }} align="center">Usage Limit</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 130 }} align="center">Status</TableCell> {/* Cột trạng thái */}
+                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 130 }} align="center">Status</TableCell> 
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 100 }} align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -865,30 +833,23 @@ function VoucherManagementPage() {
                         minWidth: 150,
                         maxWidth: 250
                     }}>{voucher.description}</TableCell>
-                    {/* Hiển thị Value */}
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">
                       {voucher.discountType === 'percentage' ? `${voucher.discountValue}%`
                       : (voucher.discountType === 'fixed' ? `${Number(voucher.discountValue).toLocaleString('vi-VN')} $`
                       : (voucher.discountType === 'free_shipping' ? 'Free Shipping' : 'N/A'))
                       }
                     </TableCell>
-                    {/* Hiển thị Start Date */}
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate.getTime()) ? voucher.startDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
-                    {/* Hiển thị Expiry Date */}
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate.getTime()) ? voucher.expiryDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
-                    {/* Hiển thị Minimum Order Value */}
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 120, maxWidth: 150 }}>{(Number(voucher.minOrderValue)) > 0 ? `${Number(voucher.minOrderValue).toLocaleString('vi-VN')} $` : 'N/A'}</TableCell>
-                    {/* Hiển thị Usage Limit / Used Count */}
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 80, maxWidth: 100 }} align="center">
                         {`${Number(voucher.usedCount)} / ${Number(voucher.usageLimit || 0) === 0 ? '∞' : Number(voucher.usageLimit)}`}
                     </TableCell>
-                    {/* Hiển thị Status (Trạng thái) */}
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 130 }} align="center">
                         <Typography variant="body2" sx={{ color: getVoucherStatus(voucher).color, fontWeight: 'bold' }}>
                             {getVoucherStatus(voucher).text}
                         </Typography>
                     </TableCell>
-                    {/* Nút hành động */}
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 100 }} align="center">
                       <IconButton size="small" color="primary" onClick={() => handleOpenEditModal(voucher)} disabled={loading}>
                         <EditIcon />
@@ -902,7 +863,6 @@ function VoucherManagementPage() {
               ) : (
                 !loading && (
                   <TableRow>
-                    {/* colSpan = số lượng cột trong TableHead (9 cột dữ liệu + 1 cột Actions = 10) */}
                     <TableCell colSpan={10} align="center"> 
                       {vouchers.length === 0 && (searchTerm === '' && filterStatus === 'all') ? 'No vouchers found.' : 'No matching vouchers found.'}
                     </TableCell>
@@ -914,7 +874,6 @@ function VoucherManagementPage() {
         </TableContainer>
       </Paper>
 
-      {/* Modals cho thêm, chỉnh sửa, xóa */}
       <VoucherFormModal
         open={openAddModal}
         onClose={handleCloseModals}

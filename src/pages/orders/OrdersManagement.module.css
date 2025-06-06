@@ -162,3 +162,7 @@
   justify-content: space-between; 
   margin-bottom: 20px; 
 }
+.statusDelivering {
+    color: orange;
+    font-weight: bold;
+}
