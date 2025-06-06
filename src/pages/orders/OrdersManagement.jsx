@@ -53,19 +53,16 @@ function OrdersManagement() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // States mới cho thông báo
-    const [newOrdersCount, setNewOrdersCount] = useState(0); // Số lượng hiển thị trên badge
-    const [totalPendingOrders, setTotalPendingOrders] = useState(0); // Tổng số đơn pending hiện tại
-    const lastAcknowledgedPendingCountRef = useRef(0); // Số lượng pending đã xem lần cuối
+    const [newOrdersCount, setNewOrdersCount] = useState(0); 
+    const [totalPendingOrders, setTotalPendingOrders] = useState(0); 
+    const lastAcknowledgedPendingCountRef = useRef(0); 
 
-    // States cho Snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
 
     const unsubscribeRef = useRef(null);
     const unsubscribeNewOrdersRef = useRef(null);
 
-    // Hàm thiết lập listener cho orders
     const setupOrdersListener = useCallback(async (direction = 'initial', startDoc = null, pageNumber = 0) => {
         if (unsubscribeRef.current) {
             unsubscribeRef.current();
@@ -203,7 +200,6 @@ function OrdersManagement() {
 
     }, [currentTab]);
 
-    // state for orders (pending)
     useEffect(() => {
         if (unsubscribeNewOrdersRef.current) {
             unsubscribeNewOrdersRef.current();
@@ -270,7 +266,6 @@ function OrdersManagement() {
         }
     };
 
-    // ---click on notification icon ---
     const handleNotificationClick = () => {
         if (currentTab !== 'pending') {
             setCurrentTab('pending');
@@ -295,20 +290,19 @@ function OrdersManagement() {
         }
     };
 
-    // New logic: Mark order as 'delivering' and send notification
     const handleMarkCompleted = async (orderId, userId) => {
         const orderRef = doc(db, 'orders', orderId);
         try {
-            await updateDoc(orderRef, { status: 'delivering' }); // Change status to 'delivering'
+            await updateDoc(orderRef, { status: 'delivering' }); 
 
-            const backendUrl = 'https://foodappfcm.onrender.com/notify-order-completed'; // Using the same endpoint
+            const backendUrl = 'https://foodappfcm.onrender.com/notify-order-completed'; 
             fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId,
                     orderId,
-                    message: 'Your order is on its way to you! 🚚' // New message for mobile
+                    message: 'Your order is on its way to you! 🚚' 
                 }),
             })
                 .then(response => {
@@ -328,12 +322,10 @@ function OrdersManagement() {
         }
     };
 
-    // New function: Mark order as 'completed'
     const handleConfirmDelivery = async (orderId) => {
         const orderRef = doc(db, 'orders', orderId);
         try {
-            await updateDoc(orderRef, { status: 'completed' }); // Change status to 'completed'
-            // No mobile notification requested for this step
+            await updateDoc(orderRef, { status: 'completed', paymentStatus: 'paid' });
         } catch (firestoreError) {
             console.error("Error updating order status to 'completed' in Firestore:", firestoreError);
             alert(`Failed to confirm delivery: ${firestoreError.message}`);
@@ -343,7 +335,7 @@ function OrdersManagement() {
     const getStatusClassName = (status) => {
         switch (status) {
             case 'pending': return styles.statusPending;
-            case 'delivering': return styles.statusDelivering; // New status class
+            case 'delivering': return styles.statusDelivering; 
             case 'completed': return styles.statusCompleted;
             default: return '';
         }
@@ -374,8 +366,8 @@ function OrdersManagement() {
                 >
                     <Tab label="All Orders" value="all" icon={<ListAltIcon />} iconPosition="start" />
                     <Tab label="Pending" value="pending" icon={<PendingActionsIcon />} iconPosition="start" />
-                    <Tab label="Delivering" value="delivering" icon={<LocalShippingIcon />} iconPosition="start" /> {/* Updated tab */}
-                    <Tab label="Completed" value="completed" icon={<CheckCircleOutlineIcon />} iconPosition="start" /> {/* Updated tab */}
+                    <Tab label="Delivering" value="delivering" icon={<LocalShippingIcon />} iconPosition="start" /> 
+                    <Tab label="Completed" value="completed" icon={<CheckCircleOutlineIcon />} iconPosition="start" /> 
                 </Tabs>
             </Box>
 
