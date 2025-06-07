@@ -295,7 +295,7 @@ function OrdersManagement() {
         try {
             await updateDoc(orderRef, { status: 'delivering' }); 
 
-            const backendUrl = 'https://foodappfcm.onrender.com/notify-order-completed'; 
+            const backendUrl = 'https://foodappbe-r5x8.onrender.com/notify-order-completed'; 
             fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

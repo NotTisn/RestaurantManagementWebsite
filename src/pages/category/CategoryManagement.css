@@ -1,8 +1,3 @@
-/* src/pages/category/CategoryManagement.css */
-
-/* Giữ nguyên các style cũ của bạn ở đây */
-
-/* --- Modal Styles (giữ nguyên) --- */
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -22,7 +17,7 @@
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     width: 90%;
-    max-width: 500px; /* Tăng chiều rộng max cho modal Add/Edit */
+    max-width: 500px; 
     text-align: center;
     transform: scale(0.95);
     animation: zoomIn 0.2s ease-out forwards;
@@ -42,18 +37,18 @@
     line-height: 1.5;
 }
 
-.modal-content form { /* Styles for the form inside the modal */
+.modal-content form { 
     display: flex;
     flex-direction: column;
     gap: 15px;
-    text-align: left; /* Căn lề trái cho label/input trong form modal */
+    text-align: left; 
 }
 
 .modal-actions {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-top: 20px; /* Thêm khoảng cách với form */
+    margin-top: 20px; 
 }
 
 .modal-actions button {
@@ -70,7 +65,7 @@
     transform: translateY(-2px);
 }
 
-.modal-actions .confirm-button { /* Dành cho modal delete */
+.modal-actions .confirm-button { 
     background-color: #dc3545;
     color: white;
 }
@@ -88,9 +83,8 @@
     background-color: #5a6268;
 }
 
-/* New: Styles for Add/Edit Modal buttons */
 .modal-actions button[type="submit"] {
-    background-color: #007bff; /* Màu xanh dương cho Add/Update */
+    background-color: #007bff;
     color: white;
 }
 .modal-actions button[type="submit"]:hover:not(:disabled) {
@@ -100,12 +94,12 @@
 .modal-content .error-message {
     font-size: 0.95em;
     padding: 8px 15px;
-    margin-bottom: 20px; /* Thêm khoảng cách với form */
+    margin-bottom: 20px;
 }
 
 .image-required-note {
     font-size: 0.9em;
-    color: #007bff; /* Màu xanh dương để gợi ý */
+    color: #007bff; 
     margin-top: 5px;
     text-align: center;
 }
@@ -123,24 +117,22 @@
 }
 
 
-/* --- Toast/Snackbar Styles (giữ nguyên) --- */
 .toast-notification {
-    /* Thay đổi các thuộc tính này để đẩy lên góc trên bên phải */
-    position: fixed; /* Giữ cố định trên màn hình */
-    top: 30px; /* Cách lề trên 30px */
-    right: 30px; /* Cách lề phải 30px */
-    left: auto; /* Bỏ căn giữa theo chiều ngang */
-    transform: translateX(0); /* Bỏ transform để không còn căn giữa */
+    position: fixed; 
+    top: 30px;
+    right: 30px; 
+    left: auto; 
+    transform: translateX(0); 
 
     padding: 15px 25px;
     border-radius: 8px;
     color: white;
     font-weight: 500;
     font-size: 1.1em;
-    z-index: 1001; /* Đảm bảo toast nằm trên tất cả */
+    z-index: 1001; 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     opacity: 0;
-    animation: fadeInOut 3.5s forwards; /* Giữ animation fade in/out */
+    animation: fadeInOut 3.5s forwards; 
 }
 
 .toast-notification.success {
@@ -170,7 +162,6 @@
     }
 }
 
-/* --- General Component Styles (giữ nguyên) --- */
 .category-management-container {
     padding: 20px;
     background-color: #f5f7fa;
@@ -197,13 +188,12 @@
     text-align: center;
 }
 
-/* New: Styles for the "Add New Category" button */
 .add-new-button {
     display: block;
-    width: fit-content; /* Hoặc 100% nếu bạn muốn nó rộng */
-    margin: 0 auto 30px auto; /* Canh giữa và tạo khoảng cách dưới */
+    width: fit-content; 
+    margin: 0 auto 30px auto; 
     padding: 12px 25px;
-    background-color: #28a745; /* Màu xanh lá cho nút thêm */
+    background-color: #28a745; 
     color: white;
     border: none;
     border-radius: 8px;
@@ -224,7 +214,6 @@
     opacity: 0.8;
 }
 
-/* List Section */
 .category-list-section {
     background-color: #ffffff;
     padding: 25px;
@@ -294,7 +283,6 @@
     background-color: #c82333;
 }
 
-/* New: Image Preview in Modal */
 .image-preview-container {
     margin-top: 15px;
     text-align: center;
@@ -309,7 +297,7 @@
 .image-preview {
     max-width: 150px;
     max-height: 150px;
-    object-fit: contain; /* Giữ nguyên tỷ lệ ảnh, không cắt */
+    object-fit: contain; 
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 5px;

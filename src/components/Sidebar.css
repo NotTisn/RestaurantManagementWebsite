@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   min-height: auto;
-  padding-top: 16px; /* Thay py: 2 bằng padding top và bottom tương ứng */
+  padding-top: 16px; 
   padding-bottom: 16px;
   border-bottom: 1px solid #dee2e6;
 }
@@ -40,21 +40,21 @@
 }
 
 .sidebar-menu-item.Mui-selected {
-  background-color: #1976d2; /* Màu xanh dương đậm hơn của MUI */
-  color: white ; /* Override màu chữ mặc định của MUI */
-  border-radius: 8px; /* Thêm border-radius */
+  background-color: #1976d2;
+  color: white ; 
+  border-radius: 8px; 
 }
 
 .sidebar-menu-item.Mui-selected .MuiListItemIcon-root {
-  color: white ; /* Override màu icon mặc định của MUI */
+  color: white ; 
 }
 
 .sidebar-menu-item:hover {
-  background-color: #e9ecef; /* Màu nền khi hover */
+  background-color: #e9ecef; 
 }
 
 .sidebar-menu-item.Mui-selected:hover {
-  background-color: #1565c0; /* Màu nền khi hover trên mục đang chọn */
+  background-color: #1565c0; 
 }
 
 .sidebar-list-item-icon {
