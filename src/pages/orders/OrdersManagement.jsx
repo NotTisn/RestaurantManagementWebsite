@@ -128,7 +128,7 @@ function OrdersManagement() {
                     id: docSnap.id,
                     items: d.items || [],
                     total: d.total || 0,
-                    voucherCode: d.voucherCode || [],
+                    voucherCode: d.appliedVoucherDetails && d.appliedVoucherDetails.code ? d.appliedVoucherDetails.code : 'None',
                     userId: d.userId || 'Unknown',
                     status: d.status || 'pending',
                     paymentStatus: d.paymentStatus,
@@ -400,7 +400,8 @@ function OrdersManagement() {
                                         <p><strong>Order Time:</strong> {order.timestamp}</p>
                                         <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
                                         <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
-                                        <p><strong>Voucher Code:</strong> {order.voucherCode && order.voucherCode.length > 0 ? order.voucherCode.join(', ') : 'None'}</p>
+                                        <p><strong>Voucher Code:</strong> {order.voucherCode}</p>
+
                                     </div>
 
                                     <div className={styles.itemsList}>

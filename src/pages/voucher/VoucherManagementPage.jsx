@@ -201,7 +201,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     };
 
     if (!isEditing) {
-      dataToSave.id = undefined; 
+      //dataToSave.id = undefined; 
       dataToSave.createdAt = new Date(); 
       const now = new Date();
       now.setHours(0,0,0,0); 
