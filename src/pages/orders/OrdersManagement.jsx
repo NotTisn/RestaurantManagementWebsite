@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { StatsContext } from '../../contexts/StatsContext';
+
+import React, { useEffect, useState, useCallback, useRef, useContext } from 'react';
 import {
     collection,
     doc,
@@ -42,6 +44,8 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 function OrdersManagement() {
+    const { updatePopularFoods } = useContext(StatsContext);
+
     const [orders, setOrders] = useState([]);
     const [, setUsersMap] = useState({});
     const [currentTab, setCurrentTab] = useState('all');
@@ -211,7 +215,7 @@ function OrdersManagement() {
             where('status', '==', 'pending')
         );
 
-        const newOrdersUnsubscribe = onSnapshot(pendingOrdersQuery, (snapshot) => {
+        const newOrdersUnsubscribe = onSnapshot(pendingOrdersQuery, async (snapshot) => {
             const currentPendingCount = snapshot.size;
             setTotalPendingOrders(currentPendingCount);
 
@@ -225,6 +229,12 @@ function OrdersManagement() {
 
                     setSnackbarMessage(`🔔 You have ${newlyArrivedOrders} new pending orders!`);
                     setSnackbarOpen(true);
+                        const now = new Date();
+                        const currentYear = now.getFullYear();
+                        const currentMonth = now.getMonth() + 1;
+                        
+                        await updatePopularFoods(currentYear, currentMonth);
+                        console.log('✅ Popular foods updated successfully after new orders');
                 } else {
                     setNewOrdersCount(0);
                 }
@@ -242,7 +252,7 @@ function OrdersManagement() {
                 unsubscribeNewOrdersRef.current = null;
             }
         };
-    }, [currentTab]);
+    }, [currentTab, updatePopularFoods]);
 
     useEffect(() => {
         setCurrentPage(0);

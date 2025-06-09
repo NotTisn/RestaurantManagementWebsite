@@ -31,19 +31,31 @@ export default function Statistics() {
     getYearlyData,
     getMonthlyData,
     getTopDailyItems,
-    getTopMonthlyItems
+    getTopMonthlyItems,
+    loading,
+    error,
+    orders
   } = useContext(StatsContext);
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState('');    // "" means “All”
+  const [month, setMonth] = useState('');    // "" means "All"
   const [day, setDay] = useState(now.getDate());
 
   const [chartData, setChartData] = useState([]);
   const [topDaily, setTopDaily] = useState([]);
   const [topMonthly, setTopMonthly] = useState([]);
 
+  // Real-time update effect - runs whenever orders data changes
   useEffect(() => {
+    // Don't calculate if we're still loading or have no orders
+    if (loading || orders.length === 0) {
+      setChartData([]);
+      setTopDaily([]);
+      setTopMonthly([]);
+      return;
+    }
+
     if (month === '') {
       // Yearly view
       setChartData(getYearlyData(year));
@@ -53,13 +65,15 @@ export default function Statistics() {
       // Monthly view
       const m = +month;
       setChartData(getMonthlyData(year, m));
-      setTopDaily(getTopDailyItems(year, m, day));
-      setTopMonthly(getTopMonthlyItems(year, m));
+      setTopDaily(getTopDailyItems(year, m, day).slice(0, 3));
+      setTopMonthly(getTopMonthlyItems(year, m).slice(0, 3));
     }
   }, [
     year,
     month,
     day,
+    orders, // This will trigger updates when orders change in real-time
+    loading,
     getYearlyData,
     getMonthlyData,
     getTopDailyItems,
@@ -69,9 +83,41 @@ export default function Statistics() {
   // Helper to check if a real month is selected
   const hasMonth = Number(month) >= 1;
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.heading}>Statistics</h1>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Loading real-time statistics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.heading}>Statistics</h1>
+        <div className={styles.errorContainer}>
+          <p className={styles.error}>❌ Error: {error}</p>
+          <p>Please check your connection and try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.heading}>Statistics</h1>
+      <div className={styles.headerContainer}>
+        <h1 className={styles.heading}>Statistics</h1>
+        <div className={styles.realtimeIndicator}>
+          <span className={styles.liveDot}></span>
+          <span>Live Data ({orders.length} orders)</span>
+        </div>
+      </div>
 
       {/* Controls */}
       <div className={styles.controls}>
@@ -89,7 +135,7 @@ export default function Statistics() {
         <label>
           Month:
           <select value={month} onChange={e => setMonth(e.target.value)}>
-            {/* “All” option */}
+            {/* "All" option */}
             <option value="">All</option>
             {/* Months 1–12 */}
             {months.slice(1).map((m, idx) => (
@@ -121,54 +167,78 @@ export default function Statistics() {
           <BarChart data={chartData}>
             <XAxis dataKey={hasMonth ? 'day' : 'month'} />
             <YAxis />
-            <Tooltip />
+            <Tooltip 
+              formatter={(value) => [`$${value.toLocaleString()}`, 'Sales']}
+              labelFormatter={(label) => hasMonth ? `Day ${label}` : `Month ${label}`}
+            />
             <Bar dataKey="sales" fill="#10B981" />  {/* emerald green */}
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Top-3 Panels, only when month is selected */}
-{hasMonth && (
-  <div className={styles.panels}>
-    <div className={styles.panel}>
-      <h2>Top 3 Items on {day}/{month}/{year}</h2>
-      <ol>
-        {topDaily.map((it, i) => (
-          <li key={i} className={styles.itemRow}>
-            <img
-              src={it.imageUrl}
-              alt={it.name}
-              className={styles.itemImage}
-            />
-            <div className={styles.itemDetails}>
-              <strong>{it.name}</strong><br/>
-              ${it.revenue.toFixed(2)}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
+      {/* Show message if no data for selected period */}
+      {chartData.length === 0 && !loading && (
+        <div className={styles.noDataMessage}>
+          <p>📊 No sales data found for the selected period.</p>
+        </div>
+      )}
 
-    <div className={styles.panel}>
-      <h2>Top 3 Items in {months[+month]} {year}</h2>
-      <ol>
-        {topMonthly.map((it, i) => (
-          <li key={i} className={styles.itemRow}>
-            <img
-              src={it.imageUrl}
-              alt={it.name}
-              className={styles.itemImage}
-            />
-            <div className={styles.itemDetails}>
-              <strong>{it.name}</strong><br/>
-              ${it.revenue.toFixed(2)}
-            </div>
-          </li>
-        ))}
-      </ol>
+      {/* Top-3 Panels, only when month is selected */}
+      {hasMonth && (
+        <div className={styles.panels}>
+          <div className={styles.panel}>
+            <h2>Top 3 Items on {day}/{month}/{year}</h2>
+            {topDaily.length > 0 ? (
+              <ol>
+                {topDaily.map((it, i) => (
+                  <li key={i} className={styles.itemRow}>
+                    <img
+                      src={it.imageUrl}
+                      alt={it.name}
+                      className={styles.itemImage}
+                      onError={(e) => {
+                        e.target.src = '/placeholder-food.png'; // fallback image
+                      }}
+                    />
+                    <div className={styles.itemDetails}>
+                      <strong>{it.name}</strong><br/>
+                      ${it.revenue.toFixed(2)}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className={styles.noItems}>No items sold on this day.</p>
+            )}
+          </div>
+
+          <div className={styles.panel}>
+            <h2>Top 3 Items in {months[+month]} {year}</h2>
+            {topMonthly.length > 0 ? (
+              <ol>
+                {topMonthly.map((it, i) => (
+                  <li key={i} className={styles.itemRow}>
+                    <img
+                      src={it.imageUrl}
+                      alt={it.name}
+                      className={styles.itemImage}
+                      onError={(e) => {
+                        e.target.src = '/placeholder-food.png'; // fallback image
+                      }}
+                    />
+                    <div className={styles.itemDetails}>
+                      <strong>{it.name}</strong><br/>
+                      ${it.revenue.toFixed(2)}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className={styles.noItems}>No items sold this month.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)}
-  </div>
   );
 }
