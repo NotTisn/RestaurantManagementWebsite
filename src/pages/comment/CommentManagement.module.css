@@ -1,0 +1,139 @@
+
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Roboto', sans-serif;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.heading {
+    font-size: 2.2em;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.heading svg {
+    margin-right: 10px;
+    color: #f57c00; 
+}
+
+.commentsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.commentCard {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.commentCard:hover {
+    transform: translateY(-3px);
+}
+
+.commentHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.userName {
+    font-weight: bold;
+    color: #424242;
+    font-size: 1.1em;
+}
+
+.commentText {
+    font-style: italic;
+    color: #555;
+    line-height: 1.5;
+}
+
+.commentTime {
+    color: #757575;
+    font-size: 0.85em;
+}
+
+.moderationSection {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #e0e0e0;
+    display: flex;
+    flex-wrap: wrap; 
+    align-items: center;
+    gap: 10px;
+}
+
+.statusApproved {
+    color: #28a745;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.statusPending {
+    color: #ffc107; 
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.statusRejected {
+    color: #dc3545;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.MuiButton-root {
+    text-transform: none; 
+}
+
+.MuiToggleButtonGroup-root {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.MuiToggleButton-root {
+    text-transform: none; /* Giữ chữ thường */
+    font-weight: 500;
+    color: #616161;
+    border: none !important; /* Bỏ border mặc định */
+    padding: 8px 16px;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.MuiToggleButton-root:hover {
+    background-color: #e0e0e0;
+}
+
+.MuiToggleButton-root.Mui-selected {
+    background-color: #f57c00 !important; 
+    color: #fff !important;
+    box-shadow: 0 2px 5px rgba(245, 124, 0, 0.3);
+}
+
+.MuiToggleButton-root.Mui-selected:hover {
+    background-color: #ef6c00 !important; 
+}

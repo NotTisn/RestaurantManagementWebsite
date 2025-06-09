@@ -25,6 +25,7 @@ export default function Input() {
     let url = null;
 
     try {
+      // Upload image if exists
       if (img) {
         const sref = ref(storage, uuid());
         const uploadTask = uploadBytesResumable(sref, img);
@@ -45,7 +46,7 @@ export default function Input() {
       };
       
 
-      // ✅ Add message to subcollection
+      // Add message to subcollection
       await addDoc(
         collection(
           db,
@@ -58,7 +59,7 @@ export default function Input() {
         msg
       );
 
-      // ✅ Update chat metadata
+      // Update chat metadata
       const meta = {
         lastMessage: { text },
         date: serverTimestamp(),
@@ -70,7 +71,7 @@ export default function Input() {
       );
       await updateDoc(doc(db, "restaurantInbox", data.user.uid), meta);
 
-      // ✅ Clear input
+      // Clear input
       setText("");
       setImg(null);
     } catch (error) {
