@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import Message from './pages/message/Message'
 import VoucherManagementPage from './pages/voucher/VoucherManagementPage';
 import CategoryManagement from './pages/category/CategoryManagement';
+import CommentManagement from './pages/comment/CommentManagement';
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
         <Route path="message" element={<Message/>}/>
         <Route path="voucher" element={<VoucherManagementPage/>}/>
         <Route path="categories" element={<CategoryManagement />} />
+        <Route path="comments" element={<CommentManagement />} />
         </Route>
       console.log("App started");
 
