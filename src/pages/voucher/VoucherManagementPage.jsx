@@ -14,6 +14,7 @@ import {
   CircularProgress,
   Alert,
   TextField,
+  Chip,
   Grid,
   Switch,
   FormControlLabel,
@@ -35,22 +36,24 @@ import ClearIcon from '@mui/icons-material/Clear';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig'; 
+import { db } from '../../firebaseConfig';
 
 const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   const isEditing = !!voucherData;
   const [formData, setFormData] = useState({
     code: '',
     description: '',
-    discountType: 'percentage', 
+    discountType: 'percentage',
     discountValue: '',
-    startDate: '', 
+    startDate: '',
     expiryDate: '',
     minOrderValue: '',
     usageLimit: '',
     usedCount: 0,
     isActive: true,
+    isPrivate: false, // NEW FIELD - default to public voucher
   });
+
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState(null);
@@ -58,20 +61,20 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   useEffect(() => {
     if (isEditing && voucherData) {
       setFormData({
-        ...voucherData,
-        startDate: voucherData.startDate instanceof Date && !Number.isNaN(voucherData.startDate)
-          ? voucherData.startDate.toISOString().split('T')[0]
-          : (typeof voucherData.startDate === 'string' ? voucherData.startDate.split('T')[0] : ''),
-        expiryDate: voucherData.expiryDate instanceof Date && !Number.isNaN(voucherData.expiryDate)
-          ? voucherData.expiryDate.toISOString().split('T')[0]
-          : (typeof voucherData.expiryDate === 'string' ? voucherData.expiryDate.split('T')[0] : ''),
-        discountValue: voucherData.discountValue,
-        minOrderValue: voucherData.minOrderValue || '',
-        usageLimit: voucherData.usageLimit || '',
+        code: voucherData.code || '',
+        description: voucherData.description || '',
+        discountType: voucherData.discountType || 'percentage',
+        discountValue: voucherData.discountValue?.toString() || '',
+        startDate: voucherData.startDate ? formatDateForInput(voucherData.startDate) : '',
+        expiryDate: voucherData.expiryDate ? formatDateForInput(voucherData.expiryDate) : '',
+        minOrderValue: voucherData.minOrderValue?.toString() || '',
+        usageLimit: voucherData.usageLimit?.toString() || '',
         usedCount: voucherData.usedCount || 0,
-        isActive: voucherData.isActive !== undefined ? voucherData.isActive : true, 
+        isActive: voucherData.isActive !== undefined ? voucherData.isActive : true,
+        isPrivate: voucherData.isPrivate || false, // NEW - handle existing vouchers without this field
       });
     } else {
+      // Reset form for new voucher
       const today = new Date();
       const formattedToday = today.toISOString().split('T')[0];
       setFormData({
@@ -79,18 +82,20 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         description: '',
         discountType: 'percentage',
         discountValue: '',
-        startDate: formattedToday, 
+        startDate: formattedToday,
         expiryDate: '',
         minOrderValue: '',
         usageLimit: '',
         usedCount: 0,
         isActive: true,
+        isPrivate: false, // NEW - default to public
       });
     }
     setErrors({});
     setSaveError(null);
     setIsSaving(false);
   }, [isEditing, voucherData, open]);
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -111,12 +116,12 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
 
       return newState;
     });
-    setErrors(prev => ({ ...prev, [name]: '' })); 
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-    if (value === '' || /^\d+(\.\d+)?$/.test(value)) { 
+    if (value === '' || /^\d+(\.\d+)?$/.test(value)) {
       if (name === 'usageLimit' && value !== '' && !/^\d+$/.test(value)) {
         return;
       }
@@ -137,15 +142,15 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       isValid = false;
     }
 
-    
+
     if (!formData.expiryDate) {
       newErrors.expiryDate = 'Expiry date cannot be empty.';
       isValid = false;
     } else {
       const start = new Date(formData.startDate);
       const expiry = new Date(formData.expiryDate);
-      start.setHours(0, 0, 0, 0); 
-      expiry.setHours(0, 0, 0, 0); 
+      start.setHours(0, 0, 0, 0);
+      expiry.setHours(0, 0, 0, 0);
 
       if (start > expiry) {
         newErrors.expiryDate = 'Expiry date cannot be before start date.';
@@ -153,7 +158,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       }
     }
 
-    if (formData.discountType !== 'free_shipping') { 
+    if (formData.discountType !== 'free_shipping') {
       const discountValue = Number(formData.discountValue);
       if (formData.discountValue === '' || Number.isNaN(discountValue) || discountValue <= 0) {
         newErrors.discountValue = 'Discount value must be a positive number.';
@@ -187,12 +192,12 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     setSaveError(null);
 
     if (!validateForm()) {
-      return; 
+      return;
     }
 
     const dataToSave = {
       ...formData,
-      discountValue: Number(formData.discountValue || 0), 
+      discountValue: Number(formData.discountValue || 0),
       minOrderValue: Number(formData.minOrderValue || 0),
       usageLimit: Number(formData.usageLimit || 0),
       usedCount: Number(formData.usedCount || 0),
@@ -202,12 +207,12 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
 
     if (!isEditing) {
       //dataToSave.id = undefined; 
-      dataToSave.createdAt = new Date(); 
+      dataToSave.createdAt = new Date();
       const now = new Date();
-      now.setHours(0,0,0,0); 
-      dataToSave.startDate = now; 
+      now.setHours(0, 0, 0, 0);
+      dataToSave.startDate = now;
     }
-    dataToSave.updatedAt = new Date(); 
+    dataToSave.updatedAt = new Date();
 
     setIsSaving(true);
     try {
@@ -237,7 +242,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               value={formData.code}
               onChange={handleChange}
-              disabled={isEditing || isSaving} 
+              disabled={isEditing || isSaving}
               required
               error={!!errors.code}
               helperText={errors.code}
@@ -257,21 +262,21 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
             />
           </Grid>
           <Grid item xs={6}>
-              <FormControl fullWidth margin="dense" variant="outlined" error={!!errors.discountType}>
-                <InputLabel>Discount Type</InputLabel>
-                <Select
-                    name="discountType"
-                    value={formData.discountType}
-                    onChange={handleChange}
-                    label="Discount Type"
-                    disabled={isSaving}
-                >
-                    <MenuItem value="percentage">Percentage</MenuItem>
-                    <MenuItem value="fixed">Fixed Amount</MenuItem>
-                    <MenuItem value="free_shipping">Free Shipping</MenuItem>
-                </Select>
-                  {errors.discountType && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.discountType}</Typography>}
-              </FormControl>
+            <FormControl fullWidth margin="dense" variant="outlined" error={!!errors.discountType}>
+              <InputLabel>Discount Type</InputLabel>
+              <Select
+                name="discountType"
+                value={formData.discountType}
+                onChange={handleChange}
+                label="Discount Type"
+                disabled={isSaving}
+              >
+                <MenuItem value="percentage">Percentage</MenuItem>
+                <MenuItem value="fixed">Fixed Amount</MenuItem>
+                <MenuItem value="free_shipping">Free Shipping</MenuItem>
+              </Select>
+              {errors.discountType && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.discountType}</Typography>}
+            </FormControl>
           </Grid>
           <Grid item xs={6}>
             <TextField
@@ -283,14 +288,14 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               value={formData.discountValue}
               onChange={handleNumberChange}
-              required={formData.discountType !== 'free_shipping'} 
+              required={formData.discountType !== 'free_shipping'}
               error={!!errors.discountValue}
               helperText={errors.discountValue}
               disabled={isSaving || formData.discountType === 'free_shipping'}
               inputProps={{ min: 0, step: formData.discountType === 'percentage' ? 0.01 : 1 }}
             />
           </Grid>
-            <Grid item xs={6}>
+          <Grid item xs={6}>
             <TextField
               margin="dense"
               name="startDate"
@@ -300,7 +305,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               value={formData.startDate}
-              onChange={handleChange} 
+              onChange={handleChange}
               error={!!errors.startDate}
               helperText={errors.startDate}
               disabled={true}
@@ -349,16 +354,16 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               variant="outlined"
               value={formData.usageLimit}
               onChange={handleNumberChange}
-              required={false} 
+              required={false}
               error={!!errors.usageLimit}
               helperText={errors.usageLimit}
               disabled={isSaving}
-              inputProps={{ min: 0, step: 1 }} 
+              inputProps={{ min: 0, step: 1 }}
             />
           </Grid>
           {isEditing && (
             <Grid item xs={6}>
-                <TextField
+              <TextField
                 margin="dense"
                 name="usedCount"
                 label="Used Count"
@@ -366,24 +371,48 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
                 fullWidth
                 variant="outlined"
                 value={formData.usedCount}
-                disabled 
+                disabled
                 inputProps={{ min: 0, step: 1 }}
-                />
+              />
             </Grid>
           )}
           <Grid item xs={12}>
-              <FormControlLabel
-                control={
+            <FormControlLabel
+              control={
                 <Switch
-                    checked={formData.isActive}
-                    onChange={handleChange}
-                    name="isActive"
-                    color="primary"
-                    disabled={isSaving}
+                  checked={formData.isActive}
+                  onChange={handleChange}
+                  name="isActive"
+                  color="primary"
+                  disabled={isSaving}
                 />
-                }
-                label="Active"
-              />
+              }
+              label="Active"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isPrivate}
+                  onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })}
+                  name="isPrivate"
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2">
+                    {formData.isPrivate ? '🎁 Private Giftcode' : '🎫 Public Voucher'}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {formData.isPrivate
+                      ? 'Only visible to users who enter the exact code'
+                      : 'Visible to all users in the app'
+                    }
+                  </Typography>
+                </Box>
+              }
+            />
+
+
           </Grid>
         </Grid>
       </DialogContent>
@@ -393,7 +422,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         </Button>
         <Button onClick={handleSubmit} color="primary" variant="contained" disabled={isSaving}>
           {isEditing ? 'Save' : 'Add'}
-            {isSaving && <CircularProgress size={20} sx={{ ml: 1 }} />}
+          {isSaving && <CircularProgress size={20} sx={{ ml: 1 }} />}
         </Button>
       </DialogActions>
     </Dialog>
@@ -401,7 +430,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
 };
 
 const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName, itemType = 'item' }) => {
-    return (
+  return (
     <Dialog
       open={open}
       onClose={onClose}
@@ -428,13 +457,13 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName, itemType 
 
 const getVoucherStatus = (voucher) => {
   const now = new Date();
-  now.setHours(0, 0, 0, 0); 
+  now.setHours(0, 0, 0, 0);
 
   const startDate = voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate) ? new Date(voucher.startDate) : null;
   const expiryDate = voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate) ? new Date(voucher.expiryDate) : null;
 
-  if(startDate) startDate.setHours(0, 0, 0, 0);
-  if(expiryDate) expiryDate.setHours(0, 0, 0, 0);
+  if (startDate) startDate.setHours(0, 0, 0, 0);
+  if (expiryDate) expiryDate.setHours(0, 0, 0, 0);
 
   if (!voucher.isActive) {
     return { text: 'Inactive', color: 'grey' };
@@ -474,7 +503,7 @@ function VoucherManagementPage() {
   const [selectedVoucher, setSelectedVoucher] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all'); 
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     const vouchersCollectionRef = collection(db, 'vouchers');
@@ -493,6 +522,7 @@ function VoucherManagementPage() {
           usageLimit: Number(data.usageLimit || 0),
           usedCount: Number(data.usedCount || 0),
           isActive: data.isActive !== undefined ? data.isActive : true,
+          isPrivate: data.isPrivate || false, // NEW - handle the isPrivate field
         };
       });
       setVouchers(vouchersData);
@@ -502,8 +532,8 @@ function VoucherManagementPage() {
       console.error("Error fetching vouchers:", err);
       setError('Unable to load vouchers. Please try again.');
       setLoading(false);
-    }); 
-    return () => unsubscribe(); 
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleOpenAddModal = () => {
@@ -532,18 +562,18 @@ function VoucherManagementPage() {
     try {
       if (voucherData.id) {
         const voucherRef = doc(db, 'vouchers', voucherData.id);
-        const {  ...dataToUpdate } = voucherData; 
+        const { ...dataToUpdate } = voucherData;
         await updateDoc(voucherRef, dataToUpdate);
         console.log("Voucher updated successfully:", voucherData.id);
 
       } else {
-        const {  ...dataToAdd } = voucherData; 
-        
-        const now = new Date();
-        now.setHours(0,0,0,0); 
-        dataToAdd.startDate = now; 
+        const { ...dataToAdd } = voucherData;
 
-        await addDoc(collection(db, 'vouchers'), dataToAdd); 
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        dataToAdd.startDate = now;
+
+        await addDoc(collection(db, 'vouchers'), dataToAdd);
         console.log("Voucher added successfully");
 
         try {
@@ -554,7 +584,7 @@ function VoucherManagementPage() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              voucherCode: dataToAdd.code, 
+              voucherCode: dataToAdd.code,
               voucherDescription: dataToAdd.description,
               discountType: dataToAdd.discountType,
               discountValue: dataToAdd.discountValue,
@@ -587,7 +617,7 @@ function VoucherManagementPage() {
       const voucherRef = doc(db, 'vouchers', selectedVoucher.id);
       await deleteDoc(voucherRef);
       console.log("Voucher deleted successfully:", selectedVoucher.id);
-      setError(null); 
+      setError(null);
       handleCloseModals();
     } catch (err) {
       console.error("Error deleting voucher:", err);
@@ -620,10 +650,10 @@ function VoucherManagementPage() {
             return status === 'Expired';
           case 'used_up':
             return status === 'Used up';
-          case 'inactive_switch': 
+          case 'inactive_switch':
             return status === 'Inactive';
           default:
-            return true; 
+            return true;
         }
       });
     }
@@ -635,7 +665,7 @@ function VoucherManagementPage() {
   const escapeCsvValue = (value) => {
     if (value == null) return '';
     let stringValue = String(value);
-    stringValue = stringValue.replace(/"/g, '""'); 
+    stringValue = stringValue.replace(/"/g, '""');
     if (/[",\n]/.test(stringValue)) {
       return `"${stringValue}"`;
     }
@@ -684,8 +714,8 @@ function VoucherManagementPage() {
       const rawUsedCount = usedCount || (usedCount === 0 ? 0 : '');
 
       const discountTypeText = discountType === 'percentage' ? 'Percentage'
-                               : (discountType === 'fixed' ? 'Fixed Amount'
-                               : (discountType === 'free_shipping' ? 'Free Shipping' : discountType));
+        : (discountType === 'fixed' ? 'Fixed Amount'
+          : (discountType === 'free_shipping' ? 'Free Shipping' : discountType));
 
       const isActiveText = isActive ? 'Yes' : 'No';
 
@@ -700,7 +730,7 @@ function VoucherManagementPage() {
         rawUsageLimit,
         rawUsedCount,
         isActiveText
-      ].map(value => escapeCsvValue(value)).join(','); 
+      ].map(value => escapeCsvValue(value)).join(',');
     });
 
     const csvString = [headers.join(','), ...rows].join('\n');
@@ -713,7 +743,7 @@ function VoucherManagementPage() {
     link.setAttribute('href', url);
     const now = new Date();
     const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-    link.setAttribute('download', `danh_sach_voucher_xuat_${dateString}.csv`); 
+    link.setAttribute('download', `danh_sach_voucher_xuat_${dateString}.csv`);
 
     document.body.appendChild(link);
     link.click();
@@ -739,10 +769,10 @@ function VoucherManagementPage() {
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
-            variant="outlined" 
-            startIcon={<CloudDownloadIcon />} 
+            variant="outlined"
+            startIcon={<CloudDownloadIcon />}
             onClick={handleExportCsv}
-            disabled={loading || filteredVouchers.length === 0} 
+            disabled={loading || filteredVouchers.length === 0}
           >
             Export CSV
           </Button>
@@ -807,18 +837,19 @@ function VoucherManagementPage() {
               <TableRow>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }}>Code</TableCell>
                 <TableCell sx={{
-                    fontWeight: 'bold',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    minWidth: 150,
-                    maxWidth: 250
-                }}>Mô tả</TableCell>
+                  fontWeight: 'bold',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  minWidth: 150,
+                  maxWidth: 250
+                }}>Description</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">Value</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Start Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 120 }}>Expiry Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 120, maxWidth: 150 }}>Minimum Order Value</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 80, maxWidth: 100 }} align="center">Usage Limit</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 130 }} align="center">Status</TableCell> 
+                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 130 }} align="center">Status</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 100 }} align="center">Type</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: 100 }} align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -826,29 +857,55 @@ function VoucherManagementPage() {
               {filteredVouchers.length > 0 ? (
                 filteredVouchers.map((voucher) => (
                   <TableRow hover role="checkbox" tabIndex={-1} key={voucher.id}>
-                    <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }}>{voucher.code}</TableCell>
                     <TableCell sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        minWidth: 150,
-                        maxWidth: 250
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      minWidth: 100,
+                      maxWidth: 150,
+                      backgroundColor: voucher.isPrivate ? '#fff3e0' : 'transparent'
+                    }}>
+                      {voucher.isPrivate && '🎁 '}{voucher.code}
+                    </TableCell>
+                    <TableCell sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      minWidth: 150,
+                      maxWidth: 250
                     }}>{voucher.description}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">
                       {voucher.discountType === 'percentage' ? `${voucher.discountValue}%`
-                      : (voucher.discountType === 'fixed' ? `${Number(voucher.discountValue).toLocaleString('vi-VN')} $`
-                      : (voucher.discountType === 'free_shipping' ? 'Free Shipping' : 'N/A'))
+                        : (voucher.discountType === 'fixed' ? `${Number(voucher.discountValue).toLocaleString('vi-VN')} $`
+                          : (voucher.discountType === 'free_shipping' ? 'Free Shipping' : 'N/A'))
                       }
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate.getTime()) ? voucher.startDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate.getTime()) ? voucher.expiryDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 120, maxWidth: 150 }}>{(Number(voucher.minOrderValue)) > 0 ? `${Number(voucher.minOrderValue).toLocaleString('vi-VN')} $` : 'N/A'}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 80, maxWidth: 100 }} align="center">
-                        {`${Number(voucher.usedCount)} / ${Number(voucher.usageLimit || 0) === 0 ? '∞' : Number(voucher.usageLimit)}`}
+                      {`${Number(voucher.usedCount)} / ${Number(voucher.usageLimit || 0) === 0 ? '∞' : Number(voucher.usageLimit)}`}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 130 }} align="center">
-                        <Typography variant="body2" sx={{ color: getVoucherStatus(voucher).color, fontWeight: 'bold' }}>
-                            {getVoucherStatus(voucher).text}
-                        </Typography>
+                      <Typography variant="body2" sx={{ color: getVoucherStatus(voucher).color, fontWeight: 'bold' }}>
+                        {getVoucherStatus(voucher).text}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 100 }} align="center">
+                      {voucher.isPrivate ? (
+                        <Chip
+                          label="Private"
+                          color="warning"
+                          size="small"
+                          sx={{ fontSize: '0.75rem' }}
+                        />
+                      ) : (
+                        <Chip
+                          label="Public"
+                          color="primary"
+                          size="small"
+                          sx={{ fontSize: '0.75rem' }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 100 }} align="center">
                       <IconButton size="small" color="primary" onClick={() => handleOpenEditModal(voucher)} disabled={loading}>
@@ -863,7 +920,7 @@ function VoucherManagementPage() {
               ) : (
                 !loading && (
                   <TableRow>
-                    <TableCell colSpan={10} align="center"> 
+                    <TableCell colSpan={11} align="center">
                       {vouchers.length === 0 && (searchTerm === '' && filterStatus === 'all') ? 'No vouchers found.' : 'No matching vouchers found.'}
                     </TableCell>
                   </TableRow>
@@ -878,7 +935,7 @@ function VoucherManagementPage() {
         open={openAddModal}
         onClose={handleCloseModals}
         onSave={handleSaveVoucher}
-        voucherData={null} 
+        voucherData={null}
       />
       {selectedVoucher && (
         <VoucherFormModal
