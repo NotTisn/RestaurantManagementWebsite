@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './EditDishModal.css';
 
-// Đảm bảo bạn có Cloudinary credentials hoặc import từ file config chung
 const CLOUDINARY_CLOUD_NAME = 'dc0umlqvf';
 const CLOUDINARY_UPLOAD_PRESET = 'android_do_an_avatars_unsigned';
 
@@ -17,15 +16,13 @@ function EditDishModal({
     categoryError,
     updateError
 }) {
+    // Giữ nguyên star trong initial state để đảm bảo nó được khởi tạo
     const [formData, setFormData] = useState({ name: '', price: '', description: '', imageUrl: '', star: '', time: '', categoryName: '', isPopular: false });
     const [isSaving, setIsSaving] = useState(false);
     const [validationErrors, setValidationErrors] = useState(initialValidationErrors);
-    // NEW STATE: Để quản lý file ảnh được chọn và URL preview
     const [selectedFile, setSelectedFile] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState('');
     const dialogRef = useRef(null);
-
-    // Remove urlRegex as we are now handling file uploads
 
     useEffect(() => {
         const dialogNode = dialogRef.current;
@@ -38,7 +35,6 @@ function EditDishModal({
         if (isOpen) {
             setIsSaving(false);
             setValidationErrors(initialValidationErrors);
-            // Reset file and preview when opening the modal
             setSelectedFile(null);
             setImagePreviewUrl('');
 
@@ -70,15 +66,14 @@ function EditDishModal({
                 name: dish.name || '',
                 price: dish.price || '',
                 description: dish.description || '',
-                imageUrl: dish.imageUrl || '', // Keep existing imageUrl
-                star: dish.star || '',
+                imageUrl: dish.imageUrl || '',
+                star: dish.star || 0, // Đảm bảo star là số, mặc định 0 nếu không có
                 time: dish.time || '',
                 categoryName: dish.categoryName || '',
                 isPopular: dish.isPopular || false
             });
-            // Set image preview to the existing dish image when editing
             setImagePreviewUrl(dish.imageUrl || '');
-            setSelectedFile(null); // Clear selected file when loading existing dish
+            setSelectedFile(null);
         }
     }, [isOpen, dish]);
 
@@ -91,28 +86,24 @@ function EditDishModal({
         setValidationErrors(prev => ({ ...prev, [name]: '' }));
     };
 
-    // NEW FUNCTION: Xử lý khi người dùng chọn file ảnh
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setSelectedFile(file); // Lưu file vào state
+        setSelectedFile(file);
 
         if (file) {
-            // Kiểm tra loại file
             if (!file.type.startsWith('image/')) {
                 setValidationErrors(prev => ({ ...prev, imageUrl: 'Please select a valid image file (e.g., .jpg, .png, .gif).' }));
-                setImagePreviewUrl(''); // Clear preview nếu không phải ảnh
+                setImagePreviewUrl('');
                 return;
             }
-            // Tạo URL tạm thời để hiển thị preview
             setImagePreviewUrl(URL.createObjectURL(file));
-            setValidationErrors(prev => ({ ...prev, imageUrl: '' })); // Xóa lỗi cũ
+            setValidationErrors(prev => ({ ...prev, imageUrl: '' }));
         } else {
-            setImagePreviewUrl(''); // Clear preview nếu không có file
+            setImagePreviewUrl('');
             setValidationErrors(prev => ({ ...prev, imageUrl: '' }));
         }
     };
 
-    // NEW FUNCTION: Tải ảnh lên Cloudinary (copied from AddDishModal)
     const uploadImageToCloudinary = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -130,7 +121,7 @@ function EditDishModal({
             if (data.error) {
                 throw new Error(data.error.message);
             }
-            return data.secure_url; // Trả về URL ảnh đã upload
+            return data.secure_url;
         } catch (error) {
             console.error("Error uploading to Cloudinary:", error);
             throw new Error(`Failed to upload image: ${error.message}`);
@@ -140,7 +131,7 @@ function EditDishModal({
     const validateForm = () => {
         const errors = {};
         const priceValue = Number.parseFloat(formData.price);
-        const starValue = Number.parseFloat(formData.star);
+        // const starValue = Number.parseFloat(formData.star); // Đã bỏ validation cho star
 
         // Validate Tên món ăn
         if (!formData.name.trim()) {
@@ -175,11 +166,10 @@ function EditDishModal({
             errors.imageUrl = 'Image is required for the dish.';
         }
 
-
-        // Validate Đánh giá (Star)
-        if (formData.star !== '' && (Number.isNaN(starValue) || starValue < 0 || starValue > 5)) {
-            errors.star = 'Rating must be a number between 0 and 5.';
-        }
+        // Đã bỏ validation cho Đánh giá (Star) vì nó bị disabled và không thể chỉnh sửa
+        // if (formData.star !== '' && (Number.isNaN(starValue) || starValue < 0 || starValue > 5)) {
+        //     errors.star = 'Rating must be a number between 0 and 5.';
+        // }
 
         // Validate Thời gian chuẩn bị (Time)
         if (formData.time && formData.time.length > 50) {
@@ -196,7 +186,6 @@ function EditDishModal({
     };
 
 
-    // Hàm xử lý khi nhấn nút Lưu trong modal
     const handleSave = async () => {
         if (!validateForm()) {
             console.log("Validation failed");
@@ -204,10 +193,10 @@ function EditDishModal({
         }
 
         setIsSaving(true);
-        let finalImageUrl = formData.imageUrl; // Start with the existing image URL
+        let finalImageUrl = formData.imageUrl; // Bắt đầu với URL ảnh hiện có
 
         try {
-            // If a new file is selected, upload it to Cloudinary
+            // Nếu có file mới được chọn, tải lên Cloudinary
             if (selectedFile) {
                 finalImageUrl = await uploadImageToCloudinary(selectedFile);
                 console.log("New image uploaded to Cloudinary:", finalImageUrl);
@@ -217,8 +206,8 @@ function EditDishModal({
                 name: formData.name.trim(),
                 price: Number.parseFloat(formData.price),
                 description: formData.description,
-                imageUrl: finalImageUrl, // Use the new Cloudinary URL or the existing one
-                star: formData.star === '' ? 0 : Number.parseFloat(formData.star),
+                imageUrl: finalImageUrl,
+                star: Number.parseFloat(formData.star), // Lấy giá trị star hiện có, đảm bảo là số
                 time: formData.time,
                 categoryName: formData.categoryName,
                 isPopular: formData.isPopular
@@ -227,14 +216,12 @@ function EditDishModal({
             await onSave(dish.id, updatedData);
         } catch (error) {
             console.error("Error during save:", error);
-            // You might want to set a general error message for the user in the modal
             setValidationErrors(prev => ({ ...prev, general: `Failed to update dish: ${error.message}` }));
         } finally {
             setIsSaving(false);
         }
     };
 
-    // Hàm xử lý click vào backdrop của dialog
     const handleBackdropClick = (event) => {
         if (event.target === dialogRef.current && !isSaving) {
             onClose();
@@ -258,8 +245,7 @@ function EditDishModal({
                 <h2 id="editDishModalTitle">Edit Dish: {dish?.name}</h2>
 
                 {updateError && <p className="error-message">{updateError}</p>}
-                {validationErrors.general && <p className="error-message">{validationErrors.general}</p>} {/* Display general errors */}
-
+                {validationErrors.general && <p className="error-message">{validationErrors.general}</p>}
 
                 <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} noValidate>
                     {/* ----- Dish Name ----- */}
@@ -291,7 +277,6 @@ function EditDishModal({
                             aria-describedby={validationErrors.price ? 'editDishPriceError' : undefined}
                             aria-invalid={!!validationErrors.price}
                         />
-                        {/* Hiển thị lỗi validation */}
                         {validationErrors.price && <p id="editDishPriceError" className="validation-error">{validationErrors.price}</p>}
                     </div>
 
@@ -315,10 +300,10 @@ function EditDishModal({
                     <div className="form-group">
                         <label htmlFor="editDishImageFile">Image:</label>
                         <input
-                            type="file" // Changed to file input
+                            type="file"
                             id="editDishImageFile"
-                            name="imageFile" // Name for the file input
-                            accept="image/*" // Accept only image files
+                            name="imageFile"
+                            accept="image/*"
                             onChange={handleFileChange}
                             disabled={isSaving}
                             aria-describedby={validationErrors.imageUrl ? 'editDishImageUrlError' : undefined}
@@ -336,7 +321,7 @@ function EditDishModal({
                         {!imagePreviewUrl && <p className="image-required-note">Image is required for the dish.</p>}
                     </div>
 
-                    {/* ----- Star Rating ----- */}
+                    {/* ----- Star Rating (READ-ONLY) ----- */}
                     <div className="form-group">
                         <label htmlFor="editDishStar">Rating (0-5):</label>
                         <input
@@ -344,12 +329,14 @@ function EditDishModal({
                             id="editDishStar"
                             name="star"
                             value={formData.star}
-                            onChange={handleChange}
-                            disabled={isSaving}
+                            onChange={handleChange} // Vẫn giữ onChange để React không cảnh báo, nhưng input đã disabled
+                            disabled={true} // **QUAN TRỌNG: Đặt disabled = true ở đây**
+                            readOnly // Để rõ ràng hơn là không chỉnh sửa được
                             aria-describedby={validationErrors.star ? 'editDishStarError' : undefined}
-                            aria-invalid={!!validationErrors.star}
+                            aria-invalid={!!validationErrors.star} // Vẫn có thể hiển thị lỗi nếu muốn, mặc dù đã bỏ validation
                         />
-                        {/* Hiển thị lỗi validation */}
+                        {/* Bạn có thể giữ hoặc bỏ dòng lỗi này tùy thuộc vào bạn có muốn hiển thị lỗi nếu starValue không phải số không.
+                            Vì đã disabled, lỗi này ít khả năng xảy ra nếu dữ liệu ban đầu đúng định dạng. */}
                         {validationErrors.star && <p id="editDishStarError" className="validation-error">{validationErrors.star}</p>}
                     </div>
 
