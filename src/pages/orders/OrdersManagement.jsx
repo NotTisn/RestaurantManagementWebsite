@@ -165,6 +165,7 @@ function OrdersManagement() {
                             paymentStatus: d.paymentStatus,
                             paymentMethod: d.paymentMethod,
                             timestamp: formattedTimestamp,
+                            deliveryAddress: d.deliveryAddress || "N/A",
                             reportStatus: d.reportStatus || 0, // Add this line
                             reportAdditionalInfo: d.reportAdditionalInfo || "", // Add this line too for future use
                         };
@@ -606,6 +607,10 @@ function OrdersManagement() {
                                         </p>
                                         <p>
                                             <strong>Order Time:</strong> {order.timestamp}
+                                        </p>
+                                        <p>
+                                            <strong>Delivery Address:</strong>{" "}
+                                            {order.deliveryAddress || "N/A"}
                                         </p>
                                         <p>
                                             <strong>Payment Status:</strong> {order.paymentStatus}
