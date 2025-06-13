@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "../contexts/ChatContext";
 
 export default function Message({ message }) {
-  const { currentUser, userRole } = useAuth(); 
+  const { currentUser, userRole } = useAuth(); // lấy thêm userRole
   const { data } = useChat();
   const ref = useRef();
 
@@ -24,7 +24,7 @@ export default function Message({ message }) {
     <div ref={ref} className={`message ${isOwner ? "owner" : ""}`}>
       <div className="messageInfo">
         <img
-          src={isOwner ? currentUser.photoUrl : data.user.photoUrl}
+          src={isOwner ? currentUser.photoURL : data.user.photoURL}
           alt=""
         />
         <span className="messageTime">{timeToShow}</span>
