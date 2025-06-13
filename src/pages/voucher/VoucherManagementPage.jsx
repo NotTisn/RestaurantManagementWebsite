@@ -207,6 +207,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       usedCount: Number(formData.usedCount || 0),
       startDate: formData.startDate ? new Date(formData.startDate) : null,
       expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : null,
+      isPrivate: formData.isPrivate ? true : false,
     };
 
     if (!isEditing) {
@@ -564,8 +565,8 @@ function VoucherManagementPage() {
 
   const handleSaveVoucher = async (voucherData) => {
     try {
-      if (voucherData.id) {
-        const voucherRef = doc(db, 'vouchers', voucherData.id);
+      if (selectedVoucher.id) {
+        const voucherRef = doc(db, 'vouchers', selectedVoucher.id);
         const { ...dataToUpdate } = voucherData;
         await updateDoc(voucherRef, dataToUpdate);
         console.log("Voucher updated successfully:", voucherData.id);
