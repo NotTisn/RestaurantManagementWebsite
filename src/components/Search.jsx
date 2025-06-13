@@ -57,7 +57,7 @@ const Search = () => {
           [combinedId + ".userInfo"]: {
             uid: user.uid,
             name: user.name,
-            //photoURL: user.photoURL,
+            photoUrl: user.photoUrl
           },
           [combinedId + ".date"]: serverTimestamp(),
         });
@@ -66,7 +66,7 @@ const Search = () => {
           [combinedId + ".userInfo"]: {
             uid: currentUser.uid,
             name: currentUser.name,
-            //photoURL: currentUser.photoURL,
+            photoUrl: user.photoUrl
           },
           [combinedId + ".date"]: serverTimestamp(),
         });
@@ -90,7 +90,7 @@ const Search = () => {
       {err && <span>User not found!</span>}
       {user && (
         <div className="userChat" onClick={handleSelect}>
-          <img src={user.photoURL} alt="" />
+          <img src={user.photoUrl} alt="" />
           <div className="userChatInfo">
             <span>{user.displayName}</span>
           </div>

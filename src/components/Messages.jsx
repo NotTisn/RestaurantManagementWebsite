@@ -13,7 +13,7 @@ export default function Messages() {
   useEffect(() => {
     if (!data.user?.uid || !data.chatId) return;
 
-    // ✅ Load từ phía đúng hướng: user đang chat với restaurant
+    // Load từ phía đúng hướng: user đang chat với restaurant
     const path = collection(
       db,
       "userChats",
