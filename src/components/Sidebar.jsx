@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, Box, Button } from '@mui/material';
-import CommentIcon from '@mui/icons-material/Comment';
+import CategoryIcon from '@mui/icons-material/Category';import CommentIcon from '@mui/icons-material/Comment';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
@@ -29,7 +29,7 @@ function Sidebar() {
     { path: '/app/orders', text: 'Orders', icon: <ShoppingCartIcon /> },
     { path: '/app/statistics', text: 'Statistics', icon: <AssessmentIcon /> },
     { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
-    { path: '/app/categories', text: 'Categories', icon: <LocalOfferIcon /> },
+    { path: '/app/categories', text: 'Categories', icon: <CategoryIcon /> },
     { path: '/app/comments', text: 'Comments', icon:  <CommentIcon /> },
   ];
 
