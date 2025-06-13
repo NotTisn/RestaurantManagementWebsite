@@ -65,8 +65,12 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         description: voucherData.description || '',
         discountType: voucherData.discountType || 'percentage',
         discountValue: voucherData.discountValue?.toString() || '',
-        startDate: voucherData.startDate ? formatDateForInput(voucherData.startDate) : '',
-        expiryDate: voucherData.expiryDate ? formatDateForInput(voucherData.expiryDate) : '',
+        startDate: voucherData.startDate instanceof Date && !Number.isNaN(voucherData.startDate)
+          ? voucherData.startDate.toISOString().split('T')[0]
+          : (typeof voucherData.startDate === 'string' ? voucherData.startDate.split('T')[0] : ''),
+        expiryDate: voucherData.expiryDate instanceof Date && !Number.isNaN(voucherData.expiryDate)
+          ? voucherData.expiryDate.toISOString().split('T')[0]
+          : (typeof voucherData.expiryDate === 'string' ? voucherData.expiryDate.split('T')[0] : ''),
         minOrderValue: voucherData.minOrderValue?.toString() || '',
         usageLimit: voucherData.usageLimit?.toString() || '',
         usedCount: voucherData.usedCount || 0,
