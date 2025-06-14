@@ -166,6 +166,7 @@ function OrdersManagement() {
                             paymentMethod: d.paymentMethod,
                             timestamp: formattedTimestamp,
                             deliveryAddress: d.deliveryAddress || "N/A",
+                            note: d.orderNote || "N/A",
                             reportStatus: d.reportStatus || 0, // Add this line
                             reportAdditionalInfo: d.reportAdditionalInfo || "", // Add this line too for future use
                         };
@@ -620,6 +621,9 @@ function OrdersManagement() {
                                         </p>
                                         <p>
                                             <strong>Voucher Code:</strong> {order.voucherCode}
+                                        </p>
+                                        <p>
+                                            <strong>Order Note:</strong> {order.note}
                                         </p>
                                     </div>
 
