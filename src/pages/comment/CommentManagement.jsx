@@ -13,7 +13,8 @@ import {
     getDocs,
     where,
     deleteDoc,
-    Timestamp
+    Timestamp,
+    getDoc // Import getDoc để lấy từng document món ăn
 } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import styles from './CommentManagement.module.css';
@@ -70,11 +71,10 @@ function CommentManagement() {
         setLoading(true);
         setError(null);
         setComments([]);
-        // Reset lastVisible và firstVisible khi thiết lập listener mới để tránh lỗi `startAt` từ lần trước
         setLastVisible(null);
         setFirstVisible(null);
-        setHasMoreNext(false); // Reset cờ để kiểm tra lại
-        setHasMorePrev(false); // Reset cờ để kiểm tra lại
+        setHasMoreNext(false);
+        setHasMorePrev(false);
 
         let qRef = collectionGroup(db, 'FoodComments');
         const queryConstraints = [];
@@ -98,22 +98,21 @@ function CommentManagement() {
         const q = query(qRef, ...queryConstraints);
 
         const newUnsubscribe = onSnapshot(q, async (snapshot) => {
-            const commentsData = [];
             if (snapshot.empty) {
                 setComments([]);
                 setLastVisible(null);
                 setFirstVisible(null);
                 setHasMoreNext(false);
-                setHasMorePrev(pageNumber > 0); // Vẫn có thể quay lại trang trước nếu pageNumber > 0
+                setHasMorePrev(pageNumber > 0);
                 setLoading(false);
                 return;
             }
 
-            // Cập nhật lastVisible và firstVisible
             setFirstVisible(snapshot.docs[0]);
             setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
 
-            snapshot.forEach((docSnap) => {
+            // === BẮT ĐẦU PHẦN THAY ĐỔI ĐỂ LẤY TÊN MÓN ĂN ===
+            const commentsDataPromises = snapshot.docs.map(async (docSnap) => {
                 const d = docSnap.data();
                 let formattedTimestamp = 'N/A';
                 if (d.timestamp instanceof Timestamp) {
@@ -122,25 +121,42 @@ function CommentManagement() {
                     formattedTimestamp = new Date(d.timestamp).toLocaleString();
                 }
 
-                commentsData.push({
+                const foodId = docSnap.ref.parent.parent.id; // Lấy foodId từ parent document của subcollection
+                let foodName = 'Unknown Food'; // Giá trị mặc định
+
+                // Truy vấn tên món ăn từ collection 'foods'
+                try {
+                    const foodDocRef = doc(db, 'food', foodId); // Giả định collection là 'foods'
+                    const foodDocSnap = await getDoc(foodDocRef);
+                    if (foodDocSnap.exists()) {
+                        foodName = foodDocSnap.data().name || 'No Name Found'; // Lấy trường 'name'
+                    }
+                } catch (foodFetchError) {
+                    console.warn(`Error fetching food name for Food ID ${foodId}:`, foodFetchError);
+                }
+
+                return {
                     id: docSnap.id,
-                    foodId: docSnap.ref.parent.parent.id,
+                    foodId: foodId,
+                    foodName: foodName, // Thêm foodName vào đối tượng comment
                     userId: d.userId,
                     userName: d.userName,
                     text: d.text,
                     rating: d.rating,
                     timestamp: formattedTimestamp,
                     moderationStatus: d.moderationStatus || 'approved'
-                });
+                };
             });
+
+            // Chờ tất cả các promise lấy tên món ăn hoàn thành
+            const commentsData = await Promise.all(commentsDataPromises);
+            // === KẾT THÚC PHẦN THAY ĐỔI ===
 
             if (direction === 'prev') {
                 commentsData.reverse();
             }
             setComments(commentsData);
 
-            // Kiểm tra xem còn trang tiếp theo không
-            // Chỉ chạy query kiểm tra next nếu snapshot hiện tại có đủ số lượng COMMENTS_PER_PAGE
             if (snapshot.docs.length === COMMENTS_PER_PAGE) {
                 let checkNextQRef = collectionGroup(db, 'FoodComments');
                 const checkNextConstraints = [];
@@ -164,7 +180,6 @@ function CommentManagement() {
                 setHasMoreNext(false);
             }
 
-            // Kiểm tra xem còn trang trước đó không
             setHasMorePrev(pageNumber > 0);
             setLoading(false);
         }, (onSnapshotError) => {
@@ -190,7 +205,6 @@ function CommentManagement() {
     }, [setupCommentsListener, selectedStatus]);
 
     const handleNextPage = () => {
-        // Chỉ đi tiếp nếu lastVisible đã được set và không đang tải
         if (lastVisible && !loading) {
             const nextPage = currentPage + 1;
             setCurrentPage(nextPage);
@@ -201,7 +215,6 @@ function CommentManagement() {
     };
 
     const handlePrevPage = () => {
-        // Chỉ lùi lại nếu firstVisible đã được set, không đang tải, và không phải trang đầu tiên
         if (firstVisible && currentPage > 0 && !loading) {
             const prevPage = currentPage - 1;
             setCurrentPage(prevPage);
@@ -339,7 +352,7 @@ function CommentManagement() {
                                         "{comment.text}"
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary" className={styles.commentTime}>
-                                        at {comment.timestamp} for Food ID: {comment.foodId}
+                                        at {comment.timestamp} for Food: <strong>{comment.foodName}</strong> (ID: {comment.foodId})
                                     </Typography>
 
                                     <div className={styles.moderationSection}>

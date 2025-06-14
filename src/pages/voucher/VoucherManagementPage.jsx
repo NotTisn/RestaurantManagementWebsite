@@ -1,32 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  CircularProgress,
-  Alert,
-  TextField,
-  Chip,
-  Grid,
-  Switch,
-  FormControlLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl
+  Box,Typography,Button,Paper,
+  Table,TableBody,TableCell,TableContainer,TableHead,TableRow,IconButton,CircularProgress, Alert,
+  TextField,Chip,Grid,Switch,FormControlLabel,Dialog,DialogTitle,DialogContent,DialogActions,DialogContentText,MenuItem, Select,InputLabel,FormControl
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -51,7 +27,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     usageLimit: '',
     usedCount: 0,
     isActive: true,
-    isPrivate: false, // NEW FIELD - default to public voucher
+    isPrivate: false, 
   });
 
   const [isSaving, setIsSaving] = useState(false);
