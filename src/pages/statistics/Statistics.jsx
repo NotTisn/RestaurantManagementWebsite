@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StatsContext } from '../../contexts/StatsContext';
-import * as XLSX from 'xlsx'; // You'll need to install this: npm install xlsx
+import * as XLSX from 'xlsx';
 import {
   BarChart,
   Bar,
@@ -10,6 +10,24 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import styles from './Statistics.module.scss';
+
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig'; 
+
+const getUserName = async (userId) => {
+  if (!userId || userId === 'Guest') return 'Guest';
+  
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      return userDoc.data().name || 'Unknown';
+    }
+    return 'Unknown';
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return 'Unknown';
+  }
+};
 
 const months = [
   '',
@@ -104,7 +122,7 @@ export default function Statistics() {
   };
 
 
-  const generateExcelReport = () => {
+  const generateExcelReport = async () => {
     setIsExporting(true);
 
     try {
@@ -161,7 +179,10 @@ export default function Statistics() {
       XLSX.utils.book_append_sheet(workbook, summaryWS, "Executive Summary");
 
       // 2. DETAILED TRANSACTIONS SHEET
-      const transactionData = filteredOrders.map(order => ({
+      const transactionData = await Promise.all(
+        filteredOrders.map(async (order) => {
+        const customerName = await getUserName(order.userId);
+        return {
         'Date': formatDate(order.timestamp),
         'Time': new Date(order.timestamp).toLocaleTimeString(),
         'Order ID': order.id?.substring(0, 8) || 'N/A',
@@ -176,15 +197,18 @@ export default function Statistics() {
         'Voucher Code': order.appliedVoucherDetails?.code || '',
         'Voucher Type': order.appliedVoucherDetails?.type || '',
         'Voucher Value': order.appliedVoucherDetails?.value || '',
-        'Customer ID': order.userId || 'Guest'
-      }));
+        'Customer ID': order.userId || 'Guest',
+        'Customer Name': customerName 
+    };
+  })
+);
 
       const transactionWS = XLSX.utils.json_to_sheet(transactionData);
       transactionWS['!cols'] = [
         { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
         { wch: 12 }, { wch: 12 }, { wch: 8 }, { wch: 10 },
         { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 12 },
-        { wch: 10 }, { wch: 12 }, { wch: 15 }
+        { wch: 10 }, { wch: 12 }, { wch: 15 }, { wch: 20 }
       ];
       XLSX.utils.book_append_sheet(workbook, transactionWS, "Detailed Transactions");
 
@@ -379,7 +403,7 @@ export default function Statistics() {
       setIsExporting(false);
     }
   };
-  const quickExportCurrentView = () => {
+  const quickExportCurrentView = async () => {
     setIsExporting(true);
 
     try {
@@ -508,7 +532,10 @@ export default function Statistics() {
       XLSX.utils.book_append_sheet(workbook, itemWS, "Complete Item Analysis");
 
       // 4. ALL TRANSACTIONS DETAIL
-      const transactionData = filteredOrders.map(order => ({
+      const transactionData = await Promise.all(
+        filteredOrders.map(async (order) => {
+        const customerName = await getUserName(order.userId);
+        return {
         'Date': formatDate(order.timestamp),
         'Time': new Date(order.timestamp).toLocaleTimeString(),
         'Order ID': order.id?.substring(0, 8) || 'N/A',
@@ -521,14 +548,17 @@ export default function Statistics() {
         'Discount': formatCurrency(order.discountAmount),
         'Total': formatCurrency(order.total),
         'Voucher Code': order.appliedVoucherDetails?.code || 'None',
-        'Customer ID': order.userId || 'Guest'
-      }));
+        'Customer ID': order.userId || 'Guest',
+        'Customer Name': customerName 
+    };
+  })
+);
 
       const transactionWS = XLSX.utils.json_to_sheet(transactionData);
       transactionWS['!cols'] = [
         { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 10 },
         { wch: 12 }, { wch: 12 }, { wch: 8 }, { wch: 10 },
-        { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 15 }
+        { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 15 }, { wch: 20 }
       ];
       XLSX.utils.book_append_sheet(workbook, transactionWS, "All Transactions");
 
