@@ -541,7 +541,7 @@ function VoucherManagementPage() {
 
   const handleSaveVoucher = async (voucherData) => {
     try {
-      if (selectedVoucher.id) {
+      if (selectedVoucher && selectedVoucher.id) {
         const voucherRef = doc(db, 'vouchers', selectedVoucher.id);
         const { ...dataToUpdate } = voucherData;
         await updateDoc(voucherRef, dataToUpdate);
