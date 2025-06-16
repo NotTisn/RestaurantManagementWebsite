@@ -7,6 +7,7 @@ import {
   addDoc,
   collection,
 } from "firebase/firestore";
+import toast from "react-hot-toast";
 import { db, storage } from "../firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useChat } from "../contexts/ChatContext";
@@ -36,6 +37,10 @@ export default function Input() {
       }
 
       // Prepare message object
+    if(text == "") {
+      toast.error("Please type something..");
+    }
+    else {
       const msg = {
         id: uuid(),
         text,
@@ -74,6 +79,7 @@ export default function Input() {
       // Clear input
       setText("");
       setImg(null);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }

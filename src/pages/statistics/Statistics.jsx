@@ -65,6 +65,12 @@ export default function Statistics() {
   const [chartData, setChartData] = useState([]);
   const [topDaily, setTopDaily] = useState([]);
   const [topMonthly, setTopMonthly] = useState([]);
+  const [summaryData, setSummaryData] = useState({
+  totalOrders: 0,
+  totalRevenue: 0,
+  totalProfit: 0, 
+  avgOrderValue: 0
+  });
 
   // Excel export states
   const [isExporting, setIsExporting] = useState(false);
@@ -81,21 +87,40 @@ export default function Statistics() {
       setChartData([]);
       setTopDaily([]);
       setTopMonthly([]);
+      setSummaryData({ totalOrders: 0, totalRevenue: 0, totalProfit: 0, avgOrderValue: 0 });
       return;
     }
 
+    let filteredOrders;
     if (month === '') {
       // Yearly view
+      const start = new Date(year, 0, 1).getTime();
+      const end = new Date(year + 1, 0, 1).getTime() - 1;
+      filteredOrders = orders.filter(o => o.timestamp >= start && o.timestamp <= end);
       setChartData(getYearlyData(year));
       setTopDaily([]);
       setTopMonthly([]);
     } else {
       // Monthly view
       const m = +month;
+      const start = new Date(year, m - 1, 1).getTime();
+      const end = new Date(year, m, 1).getTime() - 1;
+      filteredOrders = orders.filter(o => o.timestamp >= start && o.timestamp <= end);
       setChartData(getMonthlyData(year, m));
       setTopDaily(getTopDailyItems(year, m, day).slice(0, 3));
       setTopMonthly(getTopMonthlyItems(year, m).slice(0, 3));
     }
+    const totalRevenue = filteredOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+    const totalOrders = filteredOrders.length;
+    const totalProfit = totalRevenue * 0.3; // Giả sử 30% profit margin
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    setSummaryData({
+      totalOrders,
+      totalRevenue,
+      totalProfit,
+      avgOrderValue
+  });
   }, [
     year,
     month,
@@ -626,6 +651,7 @@ export default function Statistics() {
   }
 
   return (
+    
     <div className={styles.container}>
       <div className={styles.headerContainer}>
         <h1 className={styles.heading}>Statistics</h1>
@@ -713,6 +739,45 @@ export default function Statistics() {
           </label>
         )}
       </div>
+      <div className={styles.summaryCards}>
+  <div className={styles.card}>
+    <div className={styles.cardIcon}>📦</div>
+    <div className={styles.cardContent}>
+      <h3>Orders</h3>
+      <p className={styles.cardValue}>{summaryData.totalOrders.toLocaleString()}</p>
+      <span className={styles.cardLabel}>
+        {month === '' ? `Total in ${year}` : `${months[+month] || 'Month'} ${year}`}
+      </span>
+    </div>
+  </div>
+
+  <div className={styles.card}>
+    <div className={styles.cardIcon}>💰</div>
+    <div className={styles.cardContent}>
+      <h3>Revenue</h3>
+      <p className={styles.cardValue}>${summaryData.totalRevenue.toLocaleString()}</p>
+      <span className={styles.cardLabel}>Total sales</span>
+    </div>
+  </div>
+
+  <div className={styles.card}>
+    <div className={styles.cardIcon}>📈</div>
+    <div className={styles.cardContent}>
+      <h3>Profit</h3>
+      <p className={styles.cardValue}>${summaryData.totalProfit.toLocaleString()}</p>
+      <span className={styles.cardLabel}>Est. 30% margin</span>
+    </div>
+  </div>
+
+  <div className={styles.card}>
+    <div className={styles.cardIcon}>🧾</div>
+    <div className={styles.cardContent}>
+      <h3>Avg Order</h3>
+      <p className={styles.cardValue}>${summaryData.avgOrderValue.toFixed(0)}</p>
+      <span className={styles.cardLabel}>Per transaction</span>
+    </div>
+  </div>
+</div>
 
       {/* Chart */}
       <div className={styles.chart}>
