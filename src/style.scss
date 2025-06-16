@@ -10,7 +10,7 @@
   }
 }
 @mixin laptop {
-  @media screen and (max-width: 1200px) {
+  @media screen and (max-width: 1000px) {
     @content;
   }
 }
@@ -20,6 +20,8 @@
   background-color: #a7bcff;
   height: 100vh;
   width: 100vw;
+  overflow-x: hidden; /* ADD THIS to prevent horizontal page scrolling */
+  overflow-y: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,8 +97,8 @@
 // Chat layout container
 .container {
   display: flex;
-  width: 65%;
-  height: 80%;
+  width: 90%;
+  height: 90%;
   border: 1px solid white;
   border-radius: 10px;
   overflow: hidden;
@@ -258,7 +260,7 @@
       }
 
       .messageContent {
-        max-width: 80%;
+        max-width: 100%;
         display: flex;
         flex-direction: column;
         gap: 10px;
