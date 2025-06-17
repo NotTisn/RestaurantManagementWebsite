@@ -24,7 +24,7 @@ export default function Chats() {
           className="userChat"
           onClick={() => updateChat(user)}
         >
-          <img src={user.photoURL} alt="" />
+          <img src={user.photoUrl} alt="" />
           <div className="userChatInfo">
             <span>{user.displayName}</span>
             <p>{user.lastMessage?.text || "Message..."}</p>

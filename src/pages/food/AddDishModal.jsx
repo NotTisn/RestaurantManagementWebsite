@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AddDishModal.css';
 
-// Đảm bảo bạn có Cloudinary credentials hoặc import từ file config chung
 const CLOUDINARY_CLOUD_NAME = 'dc0umlqvf';
 const CLOUDINARY_UPLOAD_PRESET = 'android_do_an_avatars_unsigned';
 
 const initialFormData = {
-    name: '', price: '', description: '', imageUrl: '', star: '', time: '', categoryName: '', isPopular: false
+    name: '', price: '', description: '', imageUrl: '', time: '', categoryName: '', isPopular: false
+    // Đã bỏ 'star' ở đây
 };
 
-const initialValidationErrors = {};
+const initialValidationErrors = {}; // Đã bỏ 'star' ở đây
 
 function AddDishModal({
     isOpen,
@@ -23,13 +23,9 @@ function AddDishModal({
     const [formData, setFormData] = useState(initialFormData);
     const [isSaving, setIsSaving] = useState(false);
     const [validationErrors, setValidationErrors] = useState(initialValidationErrors);
-    // NEW STATE: Để quản lý file ảnh được chọn và URL preview
     const [selectedFile, setSelectedFile] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState('');
     const dialogRef = useRef(null);
-
-    // Regex kiểm tra URL (vẫn giữ nếu muốn validate khi có sẵn URL)
-    const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
 
     useEffect(() => {
         const dialogNode = dialogRef.current;
@@ -40,11 +36,10 @@ function AddDishModal({
         };
 
         if (isOpen) {
-            // Reset form data, validation errors, và **thêm reset cho file/preview**
             setFormData(initialFormData);
             setValidationErrors(initialValidationErrors);
-            setSelectedFile(null);          // Reset file đã chọn
-            setImagePreviewUrl('');         // Reset URL preview
+            setSelectedFile(null);
+            setImagePreviewUrl('');
             setIsSaving(false);
 
             dialogNode.showModal();
@@ -77,28 +72,24 @@ function AddDishModal({
         setValidationErrors(prev => ({ ...prev, [name]: '' }));
     };
 
-    // NEW FUNCTION: Xử lý khi người dùng chọn file ảnh
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setSelectedFile(file); // Lưu file vào state
+        setSelectedFile(file);
 
         if (file) {
-            // Kiểm tra loại file
             if (!file.type.startsWith('image/')) {
                 setValidationErrors(prev => ({ ...prev, imageUrl: 'Please select a valid image file (e.g., .jpg, .png, .gif).' }));
-                setImagePreviewUrl(''); // Clear preview nếu không phải ảnh
+                setImagePreviewUrl('');
                 return;
             }
-            // Tạo URL tạm thời để hiển thị preview
             setImagePreviewUrl(URL.createObjectURL(file));
-            setValidationErrors(prev => ({ ...prev, imageUrl: '' })); // Xóa lỗi cũ
+            setValidationErrors(prev => ({ ...prev, imageUrl: '' }));
         } else {
-            setImagePreviewUrl(''); // Clear preview nếu không có file
+            setImagePreviewUrl('');
             setValidationErrors(prev => ({ ...prev, imageUrl: '' }));
         }
     };
 
-    // NEW FUNCTION: Tải ảnh lên Cloudinary
     const uploadImageToCloudinary = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -116,7 +107,7 @@ function AddDishModal({
             if (data.error) {
                 throw new Error(data.error.message);
             }
-            return data.secure_url; // Trả về URL ảnh đã upload
+            return data.secure_url;
         } catch (error) {
             console.error("Error uploading to Cloudinary:", error);
             throw new Error(`Failed to upload image: ${error.message}`);
@@ -126,7 +117,6 @@ function AddDishModal({
     const validateForm = () => {
         const errors = {};
         const priceValue = Number.parseFloat(formData.price);
-        const starValue = Number.parseFloat(formData.star);
 
         if (!formData.name.trim()) {
             errors.name = 'Dish Name is required.';
@@ -148,17 +138,13 @@ function AddDishModal({
             errors.description = 'Description cannot exceed 500 characters.';
         }
 
-        // UPDATED VALIDATION for image: require a file to be selected
-        if (!selectedFile) { // If no file is selected
+        if (!selectedFile) {
             errors.imageUrl = 'Image is required for the new dish.';
         } else if (!selectedFile.type.startsWith('image/')) {
             errors.imageUrl = 'Selected file is not a valid image.';
         }
-        // Removed URL regex check as we are uploading a file now
 
-        if (formData.star !== '' && (Number.isNaN(starValue) || starValue < 0 || starValue > 5)) {
-            errors.star = 'Rating must be a number between 0 and 5.';
-        }
+        // Đã bỏ validation cho 'star' ở đây
 
         if (formData.time && formData.time.length > 50) {
             errors.time = 'Time cannot exceed 50 characters.';
@@ -182,14 +168,10 @@ function AddDishModal({
         let finalImageUrl = '';
 
         try {
-            // Upload ảnh lên Cloudinary trước
             if (selectedFile) {
                 finalImageUrl = await uploadImageToCloudinary(selectedFile);
                 console.log("Image uploaded to Cloudinary:", finalImageUrl);
             } else {
-                // Đây là trường hợp không có file nào được chọn, 
-                // nhưng validationForm đã bắt lỗi này rồi. 
-                // Chỉ để phòng hờ.
                 throw new Error("No image selected.");
             }
 
@@ -197,17 +179,16 @@ function AddDishModal({
                 name: formData.name.trim(),
                 price: Number.parseFloat(formData.price),
                 description: formData.description,
-                imageUrl: finalImageUrl, // Sử dụng URL từ Cloudinary
-                star: formData.star === '' ? 0 : Number.parseFloat(formData.star),
+                imageUrl: finalImageUrl,
+                star: 0, // Đã set mặc định star = 0 ở đây
                 time: formData.time,
                 categoryName: formData.categoryName,
                 isPopular: formData.isPopular
             };
 
-            await onSave(newDishData); // Gọi hàm onSave được truyền từ component cha (DishManagement)
+            await onSave(newDishData);
         } catch (error) {
             console.error("Error during save:", error);
-            // Có thể set một lỗi cục bộ cho modal hoặc hiển thị toast
             setValidationErrors(prev => ({ ...prev, general: `Failed to add dish: ${error.message}` }));
         } finally {
             setIsSaving(false);
@@ -215,7 +196,6 @@ function AddDishModal({
     };
 
     const handleBackdropClick = (event) => {
-        // Chỉ đóng modal khi click ra ngoài và không trong quá trình lưu
         if (event.target === dialogRef.current && !isSaving) {
             onClose();
         }
@@ -226,13 +206,12 @@ function AddDishModal({
             ref={dialogRef}
             className="add-dish-modal"
             onClick={handleBackdropClick}
-            onCancel={(e) => e.preventDefault()} // Ngăn chặn đóng modal bằng Esc mặc định
+            onCancel={(e) => e.preventDefault()}
             aria-labelledby="addDishModalTitle"
         >
             <div className='modal-content'>
                 <h2 id="addDishModalTitle">Add New Dish</h2>
 
-                {/* addError là lỗi từ component cha, validationErrors.general là lỗi từ modal này */}
                 {(addError || validationErrors.general) && <p className="error-message">{addError || validationErrors.general}</p>}
 
                 <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} noValidate>
@@ -281,18 +260,17 @@ function AddDishModal({
                     <div className="form-group">
                         <label htmlFor="addDishImageFile">Image:</label>
                         <input
-                            type="file" // Thay đổi type từ text thành file
-                            id="addDishImageFile" // Id mới để phân biệt
-                            name="imageFile" // Tên mới, không còn là imageUrl
-                            accept="image/*" // Chỉ chấp nhận file ảnh
-                            onChange={handleFileChange} // Xử lý file mới
+                            type="file"
+                            id="addDishImageFile"
+                            name="imageFile"
+                            accept="image/*"
+                            onChange={handleFileChange}
                             disabled={isSaving}
                             aria-describedby={validationErrors.imageUrl ? 'addDishImageUrlError' : undefined}
                             aria-invalid={!!validationErrors.imageUrl}
                         />
                         {validationErrors.imageUrl && <p id="addDishImageUrlError" className="validation-error">{validationErrors.imageUrl}</p>}
-                        
-                        {/* Hiển thị preview ảnh */}
+
                         {imagePreviewUrl && (
                             <div className="image-preview-container">
                                 <p>Image Preview:</p>
@@ -301,7 +279,8 @@ function AddDishModal({
                         )}
                         {!imagePreviewUrl && <p className="image-required-note">Image is required for new dishes.</p>}
                     </div>
-                    <div className="form-group">
+                    {/* Đã bỏ toàn bộ form-group cho rating (star) ở đây */}
+                    {/* <div className="form-group">
                         <label htmlFor="addDishStar">Rating (0-5):</label>
                         <input
                             type="number"
@@ -314,7 +293,7 @@ function AddDishModal({
                             aria-invalid={!!validationErrors.star}
                         />
                         {validationErrors.star && <p id="addDishStarError" className="validation-error">{validationErrors.star}</p>}
-                    </div>
+                    </div> */}
                     <div className="form-group">
                         <label htmlFor="addDishTime">Time:</label>
                         <input
