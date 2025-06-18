@@ -1,71 +1,59 @@
+// pages/Login.js
 import React, { useRef, useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate, Link, Navigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify"; // Đảm bảo sử dụng react-toastify nhất quán
 
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const { login, userRole, resetUserRole } = useAuth();
-  const [error, setError] = useState("");
+  // const [error, setError] = useState(""); // Loại bỏ state này vì lỗi sẽ được xử lý bằng toast
   const [loading, setLoading] = useState(false);
-  // const [userRole, setUserRole] = useState(null);
 
   const navigate = useNavigate();
-
-
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     try {
-      setError("");
+      // setError(""); // Không cần thiết
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
-      // console.log(`User role in Login: ${userRole}`)
-      // if (userRole === "restaurantOwner") {
-      //   // setUserRole(null);
-      //   await resetUserRole();
-      //   console.log(`User role after sign in: ${userRole}`)
-      //   navigate("/app");
-      // }
-      // else {
-      //   console.log(userRole)
-      //   setError("You do not have permission to access this page.");
-      // }
+      // Logic điều hướng và thông báo giờ đã được xử lý trong useEffect và AuthContext
     } catch (err) {
-      setError(`Login failed: ${err.message}`);
+      // Hàm login trong AuthContext đã xử lý toast lỗi, nên không cần setError ở đây.
+      // Nếu có lỗi ngoài mong muốn khác, có thể thêm toast.error ở đây.
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
-    useEffect(() => {
+  useEffect(() => {
     if (userRole === "restaurantOwner") {
-      resetUserRole();
+      resetUserRole(); // Đặt lại userRole để tránh re-trigger effect không cần thiết
       navigate("/app");
     } else if (userRole !== null && userRole !== undefined) {
-      setError("You do not have permission to access this page.");
+      toast.error("You do not have permission.");
     }
-  }, [userRole, navigate, resetUserRole]);
-
+  }, [userRole, navigate, resetUserRole]); // Thêm resetUserRole vào dependency array
 
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Đăng nhập</h2>
-        {error && <p style={styles.error}>{error}</p>}
+        <h2 style={styles.title}>Login</h2>
+        {/* {error && <p style={styles.error}>{error}</p>}  // Loại bỏ hiển thị lỗi cục bộ */}
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label>Email</label>
             <input type="email" ref={emailRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Mật khẩu</label>
+            <label>Password</label>
             <input type="password" ref={passwordRef} required style={styles.input} />
           </div>
           <button disabled={loading} type="submit" style={styles.button}>
-            Đăng nhập
+            Login
           </button>
         </form>
         <p style={styles.footerText}>

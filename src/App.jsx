@@ -13,6 +13,7 @@ import Message from './pages/message/Message'
 import VoucherManagementPage from './pages/voucher/VoucherManagementPage';
 import CategoryManagement from './pages/category/CategoryManagement';
 import CommentManagement from './pages/comment/CommentManagement';
+import { ToastContainer } from 'react-toastify';
 
 
 function App() {
@@ -20,30 +21,39 @@ function App() {
 
   return (
     
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path='/register' element={<Register />} />
+      <><Routes>
+      <Route path="/" element={<Login />} />
+      <Route path='/register' element={<Register />} />
 
-        <Route
+      <Route
         path="/app"
-        element={
-          <PrivateRoute>
-            <PrivateLayout />
-          </PrivateRoute>
-        }
-        >
+        element={<PrivateRoute>
+          <PrivateLayout />
+        </PrivateRoute>}
+      >
         <Route index element={<Dashboard />} />
         <Route path="food" element={<FoodManagement />} />
         <Route path="orders" element={<OrdersManagement />} />
         <Route path="statistics" element={<Statistics />} />
-        <Route path="message" element={<Message/>}/>
-        <Route path="voucher" element={<VoucherManagementPage/>}/>
+        <Route path="message" element={<Message />} />
+        <Route path="voucher" element={<VoucherManagementPage />} />
         <Route path="categories" element={<CategoryManagement />} />
         <Route path="comments" element={<CommentManagement />} />
-        </Route>
+      </Route>
       console.log("App started");
 
-      </Routes>
+    </Routes><ToastContainer
+        position="top-right" // Where the toast will appear (e.g., top-right, bottom-left)
+        autoClose={5000} // How long the toast stays visible in milliseconds
+        hideProgressBar={false} // Show or hide the progress bar
+        newestOnTop={false} // Show newest toast on top
+        closeOnClick // Close toast when clicked
+        rtl={false} // Right-to-left layout
+        pauseOnFocusLoss // Pause timer when window loses focus
+        draggable // Allow dragging toasts
+        pauseOnHover // Pause timer when mouse hovers over toast
+      /></>
+      
   );
 }
 

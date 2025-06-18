@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-
+import { toast } from "react-toastify";
 import { projectAuth, projectFirestore } from "../firebaseConfig";
 
 const AuthContext = createContext();
@@ -21,12 +21,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const signup = async (email, password) => {
-    const userCredential = await createUserWithEmailAndPassword(projectAuth, email, password);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(projectAuth, email, password);
     setCurrentUser(userCredential.user);
     console.log(userCredential)
     console.log(`User credetial UID: ${userCredential.uid}`)
     console.log(`User UID: ${userCredential.user.uid}`)
+    toast.success("Registration successful!");
     return userCredential.user;
+    }
+    catch (error){
+      toast.error(`Registration failed: ${error.message}`); 
+      throw error;
+    }
   }
 
   const login = async (email, password) => {
@@ -47,9 +54,16 @@ export function AuthProvider({ children }) {
       if (docSnap.exists()) {
         await setRestaurantOwner(docSnap.data().role);
         console.log(`User role: ${userRole}`)
+        const role = docSnap.data().role;
+        if (role === "restaurantOwner") {
+          toast.success("Login successful!");
+        } else {
+          toast.error("You do not have permission.");
+        }
       } else {
         console.error("User document not found in Firestore");
         setUserRole(null);
+        toast.error("User profile incomplete. Please contact support.");
       }
 
       setCurrentUser(user);
@@ -57,6 +71,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.log(error)
       setUserRole(null);
+      toast.error(`Login failed`);
       throw error;
     } finally {
       setLoading(false);
@@ -74,6 +89,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUserRole(null);
+    toast.info("Logged out successfully.");
     return signOut(projectAuth);
   };
 

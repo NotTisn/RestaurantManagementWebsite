@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { db } from "../firebaseConfig"; 
 import { doc, setDoc } from "firebase/firestore"; 
-
+import toast from "react-hot-toast";
 export default function Register() {
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -20,11 +20,11 @@ export default function Register() {
     e.preventDefault();
 
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      return setError("Passwords do not match");
+      toast.error("Passwords do not match");
     }
 
     try {
-      setError("");
+      //setError("");
       setLoading(true);
       const currentUser = await signup(emailRef.current.value, passwordRef.current.value);
 
@@ -42,7 +42,7 @@ export default function Register() {
       const restaurantDocRef = doc(db, "users", currentUser.uid);
       await setDoc(restaurantDocRef, restaurantData);
       console.log("Restaurant data saved to Firestore");
-
+      toast.success("Restaurant information saved!");
       await setDoc(doc(db, "userChats", currentUser.uid), {});
       navigate("/");
     } catch (err) {
