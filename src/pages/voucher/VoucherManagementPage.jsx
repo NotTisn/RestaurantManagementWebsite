@@ -14,6 +14,9 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
+// Import thư viện xlsx
+import * as XLSX from 'xlsx';
+
 const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   const isEditing = !!voucherData;
   const [formData, setFormData] = useState({
@@ -450,9 +453,7 @@ const getVoucherStatus = (voucher) => {
     return { text: 'Inactive', color: 'grey' };
   }
 
-  if (startDate && now < startDate) {
-    return { text: 'Upcoming', color: 'orange' };
-  }
+  
 
   if (expiryDate && now > expiryDate) {
     return { text: 'Expired', color: 'red' };
@@ -467,8 +468,7 @@ const getVoucherStatus = (voucher) => {
 
   if (startDate && expiryDate && now >= startDate && now <= expiryDate) {
     return { text: 'Active', color: 'green' };
-  }
-
+  } 
   return { text: 'Unknown', color: 'default' };
 };
 
@@ -625,8 +625,6 @@ function VoucherManagementPage() {
         switch (filterStatus) {
           case 'active':
             return status === 'Active';
-          case 'upcoming':
-            return status === 'Upcoming';
           case 'expired':
             return status === 'Expired';
           case 'used_up':
@@ -643,19 +641,10 @@ function VoucherManagementPage() {
   }, [vouchers, searchTerm, filterStatus]);
 
 
-  const escapeCsvValue = (value) => {
-    if (value == null) return '';
-    let stringValue = String(value);
-    stringValue = stringValue.replace(/"/g, '""');
-    if (/[",\n]/.test(stringValue)) {
-      return `"${stringValue}"`;
-    }
-    return stringValue;
-  };
-
-  const handleExportCsv = () => {
+  // Hàm xử lý xuất Excel
+  const handleExportExcel = () => {
     if (filteredVouchers.length === 0) {
-      alert("No vouchers to export.");
+      alert("Không có voucher nào để xuất.");
       return;
     }
 
@@ -669,10 +658,11 @@ function VoucherManagementPage() {
       "Minimum Order Value",
       "Usage Limit",
       "Used Count",
-      "Active"
+      "Active",
+      "Private" // Thêm cột Private
     ];
 
-    const rows = filteredVouchers.map(voucher => {
+    const dataForExcel = filteredVouchers.map(voucher => {
       const {
         code,
         description,
@@ -683,54 +673,73 @@ function VoucherManagementPage() {
         minOrderValue,
         usageLimit,
         usedCount,
-        isActive
+        isActive,
+        isPrivate
       } = voucher;
 
-      const formattedStartDate = startDate instanceof Date && !Number.isNaN(startDate.getTime()) ? startDate.toISOString().split('T')[0] : '';
-      const formattedExpiryDate = expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime()) ? expiryDate.toISOString().split('T')[0] : '';
+      const formattedDiscountValue = discountType === 'percentage' ? `${discountValue}%`
+                                    : (discountType === 'fixed' ? `${Number(discountValue).toLocaleString('vi-VN')} $` : 'Free Shipping');
 
-      const rawDiscountValue = discountValue || (discountValue === 0 ? 0 : '');
-      const rawMinOrderValue = minOrderValue || (minOrderValue === 0 ? 0 : '');
-      const rawUsageLimit = usageLimit || (usageLimit === 0 ? 0 : '');
-      const rawUsedCount = usedCount || (usedCount === 0 ? 0 : '');
+      const formattedMinOrderValue = Number(minOrderValue) > 0 ? `${Number(minOrderValue).toLocaleString('vi-VN')} $` : 'N/A';
+      const formattedUsageLimit = Number(usageLimit || 0) === 0 ? '∞' : Number(usageLimit);
+      const formattedUsedCount = Number(usedCount);
 
-      const discountTypeText = discountType === 'percentage' ? 'Percentage'
-        : (discountType === 'fixed' ? 'Fixed Amount'
-          : (discountType === 'free_shipping' ? 'Free Shipping' : discountType));
+      const discountTypeText = discountType === 'percentage' ? 'Phần trăm'
+                               : (discountType === 'fixed' ? 'Số tiền cố định' : 'Miễn phí vận chuyển');
 
-      const isActiveText = isActive ? 'Yes' : 'No';
+      const isActiveText = isActive ? 'Có' : 'Không';
+      const isPrivateText = isPrivate ? 'Có' : 'Không';
 
-      return [
-        code,
-        description,
-        discountTypeText,
-        rawDiscountValue,
-        formattedStartDate,
-        formattedExpiryDate,
-        rawMinOrderValue,
-        rawUsageLimit,
-        rawUsedCount,
-        isActiveText
-      ].map(value => escapeCsvValue(value)).join(',');
+      return {
+        "Code": code,
+        "Description": description,
+        "Discount Type": discountTypeText,
+        "Discount Value": formattedDiscountValue,
+        "Start Date": startDate instanceof Date && !Number.isNaN(startDate.getTime()) ? startDate : null, // Gán trực tiếp Date object
+        "Expiry Date": expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime()) ? expiryDate : null, // Gán trực tiếp Date object
+        "Minimum Order Value": formattedMinOrderValue,
+        "Usage Limit": `${formattedUsedCount} / ${formattedUsageLimit}`,
+        "Used Count": formattedUsedCount, // Để riêng cột này nếu cần tính toán số
+        "Active": isActiveText,
+        "Private": isPrivateText
+      };
     });
 
-    const csvString = [headers.join(','), ...rows].join('\n');
+    // Tạo một workbook mới
+    const wb = XLSX.utils.book_new();
+    // Tạo một worksheet từ dữ liệu JSON
+    const ws = XLSX.utils.json_to_sheet(dataForExcel, { header: headers });
 
-    const blob = new Blob([`\uFEFF${csvString}`], { type: 'text/csv;charset=utf-8;' });
+    // Định dạng cột ngày tháng trong Excel
+    // Lặp qua các hàng để thiết lập kiểu cho cột ngày tháng
+    const dateColumns = ["Start Date", "Expiry Date"];
+    dateColumns.forEach(colName => {
+        const colIndex = headers.indexOf(colName);
+        if (colIndex !== -1) {
+            // Xác định ký tự cột Excel (A, B, C...)
+            const colLetter = String.fromCharCode(65 + colIndex); // 65 là mã ASCII của 'A'
+            for (let R = 1; R <= dataForExcel.length; ++R) { // Bắt đầu từ hàng 1 (sau header)
+                const cellref = XLSX.utils.encode_cell({c: colIndex, r: R});
+                if (ws[cellref] && ws[cellref].t === 'n') { // Nếu ô là số (Date object được chuyển thành số Excel)
+                    ws[cellref].z = 'dd/mm/yyyy'; // Định dạng ngày tháng
+                }
+            }
+        }
+    });
 
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
+    // Đặt độ rộng cột tự động (tùy chọn)
+    const wscols = headers.map(header => ({
+        wch: Math.max(header.length, 15) // Độ rộng tối thiểu 15 hoặc theo độ dài tiêu đề
+    }));
+    ws['!cols'] = wscols;
 
-    link.setAttribute('href', url);
+    // Thêm worksheet vào workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
+
+    // Xuất file Excel
     const now = new Date();
     const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-    link.setAttribute('download', `danh_sach_voucher_xuat_${dateString}.csv`);
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
+    XLSX.writeFile(wb, `danh_sach_voucher_${dateString}.xlsx`);
   };
 
 
@@ -752,10 +761,10 @@ function VoucherManagementPage() {
           <Button
             variant="outlined"
             startIcon={<CloudDownloadIcon />}
-            onClick={handleExportCsv}
+            onClick={handleExportExcel} // Gọi hàm xuất Excel mới
             disabled={loading || filteredVouchers.length === 0}
           >
-            Export CSV
+            Export Excel
           </Button>
           <Button
             variant="contained"
@@ -794,7 +803,7 @@ function VoucherManagementPage() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Trạng thái</InputLabel>
+            <InputLabel>Status</InputLabel>
             <Select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -802,7 +811,6 @@ function VoucherManagementPage() {
             >
               <MenuItem value="all">All</MenuItem>
               <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="upcoming">Upcoming</MenuItem>
               <MenuItem value="expired">Expired</MenuItem>
               <MenuItem value="used_up">Used Up</MenuItem>
               <MenuItem value="inactive_switch">Inactive</MenuItem>
