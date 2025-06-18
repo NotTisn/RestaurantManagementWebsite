@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Box,Typography,Button,Paper,
-  Table,TableBody,TableCell,TableContainer,TableHead,TableRow,IconButton,CircularProgress, Alert,
-  TextField,Chip,Grid,Switch,FormControlLabel,Dialog,DialogTitle,DialogContent,DialogActions,DialogContentText,MenuItem, Select,InputLabel,FormControl
+  Box, Typography, Button, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Alert,
+  TextField, Chip, Grid, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, MenuItem, Select, InputLabel, FormControl
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -22,7 +22,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
   const [formData, setFormData] = useState({
     code: '',
     description: '',
-    discountType: 'percentage',
+    discountType: 'percentage', // Default to percentage
     discountValue: '',
     startDate: '',
     expiryDate: '',
@@ -30,7 +30,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     usageLimit: '',
     usedCount: 0,
     isActive: true,
-    isPrivate: false, 
+    isPrivate: false,
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -42,7 +42,8 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       setFormData({
         code: voucherData.code || '',
         description: voucherData.description || '',
-        discountType: voucherData.discountType || 'percentage',
+        // Ensure discountType is one of the allowed types
+        discountType: ['percentage', 'fixed'].includes(voucherData.discountType) ? voucherData.discountType : 'percentage',
         discountValue: voucherData.discountValue?.toString() || '',
         startDate: voucherData.startDate instanceof Date && !Number.isNaN(voucherData.startDate)
           ? voucherData.startDate.toISOString().split('T')[0]
@@ -54,16 +55,15 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         usageLimit: voucherData.usageLimit?.toString() || '',
         usedCount: voucherData.usedCount || 0,
         isActive: voucherData.isActive !== undefined ? voucherData.isActive : true,
-        isPrivate: voucherData.isPrivate || false, // NEW - handle existing vouchers without this field
+        isPrivate: voucherData.isPrivate || false,
       });
     } else {
-      // Reset form for new voucher
       const today = new Date();
       const formattedToday = today.toISOString().split('T')[0];
       setFormData({
         code: '',
         description: '',
-        discountType: 'percentage',
+        discountType: 'percentage', // Default to percentage for new vouchers
         discountValue: '',
         startDate: formattedToday,
         expiryDate: '',
@@ -71,7 +71,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
         usageLimit: '',
         usedCount: 0,
         isActive: true,
-        isPrivate: false, // NEW - default to public
+        isPrivate: false,
       });
     }
     setErrors({});
@@ -82,23 +82,10 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    setFormData(prev => {
-      const newState = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      };
-
-      if (name === 'discountType') {
-        if (value === 'free_shipping') {
-          newState.discountValue = '0';
-        } else if (prev.discountType === 'free_shipping' && newState.discountValue === '0') {
-          newState.discountValue = '';
-        }
-      }
-
-      return newState;
-    });
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
     setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
@@ -125,7 +112,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       isValid = false;
     }
 
-
     if (!formData.expiryDate) {
       newErrors.expiryDate = 'Expiry date cannot be empty.';
       isValid = false;
@@ -141,16 +127,15 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
       }
     }
 
-    if (formData.discountType !== 'free_shipping') {
-      const discountValue = Number(formData.discountValue);
-      if (formData.discountValue === '' || Number.isNaN(discountValue) || discountValue <= 0) {
-        newErrors.discountValue = 'Discount value must be a positive number.';
+    // Validation for discountValue now applies to both percentage and fixed
+    const discountValue = Number(formData.discountValue);
+    if (formData.discountValue === '' || Number.isNaN(discountValue) || discountValue <= 0) {
+      newErrors.discountValue = 'Discount value must be a positive number.';
+      isValid = false;
+    } else {
+      if (formData.discountType === 'percentage' && discountValue > 100) {
+        newErrors.discountValue = 'Discount value cannot be greater than 100 percent.';
         isValid = false;
-      } else {
-        if (formData.discountType === 'percentage' && discountValue > 100) {
-          newErrors.discountValue = 'Discount value cannot be greater than 100 percent.';
-          isValid = false;
-        }
       }
     }
 
@@ -190,7 +175,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
     };
 
     if (!isEditing) {
-      //dataToSave.id = undefined; 
       dataToSave.createdAt = new Date();
       const now = new Date();
       now.setHours(0, 0, 0, 0);
@@ -257,7 +241,7 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
               >
                 <MenuItem value="percentage">Percentage</MenuItem>
                 <MenuItem value="fixed">Fixed Amount</MenuItem>
-                <MenuItem value="free_shipping">Free Shipping</MenuItem>
+                {/* Removed Free Shipping MenuItem */}
               </Select>
               {errors.discountType && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.discountType}</Typography>}
             </FormControl>
@@ -266,16 +250,16 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
             <TextField
               margin="dense"
               name="discountValue"
-              label={formData.discountType === 'percentage' ? 'Value (%)' : (formData.discountType === 'fixed' ? 'Value ($)' : 'Value')}
+              label={formData.discountType === 'percentage' ? 'Value (%)' : 'Value ($)'}
               type="number"
               fullWidth
               variant="outlined"
               value={formData.discountValue}
               onChange={handleNumberChange}
-              required={formData.discountType !== 'free_shipping'}
+              required
               error={!!errors.discountValue}
               helperText={errors.discountValue}
-              disabled={isSaving || formData.discountType === 'free_shipping'}
+              disabled={isSaving}
               inputProps={{ min: 0, step: formData.discountType === 'percentage' ? 0.01 : 1 }}
             />
           </Grid>
@@ -395,8 +379,6 @@ const VoucherFormModal = ({ open, onClose, onSave, voucherData }) => {
                 </Box>
               }
             />
-
-
           </Grid>
         </Grid>
       </DialogContent>
@@ -453,7 +435,6 @@ const getVoucherStatus = (voucher) => {
     return { text: 'Inactive', color: 'grey' };
   }
 
-  
 
   if (expiryDate && now > expiryDate) {
     return { text: 'Expired', color: 'red' };
@@ -468,7 +449,7 @@ const getVoucherStatus = (voucher) => {
 
   if (startDate && expiryDate && now >= startDate && now <= expiryDate) {
     return { text: 'Active', color: 'green' };
-  } 
+  }
   return { text: 'Unknown', color: 'default' };
 };
 
@@ -482,7 +463,6 @@ function VoucherManagementPage() {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -503,7 +483,7 @@ function VoucherManagementPage() {
           usageLimit: Number(data.usageLimit || 0),
           usedCount: Number(data.usedCount || 0),
           isActive: data.isActive !== undefined ? data.isActive : true,
-          isPrivate: data.isPrivate || false, // NEW - handle the isPrivate field
+          isPrivate: data.isPrivate || false,
         };
       });
       setVouchers(vouchersData);
@@ -659,7 +639,7 @@ function VoucherManagementPage() {
       "Usage Limit",
       "Used Count",
       "Active",
-      "Private" // Thêm cột Private
+      "Private"
     ];
 
     const dataForExcel = filteredVouchers.map(voucher => {
@@ -677,15 +657,16 @@ function VoucherManagementPage() {
         isPrivate
       } = voucher;
 
+      // Update formattedDiscountValue to exclude 'Free Shipping' logic
       const formattedDiscountValue = discountType === 'percentage' ? `${discountValue}%`
-                                    : (discountType === 'fixed' ? `${Number(discountValue).toLocaleString('vi-VN')} $` : 'Free Shipping');
+                                     : `${Number(discountValue).toLocaleString('vi-VN')} $`;
 
       const formattedMinOrderValue = Number(minOrderValue) > 0 ? `${Number(minOrderValue).toLocaleString('vi-VN')} $` : 'N/A';
       const formattedUsageLimit = Number(usageLimit || 0) === 0 ? '∞' : Number(usageLimit);
       const formattedUsedCount = Number(usedCount);
 
-      const discountTypeText = discountType === 'percentage' ? 'Phần trăm'
-                               : (discountType === 'fixed' ? 'Số tiền cố định' : 'Miễn phí vận chuyển');
+      // Update discountTypeText to exclude 'Free Shipping'
+      const discountTypeText = discountType === 'percentage' ? 'Phần trăm' : 'Số tiền cố định';
 
       const isActiveText = isActive ? 'Có' : 'Không';
       const isPrivateText = isPrivate ? 'Có' : 'Không';
@@ -695,48 +676,40 @@ function VoucherManagementPage() {
         "Description": description,
         "Discount Type": discountTypeText,
         "Discount Value": formattedDiscountValue,
-        "Start Date": startDate instanceof Date && !Number.isNaN(startDate.getTime()) ? startDate : null, // Gán trực tiếp Date object
-        "Expiry Date": expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime()) ? expiryDate : null, // Gán trực tiếp Date object
+        "Start Date": startDate instanceof Date && !Number.isNaN(startDate.getTime()) ? startDate : null,
+        "Expiry Date": expiryDate instanceof Date && !Number.isNaN(expiryDate.getTime()) ? expiryDate : null,
         "Minimum Order Value": formattedMinOrderValue,
         "Usage Limit": `${formattedUsedCount} / ${formattedUsageLimit}`,
-        "Used Count": formattedUsedCount, // Để riêng cột này nếu cần tính toán số
+        "Used Count": formattedUsedCount,
         "Active": isActiveText,
         "Private": isPrivateText
       };
     });
 
-    // Tạo một workbook mới
     const wb = XLSX.utils.book_new();
-    // Tạo một worksheet từ dữ liệu JSON
     const ws = XLSX.utils.json_to_sheet(dataForExcel, { header: headers });
 
-    // Định dạng cột ngày tháng trong Excel
-    // Lặp qua các hàng để thiết lập kiểu cho cột ngày tháng
     const dateColumns = ["Start Date", "Expiry Date"];
     dateColumns.forEach(colName => {
         const colIndex = headers.indexOf(colName);
         if (colIndex !== -1) {
-            // Xác định ký tự cột Excel (A, B, C...)
-            const colLetter = String.fromCharCode(65 + colIndex); // 65 là mã ASCII của 'A'
-            for (let R = 1; R <= dataForExcel.length; ++R) { // Bắt đầu từ hàng 1 (sau header)
+            const colLetter = String.fromCharCode(65 + colIndex);
+            for (let R = 1; R <= dataForExcel.length; ++R) {
                 const cellref = XLSX.utils.encode_cell({c: colIndex, r: R});
-                if (ws[cellref] && ws[cellref].t === 'n') { // Nếu ô là số (Date object được chuyển thành số Excel)
-                    ws[cellref].z = 'dd/mm/yyyy'; // Định dạng ngày tháng
+                if (ws[cellref] && ws[cellref].t === 'n') {
+                    ws[cellref].z = 'dd/mm/yyyy';
                 }
             }
         }
     });
 
-    // Đặt độ rộng cột tự động (tùy chọn)
     const wscols = headers.map(header => ({
-        wch: Math.max(header.length, 15) // Độ rộng tối thiểu 15 hoặc theo độ dài tiêu đề
+        wch: Math.max(header.length, 15)
     }));
     ws['!cols'] = wscols;
 
-    // Thêm worksheet vào workbook
     XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
 
-    // Xuất file Excel
     const now = new Date();
     const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
     XLSX.writeFile(wb, `danh_sach_voucher_${dateString}.xlsx`);
@@ -761,7 +734,7 @@ function VoucherManagementPage() {
           <Button
             variant="outlined"
             startIcon={<CloudDownloadIcon />}
-            onClick={handleExportExcel} // Gọi hàm xuất Excel mới
+            onClick={handleExportExcel}
             disabled={loading || filteredVouchers.length === 0}
           >
             Export Excel
@@ -863,10 +836,9 @@ function VoucherManagementPage() {
                       maxWidth: 250
                     }}>{voucher.description}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 100, maxWidth: 150 }} align="right">
+                      {/* Updated display logic for discount value */}
                       {voucher.discountType === 'percentage' ? `${voucher.discountValue}%`
-                        : (voucher.discountType === 'fixed' ? `${Number(voucher.discountValue).toLocaleString('vi-VN')} $`
-                          : (voucher.discountType === 'free_shipping' ? 'Free Shipping' : 'N/A'))
-                      }
+                        : `${Number(voucher.discountValue).toLocaleString('vi-VN')} $`}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.startDate instanceof Date && !Number.isNaN(voucher.startDate.getTime()) ? voucher.startDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{voucher.expiryDate instanceof Date && !Number.isNaN(voucher.expiryDate.getTime()) ? voucher.expiryDate.toLocaleDateString('vi-VN') : 'N/A'}</TableCell>
