@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { toast } from "react-toastify";
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, Box, Button } from '@mui/material';
-import CategoryIcon from '@mui/icons-material/Category';import CommentIcon from '@mui/icons-material/Comment';
+import CategoryIcon from '@mui/icons-material/Category'; import CommentIcon from '@mui/icons-material/Comment';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
@@ -13,14 +14,14 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
 
-import './Sidebar.css'; 
+import './Sidebar.css';
 
-const drawerWidth = 240; 
+const drawerWidth = 240;
 
 function Sidebar() {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const location = useLocation();
-  const [open] = useState(true); 
+  const [open] = useState(true);
 
   const menuItems = [
     { path: '/app', text: 'Dashboard', icon: <HomeIcon /> },
@@ -30,14 +31,15 @@ function Sidebar() {
     { path: '/app/statistics', text: 'Statistics', icon: <AssessmentIcon /> },
     { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
     { path: '/app/categories', text: 'Categories', icon: <CategoryIcon /> },
-    { path: '/app/comments', text: 'Comments', icon:  <CommentIcon /> },
+    { path: '/app/comments', text: 'Comments', icon: <CommentIcon /> },
   ];
 
-  const handleLogout = async () => { 
+  const handleLogout = async () => {
     try {
-      await signOut(auth); 
+      await signOut(auth);
       console.log('User logged out successfully from Firebase');
-      navigate('/'); 
+      toast.info("Logged out successfully.");
+      navigate('/');
     } catch (error) {
       console.error('Error signing out:', error.message);
     }
@@ -93,12 +95,12 @@ function Sidebar() {
                   '& .MuiListItemIcon-root': {
                     color: 'white',
                   },
-                  '&:hover': { 
-                    backgroundColor: '#1565c0', 
+                  '&:hover': {
+                    backgroundColor: '#1565c0',
                   },
                 }),
                 '&:hover': {
-                  backgroundColor: location.pathname === item.path ? '#1565c0' : '#e9ecef', 
+                  backgroundColor: location.pathname === item.path ? '#1565c0' : '#e9ecef',
                 },
               }}
             >
