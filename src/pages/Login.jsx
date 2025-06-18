@@ -1,16 +1,18 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const {login, userRole } = useAuth(); 
+  const { login, userRole, resetUserRole } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // const [userRole, setUserRole] = useState(null);
+
   const navigate = useNavigate();
 
-  
+
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -19,18 +21,31 @@ export default function Login() {
       setError("");
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
-      console.log(userRole)
-      if (userRole === "restaurantOwner") {
-        navigate("/app"); 
-      }
-      else {
-        setError("You do not have permission to access this page.");
-      }
+      // console.log(`User role in Login: ${userRole}`)
+      // if (userRole === "restaurantOwner") {
+      //   // setUserRole(null);
+      //   await resetUserRole();
+      //   console.log(`User role after sign in: ${userRole}`)
+      //   navigate("/app");
+      // }
+      // else {
+      //   console.log(userRole)
+      //   setError("You do not have permission to access this page.");
+      // }
     } catch (err) {
       setError(`Login failed: ${err.message}`);
     }
     setLoading(false);
   }
+
+    useEffect(() => {
+    if (userRole === "restaurantOwner") {
+      resetUserRole();
+      navigate("/app");
+    } else if (userRole !== null && userRole !== undefined) {
+      setError("You do not have permission to access this page.");
+    }
+  }, [userRole, navigate, resetUserRole]);
 
 
   return (
@@ -67,7 +82,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#f3f4f6", 
+    backgroundColor: "#f3f4f6",
   },
   card: {
     backgroundColor: "#fff",
@@ -109,7 +124,7 @@ const styles = {
     fontSize: "16px",
   },
   error: {
-    color: "#ef4444", 
+    color: "#ef4444",
     fontSize: "14px",
     marginBottom: "10px",
   },

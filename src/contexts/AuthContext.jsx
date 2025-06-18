@@ -31,13 +31,12 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      setLoading(true); 
+      setLoading(true);
       const userCredential = await signInWithEmailAndPassword(projectAuth, email, password);
       const user = userCredential.user;
 
       console.log(user)
-      console.log(user.uid)
-      console.log(user.role)
+      console.log(`User uid: ${user.uid}`)
 
       const userDocRef = doc(projectFirestore, "users", user.uid);
       console.log(userDocRef)
@@ -46,7 +45,8 @@ export function AuthProvider({ children }) {
       console.log(docSnap.data())
 
       if (docSnap.exists()) {
-        setUserRole(docSnap.data().role);
+        await setRestaurantOwner(docSnap.data().role);
+        console.log(`User role: ${userRole}`)
       } else {
         console.error("User document not found in Firestore");
         setUserRole(null);
@@ -62,6 +62,15 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   };
+
+  const setRestaurantOwner = async (restaurantOwner) => {
+    console.log("Running...")
+    setUserRole(restaurantOwner)
+  }
+
+  const resetUserRole = async () => {
+    setUserRole(undefined);
+  }
 
   const logout = () => {
     setUserRole(null);
@@ -97,6 +106,7 @@ export function AuthProvider({ children }) {
     signup,
     login,
     logout,
+    resetUserRole
   };
 
   return (
