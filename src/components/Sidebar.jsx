@@ -72,7 +72,7 @@ function Sidebar() {
           <Link to="/app" className="sidebar-logo-link">
             <Box className="sidebar-logo-box">
               <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                Nhà Hàng XYZ
+                4T Grab Food
               </Typography>
             </Box>
           </Link>
