@@ -14,6 +14,7 @@ import VoucherManagementPage from './pages/voucher/VoucherManagementPage';
 import CategoryManagement from './pages/category/CategoryManagement';
 import CommentManagement from './pages/comment/CommentManagement';
 import { ToastContainer } from 'react-toastify';
+import BannerManagement from './pages/banner/BannerManagement';
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
         <Route path="voucher" element={<VoucherManagementPage />} />
         <Route path="categories" element={<CategoryManagement />} />
         <Route path="comments" element={<CommentManagement />} />
+        <Route path="banners" element={<BannerManagement />} />
       </Route>
       console.log("App started");
 
