@@ -55,6 +55,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import RestoreIcon from "@mui/icons-material/Restore";
 
 const ORDERS_PER_PAGE = 6;
 
@@ -649,6 +650,12 @@ function OrdersManagement() {
                         icon={<CheckCircleOutlineIcon />}
                         iconPosition="start"
                     />
+                    <Tab
+                        label="Retrieved"
+                        value="retrieved"
+                        icon={<RestoreIcon />}
+                        iconPosition="start"
+                    />
                 </Tabs>
             </Box>
 
@@ -855,6 +862,15 @@ function OrdersManagement() {
                                                 Order Completed
                                             </Typography>
                                         )}
+                                    {order.status === "retrieved" &&
+                                        (order.reportStatus === 0 || order.reportStatus === undefined) && (
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: "red", fontWeight: "bold", mt: 1 }}
+                                            >
+                                                Order Retrieved
+                                            </Typography>
+                                        )}
 
                                     <div className={styles.itemsList}>
                                         <h4>📦 Products:</h4>
@@ -932,6 +948,14 @@ function OrdersManagement() {
                                                     Order Completed
                                                 </Typography>
                                             )}
+                                        {order.status === "retrieved" && ( // Only show "Order Completed" if not reported as 'not delivered'
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: "red", fontWeight: "bold", mt: 1 }}
+                                            >
+                                                Order Retrieved
+                                            </Typography>
+                                        )}
                                     </div>
                                 </div>
                             ))}
