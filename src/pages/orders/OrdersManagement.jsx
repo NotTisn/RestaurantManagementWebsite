@@ -37,6 +37,19 @@ import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -72,6 +85,43 @@ function OrdersManagement() {
 
     const unsubscribeRef = useRef(null);
     const unsubscribeNewOrdersRef = useRef(null);
+
+    const [shippers, setShippers] = useState([]);
+    const [isShipperModalOpen, setIsShipperModalOpen] = useState(false);
+    const [selectedOrderForShipper, setSelectedOrderForShipper] = useState(null);
+    const [selectedShipperId, setSelectedShipperId] = useState(""); // Holds the shipper ID chosen in the modal
+
+    const showSnackbar = (message) => {
+        setSnackbarMessage(message);
+        setSnackbarOpen(true);
+    };
+
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === "clickaway") {
+            return;
+        }
+        setSnackbarOpen(false);
+    };
+
+    const fetchShippers = useCallback(async () => {
+        try {
+            const q = query(collection(db, "users"), where("role", "==", "shipper"));
+            const querySnapshot = await getDocs(q);
+            const shippersList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                name: doc.data().name || "Unnamed Shipper" // Assuming shippers have a 'name' field
+            }));
+            setShippers(shippersList);
+        } catch (err) {
+            console.error("Error fetching shippers:", err);
+            showSnackbar("Failed to load shipper list.");
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchShippers(); // Fetch shippers when the component mounts
+    }, [fetchShippers]);
+
 
     const setupOrdersListener = useCallback(
         async (direction = "initial", startDoc = null, pageNumber = 0) => {
@@ -122,6 +172,7 @@ function OrdersManagement() {
                 async (snapshot) => {
                     const ordersData = [];
                     const uniqueUserIds = new Set();
+                    const uniqueShipperIds = new Set(); // New: To fetch shipper names if already assigned
 
                     if (snapshot.empty) {
                         setOrders([]);
@@ -167,27 +218,34 @@ function OrdersManagement() {
                             timestamp: formattedTimestamp,
                             deliveryAddress: d.deliveryAddress || "N/A",
                             note: d.orderNote || "N/A",
-                            reportStatus: d.reportStatus || 0, // Add this line
-                            reportAdditionalInfo: d.reportAdditionalInfo || "", // Add this line too for future use
+                            reportStatus: d.reportStatus || 0,
+                            reportAdditionalInfo: d.reportAdditionalInfo || "",
+                            shipperId: d.shipperId || null, // Capture shipperId
                         };
                         ordersData.push(order);
                         if (order.userId && order.userId !== "Unknown") {
                             uniqueUserIds.add(order.userId);
                         }
+                        if (order.shipperId) { // If a shipper is assigned, add to set
+                            uniqueShipperIds.add(order.shipperId);
+                        }
                     });
 
                     const userIdsArray = Array.from(uniqueUserIds);
+                    const shipperIdsArray = Array.from(uniqueShipperIds); // Convert set to array
+                    const combinedIdsArray = [...new Set([...userIdsArray, ...shipperIdsArray])]; // Combine and get unique
+
                     const fetchedUsersMap = {};
 
-                    if (userIdsArray.length > 0) {
+                    if (combinedIdsArray.length > 0) {
                         const chunkSize = 10;
-                        const userIdChunks = [];
-                        for (let i = 0; i < userIdsArray.length; i += chunkSize) {
-                            userIdChunks.push(userIdsArray.slice(i, i + chunkSize));
+                        const idChunks = [];
+                        for (let i = 0; i < combinedIdsArray.length; i += chunkSize) {
+                            idChunks.push(combinedIdsArray.slice(i, i + chunkSize));
                         }
 
                         try {
-                            const userPromises = userIdChunks.map((chunk) => {
+                            const userPromises = idChunks.map((chunk) => {
                                 const userQuery = query(
                                     collection(db, "users"),
                                     where(documentId(), "in", chunk)
@@ -202,21 +260,23 @@ function OrdersManagement() {
                                 });
                             });
                         } catch (fetchUserError) {
-                            console.error("Error fetching user data:", fetchUserError);
-                            setError("Error fetching user data. Please try again.");
+                            console.error("Error fetching user/shipper data:", fetchUserError);
+                            setError("Error fetching user/shipper data. Please try again.");
                         }
                     }
-                    setUsersMap(fetchedUsersMap);
+                    setUsersMap(fetchedUsersMap); // Update usersMap to include shippers
 
-                    const ordersWithUserNames = ordersData.map((order) => {
+                    const ordersWithNames = ordersData.map((order) => {
                         const user = fetchedUsersMap[order.userId];
+                        const shipper = fetchedUsersMap[order.shipperId]; // Get shipper data
                         return {
                             ...order,
                             userName: user?.name || "Unknown User",
+                            shipperName: shipper?.name || "Unassigned", // Add shipper's name
                         };
                     });
 
-                    setOrders(ordersWithUserNames);
+                    setOrders(ordersWithNames);
 
                     const checkNextQuery = query(
                         baseQueryDefinition,
@@ -275,10 +335,9 @@ function OrdersManagement() {
                             currentPendingCount - lastAcknowledgedPendingCountRef.current;
                         setNewOrdersCount(newlyArrivedOrders);
 
-                        setSnackbarMessage(
+                        showSnackbar(
                             `🔔 You have ${newlyArrivedOrders} new pending orders!`
                         );
-                        setSnackbarOpen(true);
                         const now = new Date();
                         const currentYear = now.getFullYear();
                         const currentMonth = now.getMonth() + 1;
@@ -353,13 +412,29 @@ function OrdersManagement() {
         }
     };
 
-    const handleMarkCompleted = async (orderId, userId) => {
+    const handleMarkDelivering = (orderId, userId) => {
+        setSelectedOrderForShipper({ orderId, userId });
+        setIsShipperModalOpen(true);
+    };
+    const handleMarkCompleted = async (orderId, userId, shipperId) => {
+        if (!shipperId) {
+            // This check should ideally be handled before calling this function
+            showSnackbar("Internal error: Shipper ID missing for assignment.");
+            return;
+        }
+
         const orderRef = doc(db, "orders", orderId);
         try {
-            await updateDoc(orderRef, { status: "delivering" });
+            await updateDoc(orderRef, {
+                status: "delivering",
+                shipperId: shipperId, // Add the shipperId to the order
+            });
 
-            const backendUrl =
-                "https://foodappbe-r5x8.onrender.com/notify-order-completed";
+            showSnackbar(`Order ${orderId} assigned to shipper and marked as delivering!`);
+            // The modal closing logic is now in handleAssignShipperAndDeliver function called by the modal
+            // setIsShipperModalOpen(false);
+
+            const backendUrl = "https://foodappbe-r5x8.onrender.com/notify-order-completed";
             fetch(backendUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -383,16 +458,15 @@ function OrdersManagement() {
                 .catch((fetchError) => {
                     console.error("Notification API call failed:", fetchError);
                 });
+
         } catch (firestoreError) {
             console.error(
                 "Error updating order status to 'delivering' in Firestore:",
                 firestoreError
             );
-            alert(`Failed to update order status: ${firestoreError.message}`);
+            showSnackbar(`Failed to update order status: ${firestoreError.message}`);
         }
-    };
-
-    const handleConfirmDelivery = async (orderId) => {
+    }; const handleConfirmDelivery = async (orderId) => {
         const orderRef = doc(db, "orders", orderId);
         try {
             await updateDoc(orderRef, { status: "completed", paymentStatus: "paid" });
@@ -453,10 +527,14 @@ function OrdersManagement() {
             await updateDoc(orderRef, {
                 reportStatus: -1, // Mark as handled
             });
-            console.log(`Quality issue report for order ${orderId} marked as handled`);
+            console.log(
+                `Quality issue report for order ${orderId} marked as handled`
+            );
         } catch (firestoreError) {
             console.error("Error marking quality issue as handled:", firestoreError);
-            alert(`Failed to mark quality issue as handled: ${firestoreError.message}`);
+            alert(
+                `Failed to mark quality issue as handled: ${firestoreError.message}`
+            );
         }
     };
     const handleMarkWrongFoodHandled = async (orderId) => {
@@ -467,22 +545,16 @@ function OrdersManagement() {
             });
             console.log(`Wrong food report for order ${orderId} marked as handled`);
         } catch (firestoreError) {
-            console.error("Error marking wrong food report as handled:", firestoreError);
-            alert(`Failed to mark wrong food report as handled: ${firestoreError.message}`);
+            console.error(
+                "Error marking wrong food report as handled:",
+                firestoreError
+            );
+            alert(
+                `Failed to mark wrong food report as handled: ${firestoreError.message}`
+            );
         }
     };
-    const getStatusClassName = (status) => {
-        switch (status) {
-            case "pending":
-                return styles.statusPending;
-            case "delivering":
-                return styles.statusDelivering;
-            case "completed":
-                return styles.statusCompleted;
-            default:
-                return "";
-        }
-    };
+
     const getReportStatusClassName = (reportStatus) => {
         switch (reportStatus) {
             case -1:
@@ -495,6 +567,32 @@ function OrdersManagement() {
             default:
                 return ""; // No special styling for unreported orders
         }
+    };
+    const handleShipperSelect = (event) => {
+        setSelectedShipperId(event.target.value);
+    };
+
+    const handleAssignShipperAndDeliver = () => {
+        if (!selectedShipperId) {
+            showSnackbar("Please select a shipper.");
+            return;
+        }
+        if (selectedOrderForShipper) {
+            handleMarkCompleted(
+                selectedOrderForShipper.orderId,
+                selectedOrderForShipper.userId,
+                selectedShipperId
+            );
+        }
+        setIsShipperModalOpen(false);
+        setSelectedShipperId(""); // Clear selected shipper after assignment
+        setSelectedOrderForShipper(null); // Clear selected order
+    };
+
+    const handleCloseShipperModal = () => {
+        setIsShipperModalOpen(false);
+        setSelectedShipperId("");
+        setSelectedOrderForShipper(null);
     };
 
     return (
@@ -613,6 +711,11 @@ function OrdersManagement() {
                                             <strong>Delivery Address:</strong>{" "}
                                             {order.deliveryAddress || "N/A"}
                                         </p>
+                                        {order.shipperName && ( // Display shipper name only if available
+                                            <p>
+                                                <strong>Shipper:</strong> {order.shipperName}
+                                            </p>
+                                        )}
                                         <p>
                                             <strong>Payment Status:</strong> {order.paymentStatus}
                                         </p>
@@ -657,7 +760,6 @@ function OrdersManagement() {
                                         </div>
                                     )}
 
-
                                     {/* NEW: Report Status Display for "Quality Issues" */}
                                     {order.status === "completed" && order.reportStatus === 2 && (
                                         <div className={styles.reportWarningBox}>
@@ -665,7 +767,8 @@ function OrdersManagement() {
                                                 🚨 Order Reported: Quality Issues!
                                             </Typography>
                                             <Typography variant="body2" sx={{ mb: 1 }}>
-                                                <strong>Reason:</strong> Customer reported quality issues with the food.
+                                                <strong>Reason:</strong> Customer reported quality
+                                                issues with the food.
                                             </Typography>
                                             {order.reportAdditionalInfo && (
                                                 <Typography
@@ -694,7 +797,8 @@ function OrdersManagement() {
                                                 🚨 Order Reported: Wrong Food!
                                             </Typography>
                                             <Typography variant="body2" sx={{ mb: 1 }}>
-                                                <strong>Reason:</strong> Customer received wrong food items.
+                                                <strong>Reason:</strong> Customer received wrong food
+                                                items.
                                             </Typography>
                                             {order.reportAdditionalInfo && (
                                                 <Typography
@@ -715,7 +819,6 @@ function OrdersManagement() {
                                             </Button>
                                         </div>
                                     )}
-
 
                                     {/* Update the existing "Display for Handled Reports" section to cover all handled cases */}
                                     {order.status === "delivering" && order.reportStatus === -1 && (
@@ -743,7 +846,8 @@ function OrdersManagement() {
 
                                     {/* Update the existing "Order Completed" condition to exclude ALL report types */}
                                     {order.status === "completed" &&
-                                        (order.reportStatus === 0 || order.reportStatus === undefined) && (
+                                        (order.reportStatus === 0 ||
+                                            order.reportStatus === undefined) && (
                                             <Typography
                                                 variant="body2"
                                                 sx={{ color: "green", fontWeight: "bold", mt: 1 }}
@@ -794,11 +898,11 @@ function OrdersManagement() {
                                                 variant="contained"
                                                 color="primary"
                                                 onClick={() =>
-                                                    handleMarkCompleted(order.id, order.userId)
+                                                    handleMarkDelivering(order.id, order.userId) // This now opens the modal
                                                 }
                                                 sx={{ mt: 1 }}
                                             >
-                                                ✅ Mark Delivering
+                                                🛵 Assign Shipper
                                             </Button>
                                         )}
                                         {order.status === "delivering" && (
@@ -878,6 +982,49 @@ function OrdersManagement() {
                     {snackbarMessage}
                 </Alert>
             </Snackbar>
+            <Dialog
+                open={isShipperModalOpen}
+                onClose={handleCloseShipperModal}
+                aria-labelledby="shipper-select-dialog-title"
+            >
+                <DialogTitle id="shipper-select-dialog-title">
+                    Assign Shipper to Order {selectedOrderForShipper?.orderId}
+                </DialogTitle>
+                <DialogContent>
+                    <FormControl component="fieldset">
+                        <FormLabel component="legend">Available Shippers</FormLabel>
+                        <RadioGroup
+                            aria-label="shipper"
+                            name="shipper-radio-group"
+                            value={selectedShipperId}
+                            onChange={handleShipperSelect}
+                        >
+                            {shippers.length > 0 ? (
+                                shippers.map((shipper) => (
+                                    <FormControlLabel
+                                        key={shipper.id}
+                                        value={shipper.id}
+                                        control={<Radio />}
+                                        label={shipper.name}
+                                    />
+                                ))
+                            ) : (
+                                <Typography sx={{ p: 2 }}>No shippers available.</Typography>
+                            )}
+                        </RadioGroup>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseShipperModal}>Cancel</Button>
+                    <Button
+                        onClick={handleAssignShipperAndDeliver}
+                        disabled={!selectedShipperId}
+                        variant="contained"
+                    >
+                        Assign & Mark Delivering
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
