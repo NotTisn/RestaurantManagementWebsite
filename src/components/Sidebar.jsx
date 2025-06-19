@@ -9,6 +9,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import GradeIcon from '@mui/icons-material/Grade';
 
 import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
@@ -31,6 +32,7 @@ function Sidebar() {
     { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
     { path: '/app/categories', text: 'Categories', icon: <CategoryIcon /> },
     { path: '/app/comments', text: 'Comments', icon:  <CommentIcon /> },
+    { path: '/app/banners', text: 'Banners', icon: < GradeIcon/> },
   ];
 
   const handleLogout = async () => { 
