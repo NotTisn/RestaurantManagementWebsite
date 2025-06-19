@@ -1,0 +1,231 @@
+/* src/components/Modal.css */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Nền tối mờ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Đảm bảo modal hiển thị trên cùng */
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%; /* Chiều rộng tương đối */
+    max-width: 500px; /* Chiều rộng tối đa */
+    position: relative;
+    max-height: 90vh; /* Giới hạn chiều cao để nội dung có thể cuộn */
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.8em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.modal-close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s ease;
+}
+
+.modal-close-button:hover {
+    color: #333;
+}
+
+/* Form Groups */
+.modal-content .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="password"],
+.modal-content input[type="number"],
+.modal-content textarea,
+.modal-content select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* Bao gồm padding trong chiều rộng */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="email"]:focus,
+.modal-content input[type="password"]:focus,
+.modal-content input[type="number"]:focus,
+.modal-content textarea:focus,
+.modal-content select:focus {
+    border-color: #007bff; /* Màu viền khi focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Hiệu ứng đổ bóng */
+    outline: none;
+}
+
+/* Checkbox specific styling */
+.modal-content .form-group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Khoảng cách giữa checkbox và label */
+    margin-top: 20px;
+}
+
+.modal-content .form-group-checkbox input[type="checkbox"] {
+    width: auto; /* Để checkbox không bị giãn toàn bộ chiều rộng */
+    cursor: pointer;
+}
+
+.modal-content .form-group-checkbox label {
+    margin-bottom: 0; /* Bỏ margin dưới mặc định của label */
+    font-weight: normal;
+    cursor: pointer;
+}
+
+/* Button Group */
+.modal-content .button-group {
+    display: flex;
+    justify-content: flex-end; /* Căn phải các nút */
+    gap: 10px; /* Khoảng cách giữa các nút */
+    margin-top: 30px;
+    border-top: 1px solid #eee; /* Đường kẻ phân cách */
+    padding-top: 20px;
+}
+
+.modal-content .button-group button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modal-content .button-group .save-button {
+    background-color: #28a745; /* Màu xanh lá cây */
+    color: white;
+}
+
+.modal-content .button-group .save-button:hover {
+    background-color: #218838;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.modal-content .button-group .cancel-button {
+    background-color: #dc3545; /* Màu đỏ */
+    color: white;
+}
+
+.modal-content .button-group .cancel-button:hover {
+    background-color: #c82333;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* Error Message */
+.modal-content .error-message {
+    color: #dc3545; /* Màu đỏ cho lỗi */
+    font-size: 0.9em;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Confirmation Modal Specific Styles */
+.confirmation-modal-message {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.confirmation-modal-buttons {
+    display: flex;
+    justify-content: space-around; /* Căn đều các nút */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.confirmation-modal-buttons .confirm-button {
+    background-color: #f44336; /* Màu đỏ cho xác nhận xóa */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.confirmation-modal-buttons .confirm-button:hover {
+    background-color: #da190b;
+}
+
+.confirmation-modal-buttons .cancel-button {
+    background-color: #6c757d; /* Màu xám cho hủy */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.confirmation-modal-buttons .cancel-button:hover {
+    background-color: #5a6268;
+}
+
+/* Image Preview Modal specific styles */
+.image-preview-modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 80%;
+    max-height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.image-preview-modal-content img {
+    max-width: 100%;
+    max-height: calc(80vh - 50px); /* Điều chỉnh dựa trên padding và nút đóng */
+    object-fit: contain; /* Giữ tỷ lệ khung hình */
+    border-radius: 4px;
+}
+
+.image-preview-modal-content .modal-close-button {
+    top: 10px;
+    right: 10px;
+    font-size: 1.5em;
+    z-index: 10;
+}

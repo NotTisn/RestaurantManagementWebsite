@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { toast } from "react-toastify";
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, Box, Button } from '@mui/material';
-import CategoryIcon from '@mui/icons-material/Category';import CommentIcon from '@mui/icons-material/Comment';
+import CategoryIcon from '@mui/icons-material/Category'; import CommentIcon from '@mui/icons-material/Comment';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
@@ -9,18 +10,20 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import GradeIcon from '@mui/icons-material/Grade';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
 
 import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
 
-import './Sidebar.css'; 
+import './Sidebar.css';
 
-const drawerWidth = 240; 
+const drawerWidth = 240;
 
 function Sidebar() {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const location = useLocation();
-  const [open] = useState(true); 
+  const [open] = useState(true);
 
   const menuItems = [
     { path: '/app', text: 'Dashboard', icon: <HomeIcon /> },
@@ -30,16 +33,20 @@ function Sidebar() {
     { path: '/app/statistics', text: 'Statistics', icon: <AssessmentIcon /> },
     { path: '/app/message', text: 'Messenger', icon: <PeopleIcon /> },
     { path: '/app/categories', text: 'Categories', icon: <CategoryIcon /> },
-    { path: '/app/comments', text: 'Comments', icon:  <CommentIcon /> },
+    { path: '/app/comments', text: 'Comments', icon: <CommentIcon /> },
+    { path: '/app/banners', text: 'Banners', icon: < GradeIcon/> },
+    { path: '/app/accounts', text: 'Accounts', icon: < AccountBoxIcon/> },
+
   ];
 
-  const handleLogout = async () => { 
+  const handleLogout = async () => {
     try {
-      await signOut(auth); 
+      await signOut(auth);
       console.log('User logged out successfully from Firebase');
-      navigate('/'); 
+      toast.info("Logged out successfully.");
+      navigate('/');
     } catch (error) {
-      console.error('Error signing out:', error.message);
+      toast.error('Error signing out:', error.message);
     }
   };
 
@@ -68,7 +75,7 @@ function Sidebar() {
           <Link to="/app" className="sidebar-logo-link">
             <Box className="sidebar-logo-box">
               <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                Nhà Hàng XYZ
+                4T Grab Food
               </Typography>
             </Box>
           </Link>
@@ -93,12 +100,12 @@ function Sidebar() {
                   '& .MuiListItemIcon-root': {
                     color: 'white',
                   },
-                  '&:hover': { 
-                    backgroundColor: '#1565c0', 
+                  '&:hover': {
+                    backgroundColor: '#1565c0',
                   },
                 }),
                 '&:hover': {
-                  backgroundColor: location.pathname === item.path ? '#1565c0' : '#e9ecef', 
+                  backgroundColor: location.pathname === item.path ? '#1565c0' : '#e9ecef',
                 },
               }}
             >

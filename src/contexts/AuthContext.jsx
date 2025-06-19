@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-
+import { toast } from "react-toastify";
 import { projectAuth, projectFirestore } from "../firebaseConfig";
 
 const AuthContext = createContext();
@@ -19,43 +19,42 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
 
   const signup = async (email, password) => {
-    const userCredential = await createUserWithEmailAndPassword(projectAuth, email, password);
-    setCurrentUser(userCredential.user);
-    console.log(userCredential)
-    console.log(`User credetial UID: ${userCredential.uid}`)
-    console.log(`User UID: ${userCredential.user.uid}`)
-    return userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(projectAuth, email, password);
+      setCurrentUser(userCredential.user);
+      console.log(userCredential)
+      console.log(`User credetial UID: ${userCredential.uid}`)
+      console.log(`User UID: ${userCredential.user.uid}`)
+      toast.success("Registration successful!");
+      return userCredential.user;
+    }
+    catch (error) {
+      toast.error(`Registration failed: ${error.message}`);
+      throw error;
+    }
   }
 
   const login = async (email, password) => {
     try {
-      setLoading(true); 
+      setLoading(true);
       const userCredential = await signInWithEmailAndPassword(projectAuth, email, password);
       const user = userCredential.user;
-
-      console.log(user)
-      console.log(user.uid)
-      console.log(user.role)
-
       const userDocRef = doc(projectFirestore, "users", user.uid);
-      console.log(userDocRef)
-
       const docSnap = await getDoc(userDocRef);
-      console.log(docSnap.data())
 
+      let role = null;
       if (docSnap.exists()) {
-        setUserRole(docSnap.data().role);
+        role = docSnap.data().role;
+        setUserRole(role);
       } else {
-        console.error("User document not found in Firestore");
         setUserRole(null);
       }
-
-      setCurrentUser(user);
-      return userCredential;
+      console.log(role)
+      return role; // Return the role directly
     } catch (error) {
-      console.log(error)
       setUserRole(null);
       throw error;
     } finally {
@@ -63,8 +62,18 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const setRestaurantOwner = async (restaurantOwner) => {
+    console.log("Running...")
+    setUserRole(restaurantOwner)
+  }
+
+  const resetUserRole = async () => {
+    setUserRole(undefined);
+  }
+
   const logout = () => {
     setUserRole(null);
+    setIsLogin(false);
     return signOut(projectAuth);
   };
 
@@ -97,6 +106,9 @@ export function AuthProvider({ children }) {
     signup,
     login,
     logout,
+    setIsLogin,
+    resetUserRole,
+    isLogin
   };
 
   return (

@@ -1,64 +1,227 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap');
 
 body {
   margin: 0;
   padding: 0;
   font-family: 'Roboto', sans-serif;
   background-color: #f5f7fa;
+  color: #333;
 }
 
-.dashboard-container {
-  padding: 40px 20px;
-  max-width: 1200px;
+.restaurant-container {
+  padding: 0;
+  max-width: 100%;
   margin: 0 auto;
 }
 
-.dashboard-header {
+/* Header Section */
+.restaurant-header {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://via.placeholder.com/1600x600?text=Main+Restaurant+Image'); /* Change background image if needed */
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.restaurant-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.restaurant-header p {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+}
+
+.call-to-action-button {
+  background-color: #e44d26; /* Prominent orange color */
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.call-to-action-button:hover {
+  background-color: #c23e1e;
+  transform: translateY(-2px);
+}
+
+/* General Section Styling */
+/* MODIFIED: Added :not(.Toastify) to exclude the Toastify container */
+section:not(.Toastify) {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto; /* Removed default margin-bottom, will apply only to non-last-of-type sections */
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Apply margin-bottom to all sections EXCEPT the last one, AND exclude Toastify */
+section:not(:last-of-type):not(.Toastify) {
+  margin-bottom: 40px;
+}
+
+section h2 { /* This rule is fine, it applies to h2 elements inside any section */
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  color: #333;
   text-align: center;
   margin-bottom: 40px;
 }
 
-.dashboard-header h1 {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 10px;
+/* About Us Section */
+.about-us-section {
+  background-color: #fff;
 }
 
-.dashboard-header p {
-  font-size: 1.2rem;
-  color: #777;
+.about-us-content {
+  display: flex;
+  flex-direction: column; /* Stack on small screens */
+  align-items: center;
+  gap: 30px;
 }
 
-.dashboard-cards {
+@media (min-width: 768px) {
+  .about-us-content {
+    flex-direction: row; /* Side-by-side on larger screens */
+    text-align: left;
+  }
+}
+
+.about-us-image {
+ max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-height: 300px; 
+  object-fit: cover;
+}
+
+.about-us-text {
+  flex: 1;
+}
+
+.about-us-text p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 15px;
+}
+
+/* Highlights Section */
+.highlights-section {
+  background-color: #fcfcfc; /* Slightly different background for visual separation */
+}
+
+.highlight-cards {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 .card {
   background-color: #ffffff;
-  width: 280px;
-  padding: 20px;
+  width: 300px; /* Adjusted width for highlight cards */
+  padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #eee;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.card h2 {
-  font-size: 1.5rem;
+.card-icon {
+  font-size: 3rem; /* Larger icon size */
+  margin-bottom: 15px;
+  color: #e44d26; /* Orange color for icons */
+}
+
+.card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
   color: #555;
   margin-bottom: 10px;
 }
 
 .card p {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #222;
+  font-size: 1rem;
+  color: #777;
+  line-height: 1.6;
+}
+
+/* Contact Section */
+.contact-section {
+  text-align: center;
+  background-color: #fff;
+}
+
+.contact-section p {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+/* Footer Section */
+.restaurant-footer {
+  background-color: #333; /* Dark background for footer */
+  color: white;
+  text-align: center;
+  padding: 30px 20px;
+  font-size: 0.9rem;
+  margin-top: 40px; /* Spacing from the last section to the footer */
+}
+
+.restaurant-footer p {
+  margin-bottom: 10px;
+}
+
+.restaurant-footer .social-links a {
+  color: white;
+  font-size: 1.2rem; /* Adjusted font size for text links */
+  margin: 0 10px;
+  text-decoration: none; /* Remove underline for links */
+  transition: color 0.3s ease;
+}
+
+.restaurant-footer .social-links a:hover {
+  color: #e44d26; /* Orange color on hover */
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .restaurant-header h1 {
+    font-size: 2.5rem;
+  }
+  .restaurant-header p {
+    font-size: 1.2rem;
+  }
+  section:not(.Toastify) { /* Apply the not(.Toastify) here too */
+    padding: 40px 15px;
+  }
+  section h2 {
+    font-size: 2rem;
+  }
+  .card {
+    width: 100%; /* Full width on small screens */
+  }
+  .about-us-image {
+    max-width: 400px; 
+    max-height: 250px;
+    object-fit: cover;
+  }
 }

@@ -13,6 +13,9 @@ import Message from './pages/message/Message'
 import VoucherManagementPage from './pages/voucher/VoucherManagementPage';
 import CategoryManagement from './pages/category/CategoryManagement';
 import CommentManagement from './pages/comment/CommentManagement';
+import { ToastContainer } from 'react-toastify';
+import BannerManagement from './pages/banner/BannerManagement';
+import AccountManagement from './pages/account/AccountManagement';
 
 
 function App() {
@@ -20,30 +23,42 @@ function App() {
 
   return (
     
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path='/register' element={<Register />} />
+      <><Routes>
+      <Route path="/" element={<Login />} />
+      <Route path='/register' element={<Register />} />
 
-        <Route
+      <Route
         path="/app"
-        element={
-          <PrivateRoute>
-            <PrivateLayout />
-          </PrivateRoute>
-        }
-        >
+        element={<PrivateRoute>
+          <PrivateLayout />
+        </PrivateRoute>}
+      >
         <Route index element={<Dashboard />} />
         <Route path="food" element={<FoodManagement />} />
         <Route path="orders" element={<OrdersManagement />} />
         <Route path="statistics" element={<Statistics />} />
-        <Route path="message" element={<Message/>}/>
-        <Route path="voucher" element={<VoucherManagementPage/>}/>
+        <Route path="message" element={<Message />} />
+        <Route path="voucher" element={<VoucherManagementPage />} />
         <Route path="categories" element={<CategoryManagement />} />
         <Route path="comments" element={<CommentManagement />} />
-        </Route>
+        <Route path="banners" element={<BannerManagement />} />
+        <Route path="accounts" element={<AccountManagement />} />
+
+      </Route>
       console.log("App started");
 
-      </Routes>
+    </Routes><ToastContainer
+        position="top-right" 
+        autoClose={5000} 
+        hideProgressBar={false}
+        newestOnTop={false} 
+        closeOnClick 
+        rtl={false} 
+        pauseOnFocusLoss 
+        draggable 
+        pauseOnHover 
+      /></>
+      
   );
 }
 

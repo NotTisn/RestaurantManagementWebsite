@@ -1,56 +1,71 @@
-import React, { useRef, useState } from "react";
+// pages/Login.js
+import React, { useRef, useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate, Link, Navigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify"; // Đảm bảo sử dụng react-toastify nhất quán
 
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const {login, userRole } = useAuth(); 
-  const [error, setError] = useState("");
+  const { login, userRole, resetUserRole, logout, isLogin, setIsLogin } = useAuth();
+  // const [error, setError] = useState(""); // Loại bỏ state này vì lỗi sẽ được xử lý bằng toast
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
-
+    // setError("");
+    setLoading(true);
     try {
-      setError("");
-      setLoading(true);
-      await login(emailRef.current.value, passwordRef.current.value);
-      console.log(userRole)
-      if (userRole === "restaurantOwner") {
-        navigate("/app"); 
-      }
-      else {
-        setError("You do not have permission to access this page.");
+      // Vì bất đồng bộ nên khi await login cho nó trả về role luôn, nên nó sẽ cập nhật lại role hợp lệ
+      // Giữ nguyên ở dòng 23 cho tới khi role được cập nhật
+      // Có thể refresh trang mà không tự động đăng nhập
+      const role = await login(emailRef.current.value, passwordRef.current.value);
+      if (role === "restaurantOwner") {
+        toast.success("Login successful!");
+        navigate('/app')
+      } else {
+        toast.error("You do not have permission.");
       }
     } catch (err) {
-      setError(`Login failed: ${err.message}`);
+      toast.error("Login failed: " + err.message);
     }
     setLoading(false);
   }
 
+  // Không sử dụng useEffect => comment lại 
+
+  // useEffect(() => {
+  //   if (!isLogin) {
+  //     if (userRole === "restaurantOwner") {
+  //       setIsLogin(true);
+  //       resetUserRole(); // Đặt lại userRole để tránh re-trigger effect không cần thiết
+  //       navigate("/app");
+  //     } else if (userRole !== null && userRole !== undefined) {
+  //       toast.error("You do not have permission.");
+  //     }
+  //   } else {
+  //     logout();
+  //   }
+  // }, [userRole, navigate, resetUserRole]); // Thêm resetUserRole vào dependency array
 
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Đăng nhập</h2>
-        {error && <p style={styles.error}>{error}</p>}
+        <h2 style={styles.title}>Login</h2>
+        {/* {error && <p style={styles.error}>{error}</p>}  // Loại bỏ hiển thị lỗi cục bộ */}
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label>Email</label>
             <input type="email" ref={emailRef} required style={styles.input} />
           </div>
           <div style={styles.inputGroup}>
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-            <label>Mật khẩu</label>
+            <label>Password</label>
             <input type="password" ref={passwordRef} required style={styles.input} />
           </div>
           <button disabled={loading} type="submit" style={styles.button}>
-            Đăng nhập
+            Login
           </button>
         </form>
         <p style={styles.footerText}>
@@ -67,7 +82,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#f3f4f6", 
+    backgroundColor: "#f3f4f6",
   },
   card: {
     backgroundColor: "#fff",
@@ -109,7 +124,7 @@ const styles = {
     fontSize: "16px",
   },
   error: {
-    color: "#ef4444", 
+    color: "#ef4444",
     fontSize: "14px",
     marginBottom: "10px",
   },

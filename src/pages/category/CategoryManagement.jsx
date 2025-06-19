@@ -248,7 +248,7 @@
             } catch (err) {
                 console.error("Error deleting category:", err);
                 setGlobalError("Failed to delete category. Please try again.");
-                showToast("Failed to delete category.", "error");
+                showToast("Failed to delete category. Please delete these dishes before deleting the category.", "error");
             } finally {
                 setLoading(false);
             }
