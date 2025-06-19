@@ -11,6 +11,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import GradeIcon from '@mui/icons-material/Grade';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
 
 import { auth } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
@@ -34,7 +35,7 @@ function Sidebar() {
     { path: '/app/categories', text: 'Categories', icon: <CategoryIcon /> },
     { path: '/app/comments', text: 'Comments', icon: <CommentIcon /> },
     { path: '/app/banners', text: 'Banners', icon: < GradeIcon/> },
-    { path: '/app/accounts', text: 'Accounts', icon: < GradeIcon/> },
+    { path: '/app/accounts', text: 'Accounts', icon: < AccountBoxIcon/> },
 
   ];
 
