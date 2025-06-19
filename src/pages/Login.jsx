@@ -7,7 +7,7 @@ import { toast } from "react-toastify"; // Đảm bảo sử dụng react-toasti
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { login, userRole, resetUserRole } = useAuth();
+  const { login, userRole, resetUserRole, logout, isLogin, setIsLogin } = useAuth();
   // const [error, setError] = useState(""); // Loại bỏ state này vì lỗi sẽ được xử lý bằng toast
   const [loading, setLoading] = useState(false);
 
@@ -15,28 +15,40 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
+    // setError("");
+    setLoading(true);
     try {
-      // setError(""); // Không cần thiết
-      setLoading(true);
-      await login(emailRef.current.value, passwordRef.current.value);
-      // Logic điều hướng và thông báo giờ đã được xử lý trong useEffect và AuthContext
+      // Vì bất đồng bộ nên khi await login cho nó trả về role luôn, nên nó sẽ cập nhật lại role hợp lệ
+      // Giữ nguyên ở dòng 23 cho tới khi role được cập nhật
+      // Có thể refresh trang mà không tự động đăng nhập
+      const role = await login(emailRef.current.value, passwordRef.current.value);
+      if (role === "restaurantOwner") {
+        toast.success("Login successful!");
+        navigate('/app')
+      } else {
+        toast.error("You do not have permission.");
+      }
     } catch (err) {
-      // Hàm login trong AuthContext đã xử lý toast lỗi, nên không cần setError ở đây.
-      // Nếu có lỗi ngoài mong muốn khác, có thể thêm toast.error ở đây.
-    } finally {
-      setLoading(false);
+      setError("Login failed: " + err.message);
     }
+    setLoading(false);
   }
 
-  useEffect(() => {
-    if (userRole === "restaurantOwner") {
-      resetUserRole(); // Đặt lại userRole để tránh re-trigger effect không cần thiết
-      navigate("/app");
-    } else if (userRole !== null && userRole !== undefined) {
-      toast.error("You do not have permission.");
-    }
-  }, [userRole, navigate, resetUserRole]); // Thêm resetUserRole vào dependency array
+  // Không sử dụng useEffect => comment lại 
+
+  // useEffect(() => {
+  //   if (!isLogin) {
+  //     if (userRole === "restaurantOwner") {
+  //       setIsLogin(true);
+  //       resetUserRole(); // Đặt lại userRole để tránh re-trigger effect không cần thiết
+  //       navigate("/app");
+  //     } else if (userRole !== null && userRole !== undefined) {
+  //       toast.error("You do not have permission.");
+  //     }
+  //   } else {
+  //     logout();
+  //   }
+  // }, [userRole, navigate, resetUserRole]); // Thêm resetUserRole vào dependency array
 
   return (
     <div style={styles.wrapper}>
