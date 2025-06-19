@@ -29,7 +29,7 @@ export default function Login() {
         toast.error("You do not have permission.");
       }
     } catch (err) {
-      setError("Login failed: " + err.message);
+      toast.error("Login failed: " + err.message);
     }
     setLoading(false);
   }
