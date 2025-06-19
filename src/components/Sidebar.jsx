@@ -43,7 +43,7 @@ function Sidebar() {
       toast.info("Logged out successfully.");
       navigate('/');
     } catch (error) {
-      console.error('Error signing out:', error.message);
+      toast.error('Error signing out:', error.message);
     }
   };
 
