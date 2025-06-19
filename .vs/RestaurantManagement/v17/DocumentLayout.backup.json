@@ -22,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 13,
+          "SelectedChildIndex": 12,
           "Children": [
             {
               "$type": "Bookmark",
@@ -73,10 +73,6 @@
               "Name": "ST:131:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "AddAccountModal.jsx",
@@ -84,7 +80,7 @@
               "RelativeDocumentMoniker": "src\\pages\\account\\AddAccountModal.jsx",
               "ToolTip": "C:\\Users\\Ngo Minh Tri\\SE330\\RestaurantManagement\\src\\pages\\account\\AddAccountModal.jsx",
               "RelativeToolTip": "src\\pages\\account\\AddAccountModal.jsx",
-              "ViewState": "AgIAAJYAAAAAAAAAAAAtwKoAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAJEAAAAAAAAAAAAtwKgAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-06-19T14:38:04.826Z",
               "EditorCaption": ""
@@ -99,7 +95,8 @@
               "RelativeToolTip": "src\\pages\\account\\AccountManagement.jsx",
               "ViewState": "AgIAANEAAAAAAAAAAAAtwOgAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-06-19T14:37:52.558Z"
+              "WhenOpened": "2025-06-19T14:37:52.558Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -111,7 +108,8 @@
               "RelativeToolTip": "src\\pages\\food\\FoodManagement.jsx",
               "ViewState": "AgIAAC0AAAAAAAAAAAAtwDwAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-06-19T14:35:49.866Z"
+              "WhenOpened": "2025-06-19T14:35:49.866Z",
+              "EditorCaption": ""
             }
           ]
         },
