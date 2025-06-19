@@ -15,6 +15,7 @@ import CategoryManagement from './pages/category/CategoryManagement';
 import CommentManagement from './pages/comment/CommentManagement';
 import { ToastContainer } from 'react-toastify';
 import BannerManagement from './pages/banner/BannerManagement';
+import AccountManagement from './pages/account/AccountManagement';
 
 
 function App() {
@@ -41,19 +42,21 @@ function App() {
         <Route path="categories" element={<CategoryManagement />} />
         <Route path="comments" element={<CommentManagement />} />
         <Route path="banners" element={<BannerManagement />} />
+        <Route path="accounts" element={<AccountManagement />} />
+
       </Route>
       console.log("App started");
 
     </Routes><ToastContainer
-        position="top-right" // Where the toast will appear (e.g., top-right, bottom-left)
-        autoClose={5000} // How long the toast stays visible in milliseconds
-        hideProgressBar={false} // Show or hide the progress bar
-        newestOnTop={false} // Show newest toast on top
-        closeOnClick // Close toast when clicked
-        rtl={false} // Right-to-left layout
-        pauseOnFocusLoss // Pause timer when window loses focus
-        draggable // Allow dragging toasts
-        pauseOnHover // Pause timer when mouse hovers over toast
+        position="top-right" 
+        autoClose={5000} 
+        hideProgressBar={false}
+        newestOnTop={false} 
+        closeOnClick 
+        rtl={false} 
+        pauseOnFocusLoss 
+        draggable 
+        pauseOnHover 
       /></>
       
   );

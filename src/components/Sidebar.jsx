@@ -34,6 +34,8 @@ function Sidebar() {
     { path: '/app/categories', text: 'Categories', icon: <CategoryIcon /> },
     { path: '/app/comments', text: 'Comments', icon: <CommentIcon /> },
     { path: '/app/banners', text: 'Banners', icon: < GradeIcon/> },
+    { path: '/app/accounts', text: 'Accounts', icon: < GradeIcon/> },
+
   ];
 
   const handleLogout = async () => {
