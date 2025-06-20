@@ -68,9 +68,6 @@ export default function Login() {
             Login
           </button>
         </form>
-        <p style={styles.footerText}>
-          Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
-        </p>
       </div>
     </div>
   );
