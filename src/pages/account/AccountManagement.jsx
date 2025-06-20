@@ -122,7 +122,7 @@ function AccountManagement() {
                     const normalizedName = removeDiacritics(user.name?.toLowerCase() || '');
                     const normalizedEmail = removeDiacritics(user.email?.toLowerCase() || '');
                     const normalizedPhone = removeDiacritics(user.phoneNumber?.toLowerCase() || '');
-                    const normalizedAddress = removeDiacritics(user.address?.toLowerCase() || '');
+                    const normalizedAddress = removeDiacritics(user.address?.toLowerCase() || ''); // Include address in search
                     return normalizedName.includes(normalizedSearchTerm) ||
                         normalizedEmail.includes(normalizedSearchTerm) ||
                         normalizedPhone.includes(normalizedSearchTerm) ||
@@ -179,7 +179,7 @@ function AccountManagement() {
                 name: newAccountData.name,
                 email: newAccountData.email,
                 phoneNumber: newAccountData.phone,
-                address: newAccountData.address,
+                address: newAccountData.address, // Include address here for new user
                 isSuspended: newAccountData.isSuspended || false, // Đảm bảo luôn có isSuspended
                 role: newAccountData.role === 'admin' ? 'restaurantOwner' : newAccountData.role,
                 createdAt: serverTimestamp(),
@@ -380,7 +380,7 @@ function AccountManagement() {
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Phone</th>
-                                    <th>Address</th>
+                                    <th>Address</th> {/* New table header for Address */}
                                     <th>Role</th>
                                     <th>Status</th> {/* Thêm cột trạng thái */}
                                     <th>Actions</th>
@@ -393,7 +393,7 @@ function AccountManagement() {
                                             <td>{user.name || 'N/A'}</td>
                                             <td>{user.email || 'N/A'}</td>
                                             <td>{user.phoneNumber || 'N/A'}</td>
-                                            <td>{user.address || 'N/A'}</td>
+                                            <td>{user.address || 'N/A'}</td> {/* Display user address */}
                                             <td>
                                                 <span className={`role-badge ${user.role || 'customer'}`}>
                                                     {user.role === 'restaurantOwner' ? 'Restaurant Owner' : (user.role === 'customer' ? 'Customer' : (user.role === 'shipper' ? 'Shipper' : 'Unknown'))}
