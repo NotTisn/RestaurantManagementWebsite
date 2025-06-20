@@ -8,6 +8,7 @@ function EditAccountModal({ isOpen, onClose, user, onSave, updateError }) {
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
+        address: '', // Add the address field here
         role: '',
         isSuspended: false, // Mặc định là false
     });
@@ -18,6 +19,7 @@ function EditAccountModal({ isOpen, onClose, user, onSave, updateError }) {
             setFormData({
                 name: user.name || '',
                 phone: user.phoneNumber || '',
+                address: user.address || '', // Initialize address from user prop
                 role: user.role || 'customer',
                 // Lấy giá trị isSuspended từ user, mặc định là false nếu không có
                 isSuspended: user.isSuspended || false,
@@ -34,13 +36,13 @@ function EditAccountModal({ isOpen, onClose, user, onSave, updateError }) {
 
             // === BỎ CÁC LOGIC NÀY ===
             // if (name === 'role') {
-            //     if (value !== 'customer') {
-            //         if ('isSuspended' in newState) {
-            //             delete newState.isSuspended;
-            //         }
-            //     } else if (value === 'customer' && !('isSuspended' in newState)) {
-            //         newState.isSuspended = false;
-            //     }
+            //      if (value !== 'customer') {
+            //          if ('isSuspended' in newState) {
+            //              delete newState.isSuspended;
+            //          }
+            //      } else if (value === 'customer' && !('isSuspended' in newState)) {
+            //          newState.isSuspended = false;
+            //      }
             // }
             // === KẾT THÚC BỎ CÁC LOGIC NÀY ===
 
@@ -62,6 +64,10 @@ function EditAccountModal({ isOpen, onClose, user, onSave, updateError }) {
         } else if (!/^\d{10,11}$/.test(formData.phone)) {
             errors.phone = 'Phone number must be 10-11 digits.';
         }
+        // Add validation for address
+        if (!formData.address.trim()) {
+            errors.address = 'Address is required.';
+        }
         if (!formData.role) {
             errors.role = 'Role is required.';
         }
@@ -75,6 +81,7 @@ function EditAccountModal({ isOpen, onClose, user, onSave, updateError }) {
             const updatedFirestoreData = {
                 name: formData.name,
                 phoneNumber: formData.phone,
+                address: formData.address, // Include address in the data to be saved
                 // isSuspended luôn được cập nhật với giá trị từ form
                 isSuspended: formData.isSuspended,
             };
@@ -126,6 +133,18 @@ function EditAccountModal({ isOpen, onClose, user, onSave, updateError }) {
                         required
                     />
                     {formErrors.phone && <p className="error-message">{formErrors.phone}</p>}
+                </div>
+                <div className="form-group">
+                    <label htmlFor="address">Address:</label>
+                    <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        required
+                    />
+                    {formErrors.address && <p className="error-message">{formErrors.address}</p>}
                 </div>
                 <div className="form-group">
                     <label htmlFor="role">Role:</label>
